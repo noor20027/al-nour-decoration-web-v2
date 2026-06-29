@@ -1,22 +1,6 @@
-// Preconfigured storage helpers for Manus WebDev templates
-// Uploads via Forge Server presigned URL to S3 (PUT direct).
-// Downloads return /manus-storage/{key} paths served via 307 redirect.
-
+import { put, get, getSignedUrl } from '@vercel/blob';
 import { ENV } from "./_core/env";
 import crypto from "node:crypto";
-
-function getForgeConfig() {
-  const forgeUrl = ENV.forgeApiUrl;
-  const forgeKey = ENV.forgeApiKey;
-
-  if (!forgeUrl || !forgeKey) {
-    throw new Error(
-      "Storage config missing: set BUILT_IN_FORGE_API_URL and BUILT_IN_FORGE_API_KEY",
-    );
-  }
-
-  return { forgeUrl: forgeUrl.replace(/\/+$/, ""), forgeKey };
-}
 
 function normalizeKey(relKey: string): string {
   return relKey.replace(/^\/+/, "");
@@ -31,71 +15,53 @@ function appendHashSuffix(relKey: string): string {
 
 export async function storagePut(
   relKey: string,
-  data: Buffer | Uint8Array | string,
+  data: Buffer | Uint8Array | string | Blob,
   contentType = "application/octet-stream",
 ): Promise<{ key: string; url: string }> {
   const key = appendHashSuffix(normalizeKey(relKey));
-  
+
   try {
-    const { forgeUrl, forgeKey } = getForgeConfig();
-
-    // 1. Get presigned PUT URL from Forge
-    const presignUrl = new URL("v1/storage/presign/put", forgeUrl + "/");
-    presignUrl.searchParams.set("path", key);
-
-    const presignResp = await fetch(presignUrl, {
-      headers: { Authorization: `Bearer ${forgeKey}` },
+    const blob = await put(key, data, {
+      access: 'public',
+      addRandomSuffix: false, // We already add a suffix manually
+      contentType: contentType,
+      token: ENV.blobReadWriteToken, // Use the Vercel Blob token from environment variables
     });
-
-    if (presignResp.ok) {
-      const { url: s3Url } = (await presignResp.json()) as { url: string };
-      if (s3Url) {
-        // 2. PUT file directly to S3
-        const blob = typeof data === "string" 
-          ? new Blob([data], { type: contentType }) 
-          : new Blob([data as any], { type: contentType });
-
-        const uploadResp = await fetch(s3Url, {
-          method: "PUT",
-          headers: { "Content-Type": contentType },
-          body: blob,
-        });
-
-        if (uploadResp.ok) {
-          return { key, url: `/manus-storage/${key}` };
-        }
-      }
-    }
+    return { key: blob.pathname, url: blob.url };
   } catch (e) {
-    console.warn("Storage Forge config missing or failed, using local fallback if available");
+    console.error("Vercel Blob upload failed:", e);
+    throw new Error("Failed to upload file to Vercel Blob Storage.");
   }
-
-  // Fallback to a simpler way or just return a mock URL for now to prevent crash
-  // In a real Vercel environment, the Forge config SHOULD be there.
-  return { key, url: `https://via.placeholder.com/150?text=Upload_Success_${key}` };
 }
 
 export async function storageGet(relKey: string): Promise<{ key: string; url: string }> {
   const key = normalizeKey(relKey);
-  return { key, url: `/manus-storage/${key}` };
+  // Vercel Blob URLs are directly accessible if access is 'public'
+  // We can use the get function to retrieve metadata or ensure existence if needed
+  // For direct URL, we can construct it or rely on the put function's returned URL
+  // For simplicity, assuming the URL is directly constructible or stored during put
+  // A more robust solution might involve storing the full URL in the database during upload
+  try {
+    const blob = await get(key, { token: ENV.blobReadWriteToken });
+    if (blob) {
+      return { key: blob.pathname, url: blob.url };
+    } else {
+      throw new Error(`Blob with key ${key} not found.`);
+    }
+  } catch (e) {
+    console.warn(`Failed to retrieve blob ${key} from Vercel Blob Storage, attempting to construct URL:`, e);
+    // Fallback: if get fails, try to construct a public URL (might not work if blob doesn't exist or is private)
+    return { key, url: `https://blob.vercel-storage.com/${key}` }; // This is a generic URL, might need adjustment
+  }
 }
 
 export async function storageGetSignedUrl(relKey: string): Promise<string> {
-  const { forgeUrl, forgeKey } = getForgeConfig();
   const key = normalizeKey(relKey);
-
-  const getUrl = new URL("v1/storage/presign/get", forgeUrl + "/");
-  getUrl.searchParams.set("path", key);
-
-  const resp = await fetch(getUrl, {
-    headers: { Authorization: `Bearer ${forgeKey}` },
-  });
-
-  if (!resp.ok) {
-    const msg = await resp.text().catch(() => resp.statusText);
-    throw new Error(`Storage signed URL failed (${resp.status}): ${msg}`);
+  try {
+    const signedUrl = await getSignedUrl(key, { access: 'public', token: ENV.blobReadWriteToken });
+    return signedUrl;
+  } catch (e) {
+    console.error("Failed to get signed URL from Vercel Blob:", e);
+    throw new Error("Failed to generate signed URL for Vercel Blob Storage.");
   }
-
-  const { url } = (await resp.json()) as { url: string };
-  return url;
 }
