@@ -3,6 +3,7 @@
 
 import express from 'express';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import { storagePut } from '../server/storage';
 import { createConnection } from 'mysql2/promise';
 import { drizzle } from 'drizzle-orm/mysql2';
 import { eq, sql } from 'drizzle-orm';
@@ -120,10 +121,14 @@ const appRouter = router({
       .input(z.object({ fileName: z.string(), fileSize: z.number(), mimeType: z.string(), fileData: z.string() }))
       .mutation(async ({ input }) => {
         try {
-          const imageUrl = `/manus-storage/logo_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-          const imageKey = `branding/logo_${Date.now()}`;
-          
-          // Try to save to database
+          const fileBuffer = Buffer.from(input.fileData.split(',')[1], 'base64');
+          const { key: imageKey, url: imageUrl } = await storagePut(
+            `branding/logo/${input.fileName}`,
+            fileBuffer,
+            input.mimeType
+          );
+
+          // Save to database
           const db = await getDb();
           if (db) {
             try {
@@ -152,10 +157,14 @@ const appRouter = router({
       .input(z.object({ fileName: z.string(), fileSize: z.number(), mimeType: z.string(), fileData: z.string() }))
       .mutation(async ({ input }) => {
         try {
-          const imageUrl = `/manus-storage/banner_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-          const imageKey = `branding/banner_${Date.now()}`;
-          
-          // Try to save to database
+          const fileBuffer = Buffer.from(input.fileData.split(',')[1], 'base64');
+          const { key: imageKey, url: imageUrl } = await storagePut(
+            `branding/banner/${input.fileName}`,
+            fileBuffer,
+            input.mimeType
+          );
+
+          // Save to database
           const db = await getDb();
           if (db) {
             try {
