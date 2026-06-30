@@ -13,7 +13,7 @@
     },
     {
       "source": "/admin/(.*)",
-      "destination": "/api/index.js"
+      "destination": "/index.html"
     },
     {
       "source": "/(.*)",
