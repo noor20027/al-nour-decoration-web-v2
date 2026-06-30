@@ -4,6 +4,8 @@
 import express from 'express';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { storagePut } from '../server/storage';
+import { ENV } from '../server/_core/env';
+console.log('BLOB_READ_WRITE_TOKEN:', ENV.blobReadWriteToken ? 'Set' : 'Not Set');
 import { createConnection } from 'mysql2/promise';
 import { drizzle } from 'drizzle-orm/mysql2';
 import { eq, sql } from 'drizzle-orm';
