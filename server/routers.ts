@@ -7,7 +7,6 @@ import { TRPCError } from "@trpc/server";
 import { hashPassword, verifyPassword } from "./_core/auth";
 import {
   getAdminByUsername,
-  createAdminCredentials,
   updateAdminPassword,
   getAllGalleryImages,
   addGalleryImage,
@@ -40,17 +39,7 @@ export const appRouter = router({
     login: publicProcedure
       .input(z.object({ username: z.string(), password: z.string() }))
       .mutation(async ({ input, ctx }) => {
-        // الحل المباشر والمضمون لفتح لوحة التحكم
-        if (input.username === "admin" && input.password === "admin") {
-          console.log("[Admin] Login successful via hardcoded fallback");
-          const cookieOptions = getSessionCookieOptions(ctx.req);
-          ctx.res.cookie("admin_session", "admin_id_1", {
-            ...cookieOptions,
-            maxAge: 86400000, // 24 hours
-          });
-          return { success: true, adminId: 1 };
-        }
-
+        // تم إزالة كلمة المرور الافتراضية (admin/admin) لزيادة الأمان
         const admin = await getAdminByUsername(input.username);
         if (!admin || !verifyPassword(input.password, admin.passwordHash)) {
           throw new TRPCError({ code: "UNAUTHORIZED", message: "اسم المستخدم أو كلمة السر غير صحيحة" });
@@ -59,7 +48,7 @@ export const appRouter = router({
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie("admin_session", String(admin.id), {
           ...cookieOptions,
-          maxAge: 86400000,
+          maxAge: 86400000, // 24 hours
         });
         return { success: true, adminId: admin.id };
       }),
@@ -92,26 +81,6 @@ export const appRouter = router({
         const buffer = Buffer.from(input.fileData, "base64");
         const { key, url } = await storagePut(`gallery/${input.fileName}`, buffer, input.mimeType);
         return { success: true, imageUrl: url, imageKey: key };
-      }),
-    getUploadUrl: publicProcedure
-      .input(z.object({ fileName: z.string(), fileSize: z.number(), mimeType: z.string(), folder: z.string().optional() }))
-      .mutation(async ({ input }) => {
-        const timestamp = Date.now();
-        const random = Math.random().toString(36).substring(2, 8);
-        const folder = input.folder || "gallery";
-        const fileKey = `${folder}/${timestamp}_${random}_${input.fileName}`;
-        
-        const presignUrl = new URL("v1/storage/presign/put", (process.env.BUILT_IN_FORGE_API_URL || "") + "/");
-        presignUrl.searchParams.set("path", fileKey);
-        
-        const presignResp = await fetch(presignUrl.toString(), {
-          headers: { Authorization: `Bearer ${process.env.BUILT_IN_FORGE_API_KEY}` },
-        });
-        
-        if (!presignResp.ok) throw new Error("Failed to get presigned URL");
-        const { url: uploadUrl } = await presignResp.json() as { url: string };
-        
-        return { uploadUrl, fileKey, imageUrl: `/manus-storage/${fileKey}` };
       }),
     add: publicProcedure
       .input(z.object({ imageUrl: z.string().min(1), imageKey: z.string(), title: z.string().optional(), description: z.string().optional(), orientation: z.enum(["horizontal", "vertical"]).optional(), isCarousel: z.enum(["yes", "no"]).optional() }))

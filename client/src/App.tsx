@@ -9,10 +9,10 @@ import About from "./pages/About";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
 import Gallery from "./pages/Gallery";
-import AdminDashboard from "./components/AdminDashboard";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
+  // تم إلغاء مسار /admin المباشر لضمان الحماية
+  // لوحة التحكم تفتح الآن فقط من خلال الصفحة الرئيسية بعد تسجيل الدخول
   return (
     <Switch>
       <Route path={"/"} component={Home} />
@@ -20,7 +20,6 @@ function Router() {
       <Route path={"/gallery"} component={Gallery} />
       <Route path={"/services"} component={Services} />
       <Route path={"/contact"} component={Contact} />
-      <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -28,17 +27,11 @@ function Router() {
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider
         defaultTheme="light"
-        // switchable
       >
         <TooltipProvider>
           <Toaster />
