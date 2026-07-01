@@ -123,7 +123,8 @@ const appRouter = router({
       .input(z.object({ fileName: z.string(), fileSize: z.number(), mimeType: z.string(), fileData: z.string() }))
       .mutation(async ({ input }) => {
         try {
-          const fileBuffer = Buffer.from(input.fileData.split(',')[1], 'base64');
+          // The frontend sends raw base64 data without the 'data:image/...;base64,' prefix
+          const fileBuffer = Buffer.from(input.fileData, 'base64');
           const { key: imageKey, url: imageUrl } = await storagePut(
             `branding/logo/${input.fileName}`,
             fileBuffer,
@@ -159,7 +160,8 @@ const appRouter = router({
       .input(z.object({ fileName: z.string(), fileSize: z.number(), mimeType: z.string(), fileData: z.string() }))
       .mutation(async ({ input }) => {
         try {
-          const fileBuffer = Buffer.from(input.fileData.split(',')[1], 'base64');
+          // The frontend sends raw base64 data without the 'data:image/...;base64,' prefix
+          const fileBuffer = Buffer.from(input.fileData, 'base64');
           const { key: imageKey, url: imageUrl } = await storagePut(
             `branding/banner/${input.fileName}`,
             fileBuffer,
