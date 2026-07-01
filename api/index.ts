@@ -73,7 +73,17 @@ app.post('/api/upload/blob', async (req, res) => {
         // هنا يمكن إضافة التحقق من هوية المستخدم (Session check)
         // بما أن المستخدم مسجل الدخول في المتصفح، سنسمح بالرفع
         return {
-          allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+          allowedContentTypes: [
+            'image/jpeg', 
+            'image/png', 
+            'image/gif', 
+            'image/webp', 
+            'image/heic', 
+            'image/heif', 
+            'image/tiff', 
+            'image/bmp',
+            'image/x-adobe-dng'
+          ],
           tokenPayload: JSON.stringify({
             // معلومات إضافية يمكن تمريرها
           }),

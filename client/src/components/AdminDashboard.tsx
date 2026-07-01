@@ -173,7 +173,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <CardContent>
                 <form onSubmit={handleAddImage} className="space-y-4">
                   <div className="border-2 border-dashed border-gold/30 rounded-lg p-6 text-center cursor-pointer hover:bg-gold/5 transition-colors" onClick={() => fileInputRef.current?.click()}>
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+                    <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif,.dng,.tiff,.bmp" onChange={handleFileSelect} className="hidden" />
                     {selectedFile ? <p className="text-gold font-bold">{selectedFile.name}</p> : <p className="text-gray-500">انقر لاختيار صورة من جهازك</p>}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
