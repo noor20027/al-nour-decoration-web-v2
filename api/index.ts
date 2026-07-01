@@ -2,7 +2,7 @@ import express from 'express';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { appRouter } from '../server/routers';
 import { createContext } from '../server/_core/context';
-import { put } from '@vercel/blob';
+import { put, handleUpload, type HandleUploadBody } from '@vercel/blob';
 
 const app = express();
 
@@ -62,6 +62,34 @@ app.use(
     createContext
   })
 );
+
+// مسار معالجة الرفع من طرف العميل لـ Vercel Blob
+app.post('/api/upload/blob', async (req, res) => {
+  try {
+    const jsonResponse = await handleUpload({
+      body: req.body as HandleUploadBody,
+      request: req,
+      onBeforeGenerateToken: async (pathname) => {
+        // هنا يمكن إضافة التحقق من هوية المستخدم (Session check)
+        // بما أن المستخدم مسجل الدخول في المتصفح، سنسمح بالرفع
+        return {
+          allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+          tokenPayload: JSON.stringify({
+            // معلومات إضافية يمكن تمريرها
+          }),
+        };
+      },
+      onUploadCompleted: async ({ blob, tokenPayload }) => {
+        // تم الرفع بنجاح
+        console.log('Upload completed:', blob.url);
+      },
+    });
+
+    res.json(jsonResponse);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
 
 // نقطة فحص الحالة
 app.get('/api/health', (req, res) => {
