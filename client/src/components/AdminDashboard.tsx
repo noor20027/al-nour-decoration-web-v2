@@ -49,12 +49,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   // Queries and mutations
   const galleryQuery = trpc.gallery.getAll.useQuery();
   const socialQuery = trpc.social.getAll.useQuery();
-  const uploadImageMutation = trpc.gallery.uploadImage.useMutation();
   const addImageMutation = trpc.gallery.add.useMutation();
   const deleteImageMutation = trpc.gallery.delete.useMutation();
   const updateSocialMutation = trpc.social.update.useMutation();
-  const uploadLogoMutation = trpc.branding.uploadLogo.useMutation();
-  const uploadBannerMutation = trpc.branding.uploadBanner.useMutation();
+  const saveBrandingMutation = trpc.branding.saveBranding.useMutation();
   const getLogoQuery = trpc.branding.getLogo.useQuery();
   const getBannerQuery = trpc.branding.getBanner.useQuery();
 
@@ -75,47 +73,42 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
+  // وظيفة الرفع المباشر الجديدة
+  const directUpload = async (file: File) => {
+    const reader = new FileReader();
+    const base64Data = await new Promise<string>((resolve) => {
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsDataURL(file);
+    });
+    
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: `${Date.now()}_${file.name}`,
+        fileData: base64Data.split(',')[1],
+        mimeType: file.type
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.details || 'Upload failed');
+    }
+
+    return await response.json();
+  };
+
   const handleAddImage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile) return;
     setIsLoading(true);
     try {
-      const processImage = async (file: File): Promise<{ data: string; mime: string }> => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target?.result as string;
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              const ctx = canvas.getContext('2d');
-              const tryCompress = (q: number, dim: number): string => {
-                let width = img.width; let height = img.height;
-                if (width > dim || height > dim) {
-                  if (width > height) { height *= dim / width; width = dim; }
-                  else { width *= dim / height; height = dim; }
-                }
-                canvas.width = width; canvas.height = height;
-                ctx?.drawImage(img, 0, 0, width, height);
-                return canvas.toDataURL('image/jpeg', q);
-              };
-              let result = tryCompress(0.95, 3000);
-              if (result.length > 4 * 1024 * 1024) result = tryCompress(0.85, 2000);
-              resolve({ data: result.split(',')[1], mime: 'image/jpeg' });
-            };
-          };
-        });
-      };
-
-      const { data: fileData, mime: mimeType } = await processImage(selectedFile);
-      const uploadResult = await uploadImageMutation.mutateAsync({
-        fileName: selectedFile.name, fileSize: selectedFile.size, mimeType, fileData
-      });
+      const uploadResult = await directUpload(selectedFile);
 
       await addImageMutation.mutateAsync({
-        imageUrl: uploadResult.imageUrl, 
-        imageKey: uploadResult.imageKey,
+        imageUrl: uploadResult.url, 
+        imageKey: uploadResult.pathname,
         title: imageTitle,
         description: imageDescription,
         orientation: imageOrientation,
@@ -127,7 +120,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       toast.success("تم النشر بنجاح");
     } catch (err: any) { 
       console.error(err);
-      toast.error(`فشل النشر: ${err.message || "تأكد من حجم الصورة"}`);
+      toast.error(`فشل النشر: ${err.message || "تأكد من الاتصال بالإنترنت"}`);
     } finally { setIsLoading(false); }
   };
 
@@ -154,7 +147,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           <Button onClick={onLogout} variant="outline" className="border-gold text-gold"><LogOut className="mr-2 h-4 w-4" />خروج</Button>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs defaultValue="gallery" className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-card border border-gold/20">
             <TabsTrigger value="gallery">المعرض</TabsTrigger>
             <TabsTrigger value="branding">الهوية</TabsTrigger>
@@ -234,16 +227,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                               if (!logoFile) return;
                               setLogoLoading(true);
                               try {
-                                const reader = new FileReader();
-                                const base64Data = await new Promise<string>((resolve) => {
-                                  reader.onload = () => resolve(reader.result as string);
-                                  reader.readAsDataURL(logoFile);
-                                });
-                                const fileData = base64Data.split(',')[1];
-                                await uploadLogoMutation.mutateAsync({ fileName: logoFile.name, fileSize: logoFile.size, mimeType: logoFile.type, fileData });
+                                const uploadResult = await directUpload(logoFile);
+                                await saveBrandingMutation.mutateAsync({ type: 'logo', imageUrl: uploadResult.url, imageKey: uploadResult.pathname });
                                 await getLogoQuery.refetch();
                                 toast.success('تم نشر الشعار بنجاح');
-                                setTimeout(() => window.location.reload(), 1500);
                                 setLogoFile(null);
                               } catch (err: any) { 
                                 console.error(err);
@@ -271,16 +258,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                             if (!bannerFile) return;
                             setBannerLoading(true);
                             try {
-                              const reader = new FileReader();
-                              const base64Data = await new Promise<string>((resolve) => {
-                                reader.onload = () => resolve(reader.result as string);
-                                reader.readAsDataURL(bannerFile);
-                              });
-                              const fileData = base64Data.split(',')[1];
-                              await uploadBannerMutation.mutateAsync({ fileName: bannerFile.name, fileSize: bannerFile.size, mimeType: bannerFile.type, fileData });
+                              const uploadResult = await directUpload(bannerFile);
+                              await saveBrandingMutation.mutateAsync({ type: 'banner', imageUrl: uploadResult.url, imageKey: uploadResult.pathname });
                               await getBannerQuery.refetch();
                               toast.success('تم نشر البنر بنجاح');
-                              setTimeout(() => window.location.reload(), 1500);
                               setBannerFile(null);
                             } catch (err: any) { 
                               console.error(err);
@@ -298,7 +279,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
           <TabsContent value="social" className="space-y-6">
             <Card className="border-gold/20">
-              <CardHeader><CardTitle className="text-gold">إدارة روابط التواصل الاجتماعي (مطابقة للأصل)</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-gold">إدارة روابط التواصل الاجتماعي</CardTitle></CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
