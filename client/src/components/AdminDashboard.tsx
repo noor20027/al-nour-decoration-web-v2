@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Trash2, LogOut, ArrowRight, Grid3x3, List, Check } from "lucide-react";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from 'uuid';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -73,54 +74,38 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
-  // طريقة الرفع المباشر من المتصفح
-  const directBrowserUpload = async (file: File, type: 'gallery' | 'logo' | 'banner') => {
+  // الرفع المباشر إلى Vercel Blob باستخدام API الرسمي
+  const directBlobUpload = async (file: File, type: 'gallery' | 'logo' | 'banner') => {
     try {
-      // الخطوة 1: الحصول على رابط الرفع من الخادم
-      const uploadUrlResponse = await fetch('/api/get-upload-url', {
+      // توليد اسم فريد للملف
+      const uniqueId = uuidv4();
+      const ext = file.name.split('.').pop();
+      const uniqueFilename = `${type}/${uniqueId}.${ext}`;
+
+      console.log('[Upload] Starting upload for:', uniqueFilename);
+
+      // استخدام FormData لرفع الملف
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('filename', uniqueFilename);
+
+      // الرفع إلى مسار API بسيط في الخادم
+      const response = await fetch('/api/upload-blob', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filename: file.name,
-          type: type
-        })
+        body: formData,
       });
 
-      if (!uploadUrlResponse.ok) {
-        const errorData = await uploadUrlResponse.json();
-        throw new Error(`فشل في الحصول على رابط الرفع: ${errorData.error}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'فشل الرفع');
       }
 
-      const { uploadUrl, filename, blobUrl } = await uploadUrlResponse.json();
+      const data = await response.json();
+      console.log('[Upload] Success:', data);
 
-      if (!uploadUrl) {
-        throw new Error('لم يتم الحصول على رابط الرفع من الخادم');
-      }
-
-      console.log('[Client] Upload URL received:', uploadUrl);
-      console.log('[Client] Blob URL will be:', blobUrl);
-
-      // الخطوة 2: رفع الملف مباشرة إلى Vercel Blob
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': file.type,
-          'Authorization': `Bearer ${process.env.REACT_APP_BLOB_TOKEN || ''}`,
-        },
-        body: file,
-      });
-
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        console.error('[Client] Upload failed:', uploadResponse.status, errorText);
-        throw new Error(`فشل في رفع الملف: ${uploadResponse.status}`);
-      }
-
-      console.log('[Client] File uploaded successfully');
-      
-      return { url: blobUrl, key: filename };
+      return { url: data.url, key: data.key };
     } catch (error: any) {
-      console.error('[Client] Upload error:', error);
+      console.error('[Upload] Error:', error);
       throw error;
     }
   };
@@ -130,7 +115,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     if (!selectedFile) return;
     setIsLoading(true);
     try {
-      const uploadResult = await directBrowserUpload(selectedFile, 'gallery');
+      const uploadResult = await directBlobUpload(selectedFile, 'gallery');
 
       await addImageMutation.mutateAsync({
         imageUrl: uploadResult.url, 
@@ -253,7 +238,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                               if (!logoFile) return;
                               setLogoLoading(true);
                               try {
-                                const uploadResult = await directBrowserUpload(logoFile, 'logo');
+                                const uploadResult = await directBlobUpload(logoFile, 'logo');
                                 await saveBrandingMutation.mutateAsync({ type: 'logo', imageUrl: uploadResult.url, imageKey: uploadResult.key });
                                 await getLogoQuery.refetch();
                                 toast.success('تم نشر الشعار بنجاح');
@@ -284,7 +269,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                             if (!bannerFile) return;
                             setBannerLoading(true);
                             try {
-                              const uploadResult = await directBrowserUpload(bannerFile, 'banner');
+                              const uploadResult = await directBlobUpload(bannerFile, 'banner');
                               await saveBrandingMutation.mutateAsync({ type: 'banner', imageUrl: uploadResult.url, imageKey: uploadResult.key });
                               await getBannerQuery.refetch();
                               toast.success('تم نشر البنر بنجاح');
