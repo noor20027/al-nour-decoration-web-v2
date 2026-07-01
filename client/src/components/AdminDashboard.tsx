@@ -73,30 +73,46 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
-  // وظيفة الرفع المباشر الجديدة
-  const directUpload = async (file: File) => {
-    const reader = new FileReader();
-    const base64Data = await new Promise<string>((resolve) => {
-      reader.onload = () => resolve(reader.result as string);
-      reader.readAsDataURL(file);
-    });
-    
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fileName: `${Date.now()}_${file.name}`,
-        fileData: base64Data.split(',')[1],
-        mimeType: file.type
-      })
-    });
+  // طريقة الرفع المباشر من المتصفح
+  const directBrowserUpload = async (file: File, type: 'gallery' | 'logo' | 'banner') => {
+    try {
+      // الخطوة 1: الحصول على رابط الرفع من الخادم
+      const uploadUrlResponse = await fetch('/api/get-upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: file.name,
+          type: type
+        })
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.details || 'Upload failed');
+      if (!uploadUrlResponse.ok) {
+        throw new Error('فشل في الحصول على رابط الرفع');
+      }
+
+      const { uploadUrl, filename } = await uploadUrlResponse.json();
+
+      // الخطوة 2: رفع الملف مباشرة إلى Vercel Blob
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type,
+        },
+        body: file,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('فشل في رفع الملف');
+      }
+
+      // الخطوة 3: الحصول على الرابط النهائي
+      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${filename}`;
+      
+      return { url: blobUrl, key: filename };
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      throw error;
     }
-
-    return await response.json();
   };
 
   const handleAddImage = async (e: React.FormEvent) => {
@@ -104,11 +120,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     if (!selectedFile) return;
     setIsLoading(true);
     try {
-      const uploadResult = await directUpload(selectedFile);
+      const uploadResult = await directBrowserUpload(selectedFile, 'gallery');
 
       await addImageMutation.mutateAsync({
         imageUrl: uploadResult.url, 
-        imageKey: uploadResult.pathname,
+        imageKey: uploadResult.key,
         title: imageTitle,
         description: imageDescription,
         orientation: imageOrientation,
@@ -120,7 +136,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       toast.success("تم النشر بنجاح");
     } catch (err: any) { 
       console.error(err);
-      toast.error(`فشل النشر: ${err.message || "تأكد من الاتصال بالإنترنت"}`);
+      toast.error(`فشل النشر: ${err.message}`);
     } finally { setIsLoading(false); }
   };
 
@@ -227,8 +243,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                               if (!logoFile) return;
                               setLogoLoading(true);
                               try {
-                                const uploadResult = await directUpload(logoFile);
-                                await saveBrandingMutation.mutateAsync({ type: 'logo', imageUrl: uploadResult.url, imageKey: uploadResult.pathname });
+                                const uploadResult = await directBrowserUpload(logoFile, 'logo');
+                                await saveBrandingMutation.mutateAsync({ type: 'logo', imageUrl: uploadResult.url, imageKey: uploadResult.key });
                                 await getLogoQuery.refetch();
                                 toast.success('تم نشر الشعار بنجاح');
                                 setLogoFile(null);
@@ -258,8 +274,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                             if (!bannerFile) return;
                             setBannerLoading(true);
                             try {
-                              const uploadResult = await directUpload(bannerFile);
-                              await saveBrandingMutation.mutateAsync({ type: 'banner', imageUrl: uploadResult.url, imageKey: uploadResult.pathname });
+                              const uploadResult = await directBrowserUpload(bannerFile, 'banner');
+                              await saveBrandingMutation.mutateAsync({ type: 'banner', imageUrl: uploadResult.url, imageKey: uploadResult.key });
                               await getBannerQuery.refetch();
                               toast.success('تم نشر البنر بنجاح');
                               setBannerFile(null);
