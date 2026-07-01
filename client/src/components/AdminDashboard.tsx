@@ -87,30 +87,40 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       });
 
       if (!uploadUrlResponse.ok) {
-        throw new Error('فشل في الحصول على رابط الرفع');
+        const errorData = await uploadUrlResponse.json();
+        throw new Error(`فشل في الحصول على رابط الرفع: ${errorData.error}`);
       }
 
-      const { uploadUrl, filename } = await uploadUrlResponse.json();
+      const { uploadUrl, filename, blobUrl } = await uploadUrlResponse.json();
+
+      if (!uploadUrl) {
+        throw new Error('لم يتم الحصول على رابط الرفع من الخادم');
+      }
+
+      console.log('[Client] Upload URL received:', uploadUrl);
+      console.log('[Client] Blob URL will be:', blobUrl);
 
       // الخطوة 2: رفع الملف مباشرة إلى Vercel Blob
       const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': file.type,
+          'Authorization': `Bearer ${process.env.REACT_APP_BLOB_TOKEN || ''}`,
         },
         body: file,
       });
 
       if (!uploadResponse.ok) {
-        throw new Error('فشل في رفع الملف');
+        const errorText = await uploadResponse.text();
+        console.error('[Client] Upload failed:', uploadResponse.status, errorText);
+        throw new Error(`فشل في رفع الملف: ${uploadResponse.status}`);
       }
 
-      // الخطوة 3: الحصول على الرابط النهائي
-      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${filename}`;
+      console.log('[Client] File uploaded successfully');
       
       return { url: blobUrl, key: filename };
     } catch (error: any) {
-      console.error('Upload error:', error);
+      console.error('[Client] Upload error:', error);
       throw error;
     }
   };
