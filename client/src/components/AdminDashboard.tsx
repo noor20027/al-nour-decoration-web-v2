@@ -74,25 +74,35 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
-  // الرفع المباشر إلى Vercel Blob باستخدام API الرسمي
+  // تحويل الملف لـ Base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result.split(',')[1]); // إزالة البادئة
+      };
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  // الرفع المباشر
   const directBlobUpload = async (file: File, type: 'gallery' | 'logo' | 'banner') => {
     try {
-      // توليد اسم فريد للملف
       const uniqueId = uuidv4();
       const ext = file.name.split('.').pop();
       const uniqueFilename = `${type}/${uniqueId}.${ext}`;
+      const base64Data = await fileToBase64(file);
 
-      console.log('[Upload] Starting upload for:', uniqueFilename);
-
-      // استخدام FormData لرفع الملف
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('filename', uniqueFilename);
-
-      // الرفع إلى مسار API بسيط في الخادم
       const response = await fetch('/api/upload-blob', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: uniqueFilename,
+          fileData: base64Data,
+          mimeType: file.type
+        }),
       });
 
       if (!response.ok) {
@@ -100,10 +110,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         throw new Error(errorData.error || 'فشل الرفع');
       }
 
-      const data = await response.json();
-      console.log('[Upload] Success:', data);
-
-      return { url: data.url, key: data.key };
+      return await response.json();
     } catch (error: any) {
       console.error('[Upload] Error:', error);
       throw error;

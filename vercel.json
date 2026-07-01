@@ -12,10 +12,6 @@
       "destination": "/api/index.js"
     },
     {
-      "source": "/manus-storage/(.*)",
-      "destination": "/api/index.js"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
