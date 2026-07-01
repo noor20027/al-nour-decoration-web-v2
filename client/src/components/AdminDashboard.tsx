@@ -7,6 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { Loader2, Trash2, LogOut, ArrowRight, Grid3x3, List, Check } from "lucide-react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from 'uuid';
+import { upload } from '@vercel/blob/client';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -87,32 +88,25 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     });
   };
 
-  // الرفع المباشر
+  // الرفع المباشر من طرف العميل لتجاوز قيود حجم Vercel Serverless (4.5MB)
   const directBlobUpload = async (file: File, type: 'gallery' | 'logo' | 'banner') => {
     try {
       const uniqueId = uuidv4();
       const ext = file.name.split('.').pop();
       const uniqueFilename = `${type}/${uniqueId}.${ext}`;
-      const base64Data = await fileToBase64(file);
 
-      const response = await fetch('/api/upload-blob', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filename: uniqueFilename,
-          fileData: base64Data,
-          mimeType: file.type
-        }),
+      const blob = await upload(uniqueFilename, file, {
+        access: 'public',
+        handleUploadUrl: '/api/upload/blob',
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'فشل الرفع');
-      }
-
-      return await response.json();
+      return {
+        success: true,
+        url: blob.url,
+        key: blob.pathname
+      };
     } catch (error: any) {
-      console.error('[Upload] Error:', error);
+      console.error('[Upload] Client-side Error:', error);
       throw error;
     }
   };
