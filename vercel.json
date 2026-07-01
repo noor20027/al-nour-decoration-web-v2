@@ -4,6 +4,10 @@
   "outputDirectory": "dist/public",
   "rewrites": [
     {
+      "source": "/api/upload/blob",
+      "destination": "/api/index.js"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/index.js"
     },

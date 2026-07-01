@@ -66,12 +66,12 @@ app.use(
 // مسار معالجة الرفع من طرف العميل لـ Vercel Blob
 app.post('/api/upload/blob', async (req, res) => {
   try {
+    console.log('[API] Blob upload request received');
     const jsonResponse = await handleUpload({
-      body: req.body as HandleUploadBody,
+      body: req.body,
       request: req,
-      onBeforeGenerateToken: async (pathname) => {
-        // هنا يمكن إضافة التحقق من هوية المستخدم (Session check)
-        // بما أن المستخدم مسجل الدخول في المتصفح، سنسمح بالرفع
+      onBeforeGenerateToken: async (pathname, clientPayload) => {
+        console.log('[API] Generating token for:', pathname);
         return {
           allowedContentTypes: [
             'image/jpeg', 
@@ -84,20 +84,18 @@ app.post('/api/upload/blob', async (req, res) => {
             'image/bmp',
             'image/x-adobe-dng'
           ],
-          tokenPayload: JSON.stringify({
-            // معلومات إضافية يمكن تمريرها
-          }),
+          tokenPayload: clientPayload || JSON.stringify({}),
         };
       },
       onUploadCompleted: async ({ blob, tokenPayload }) => {
-        // تم الرفع بنجاح
-        console.log('Upload completed:', blob.url);
+        console.log('[API] Upload completed:', blob.url);
       },
     });
 
-    res.json(jsonResponse);
+    return res.status(200).json(jsonResponse);
   } catch (error: any) {
-    res.status(400).json({ error: error.message });
+    console.error('[API] Blob upload error:', error);
+    return res.status(400).json({ error: error.message });
   }
 });
 
