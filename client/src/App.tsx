@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner"; // Toast notifications
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -9,9 +10,13 @@ import About from "./pages/About";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
 import Gallery from "./pages/Gallery";
+import AdminLogin from "./components/AdminLogin";
+import AdminDashboard from "./components/AdminDashboard";
+import { useState } from "react";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+
   return (
     <Switch>
       <Route path={"/"} component={Home} />
@@ -19,6 +24,19 @@ function Router() {
       <Route path={"/gallery"} component={Gallery} />
       <Route path={"/services"} component={Services} />
       <Route path={"/contact"} component={Contact} />
+      
+      {/* Admin Routes */}
+      <Route path={"/admin"}>
+        {isAdminLoggedIn ? (
+          <AdminDashboard onLogout={() => setIsAdminLoggedIn(false)} />
+        ) : (
+          <AdminLogin 
+            onLoginSuccess={() => setIsAdminLoggedIn(true)} 
+            onCancel={() => window.location.href = "/"} 
+          />
+        )}
+      </Route>
+
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -26,18 +44,10 @@ function Router() {
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <Router />
