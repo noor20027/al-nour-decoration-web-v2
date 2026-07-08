@@ -1,14 +1,14 @@
 
 import express from "express";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-// @ts-ignore
-import { appRouter } from "../dist/server/routers.js";
-// @ts-ignore
-import { createContext } from "../dist/server/_core/context.js";
-// @ts-ignore
-import { registerOAuthRoutes } from "../dist/server/_core/oauth.js";
-// @ts-ignore
-import { registerStorageProxy } from "../dist/server/_core/storageProxy.js";
+import path from "path";
+import fs from "fs";
+
+// Function to safely import a module from dist
+const safeImport = async (relativePath) => {
+  const fullPath = path.resolve(process.cwd(), "dist", relativePath);
+  return import(`file://${fullPath}`);
+};
 
 const app = express();
 
@@ -16,18 +16,35 @@ const app = express();
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-// Register proxies and OAuth
-registerStorageProxy(app);
-registerOAuthRoutes(app);
+// Serverless handler
+const handler = async (req, res) => {
+  try {
+    // Dynamically import modules from dist after build
+    const { appRouter } = await safeImport("server/routers.js");
+    const { createContext } = await safeImport("server/_core/context.js");
+    const { registerOAuthRoutes } = await safeImport("server/_core/oauth.js");
+    const { registerStorageProxy } = await safeImport("server/_core/storageProxy.js");
 
-// tRPC API
-app.use(
-  "/api/trpc",
-  createExpressMiddleware({
-    router: appRouter,
-    createContext,
-  })
-);
+    // Initialize express app logic inside handler if needed, or use a singleton
+    if (!(app as any)._initialized) {
+      registerStorageProxy(app);
+      registerOAuthRoutes(app);
+      (app as any)._initialized = true;
+    }
 
-// Export for Vercel
-export default app;
+    // Handle tRPC
+    if (req.url.startsWith("/api/trpc")) {
+      return createExpressMiddleware({
+        router: appRouter,
+        createContext,
+      })(req, res);
+    }
+
+    res.status(404).send("Not Found");
+  } catch (error) {
+    console.error("Serverless Error:", error);
+    res.status(500).json({ error: "Internal Server Error", message: error.message });
+  }
+};
+
+export default handler;
