@@ -1,4 +1,4 @@
-import { getSessionCookieOptions } from "./_core/cookies";
+import { getSessionCookieOptions } from "./_core/cookies.js";
 import { COOKIE_NAME } from "../shared/const";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
