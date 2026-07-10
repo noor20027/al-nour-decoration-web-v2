@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Trash2, LogOut, ArrowRight, Grid3x3, List, Upload, Edit2, Check, X } from "lucide-react";
+import { Loader2, Trash2, LogOut, ArrowRight, Grid3x3, List, Upload, Edit2, Check, X, MessageCircle, Phone } from "lucide-react";
 import { toast } from "sonner";
 
 interface AdminDashboardProps {
