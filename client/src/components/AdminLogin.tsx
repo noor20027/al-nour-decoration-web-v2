@@ -24,6 +24,13 @@ export default function AdminLogin({ onLoginSuccess, onCancel }: AdminLoginProps
     setError("");
     setIsLoading(true);
 
+    // التحقق من اسم المستخدم وكلمة المرور المطلوبة
+    if (username !== "admin" || password !== "admin") {
+      setError("اسم المستخدم أو كلمة المرور غير صحيحة.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       await loginMutation.mutateAsync({ username, password });
       onLoginSuccess();
