@@ -13,6 +13,7 @@ import {
   addGalleryImage,
   deleteGalleryImage,
   updateGalleryImage,
+  updateImageOrder,
   getCarouselImages,
   getAllSocialLinks,
   updateSocialLink,
@@ -35,6 +36,7 @@ export const appRouter = router({
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      ctx.res.clearCookie('admin_session', { ...cookieOptions, maxAge: -1 });
       return {
         success: true,
       } as const;
@@ -45,11 +47,11 @@ export const appRouter = router({
     login: publicProcedure
       .input(z.object({ username: z.string(), password: z.string() }))
       .mutation(async ({ input, ctx }) => {
-        // التحقق المباشر من الثوابت المطلوبة admin / admin
+        // Direct check for admin/admin credentials
         if (input.username === "admin" && input.password === "admin") {
           const cookieOptions = getSessionCookieOptions(ctx.req);
           
-          // تعيين الجلسة على الكوكيز الافتراضي للنظام والكوكيز المخصص لضمان التوافق التام
+          // Set admin session cookie
           ctx.res.cookie(COOKIE_NAME, 'admin_static_session', {
             ...cookieOptions,
             maxAge: 86400000,
@@ -61,7 +63,7 @@ export const appRouter = router({
           return { success: true, adminId: 0 };
         }
 
-        // في حال فشل المطابقة الثابتة يتم التحقق من قاعدة البيانات كخيار بديل
+        // Fallback to database verification
         const admin = await getAdminByUsername(input.username);
         if (!admin || !verifyPassword(input.password, admin.passwordHash)) {
           throw new TRPCError({ code: "UNAUTHORIZED", message: "بيانات الدخول غير صحيحة" });
@@ -81,14 +83,15 @@ export const appRouter = router({
     changePassword: publicProcedure
       .input(z.object({ oldPassword: z.string(), newPassword: z.string() }))
       .mutation(async ({ input, ctx }) => {
-        if (!ctx.user || ctx.user.id !== 0) {
-          const admin = await getAdminByUsername('admin');
-          if (!admin || !verifyPassword(input.oldPassword, admin.passwordHash)) {
-            throw new TRPCError({ code: "UNAUTHORIZED", message: "كلمة المرور القديمة غير صحيحة" });
-          }
-          const newHash = hashPassword(input.newPassword);
-          await updateAdminPassword(admin.id, newHash);
+        if (!ctx.user || ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: "FORBIDDEN", message: "غير مصرح" });
         }
+        const admin = await getAdminByUsername('admin');
+        if (!admin || !verifyPassword(input.oldPassword, admin.passwordHash)) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "كلمة المرور القديمة غير صحيحة" });
+        }
+        const newHash = hashPassword(input.newPassword);
+        await updateAdminPassword(admin.username, newHash);
         return { success: true };
       }),
   }),
@@ -109,18 +112,34 @@ export const appRouter = router({
       }),
     update: publicProcedure
       .input(z.object({
-        id: z.number(),
+        imageKey: z.string(),
         title: z.string().optional(),
         description: z.string().optional(),
-        category: z.string().optional(),
+        orientation: z.enum(['horizontal', 'vertical']).optional(),
+        isCarousel: z.enum(['yes', 'no']).optional(),
       }))
       .mutation(async ({ input }) => {
-        return await updateGalleryImage(input.id, input);
+        return await updateGalleryImage(input.imageKey, input);
       }),
     delete: publicProcedure
-      .input(z.object({ id: z.number() }))
+      .input(z.object({ imageKey: z.string() }))
       .mutation(async ({ input }) => {
-        return await deleteGalleryImage(input.id);
+        return await deleteGalleryImage(input.imageKey);
+      }),
+    getCarousel: publicProcedure.query(async () => {
+      return await getCarouselImages();
+    }),
+    uploadImage: publicProcedure
+      .input(z.object({
+        fileName: z.string(),
+        fileSize: z.number(),
+        mimeType: z.string(),
+        fileData: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const buffer = Buffer.from(input.fileData, 'base64');
+        const result = await storagePut(input.fileName, buffer, input.mimeType);
+        return { imageUrl: result.url, imageKey: result.key };
       }),
   }),
   carousel: router({
@@ -139,25 +158,64 @@ export const appRouter = router({
     }),
     update: publicProcedure
       .input(z.object({
-        id: z.number(),
-        url: z.string(),
-        isActive: z.boolean().optional(),
+        platform: z.string(),
+        url: z.string().nullable().optional(),
       }))
       .mutation(async ({ input }) => {
-        return await updateSocialLink(input.id, input.url, input.isActive);
+        return await updateSocialLink(input.platform, input.url || null);
       }),
+    initialize: publicProcedure.mutation(async () => {
+      await initializeSocialLinks();
+      return { success: true };
+    }),
   }),
   branding: router({
     get: publicProcedure.query(async () => {
       return await getBrandingImage();
+    }),
+    getLogo: publicProcedure.query(async () => {
+      return await getBrandingImage('logo');
+    }),
+    getBanner: publicProcedure.query(async () => {
+      return await getBrandingImage('banner');
     }),
     upsert: publicProcedure
       .input(z.object({ imageUrl: z.string() }))
       .mutation(async ({ input }) => {
         return await upsertBrandingImage(input.imageUrl);
       }),
+    uploadLogo: publicProcedure
+      .input(z.object({
+        fileName: z.string(),
+        fileSize: z.number(),
+        mimeType: z.string(),
+        fileData: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const buffer = Buffer.from(input.fileData, 'base64');
+        const result = await storagePut(input.fileName, buffer, input.mimeType);
+        return { url: result.url, key: result.key };
+      }),
+    uploadBanner: publicProcedure
+      .input(z.object({
+        fileName: z.string(),
+        fileSize: z.number(),
+        mimeType: z.string(),
+        fileData: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const buffer = Buffer.from(input.fileData, 'base64');
+        const result = await storagePut(input.fileName, buffer, input.mimeType);
+        return { url: result.url, key: result.key };
+      }),
     delete: publicProcedure.mutation(async () => {
       return await deleteBrandingImage();
+    }),
+    deleteLogo: publicProcedure.mutation(async () => {
+      return await deleteBrandingImage('logo');
+    }),
+    deleteBanner: publicProcedure.mutation(async () => {
+      return await deleteBrandingImage('banner');
     }),
   }),
   floatingIcons: router({
@@ -171,15 +229,12 @@ export const appRouter = router({
       }),
     upsert: publicProcedure
       .input(z.object({
-        id: z.number().optional(),
-        name: z.string(),
-        icon: z.string(),
-        url: z.string(),
-        color: z.string().optional(),
-        isActive: z.boolean().optional(),
+        type: z.enum(['whatsapp', 'call']),
+        phoneNumber: z.string(),
+        isEnabled: z.enum(['yes', 'no']).optional().default('yes'),
       }))
       .mutation(async ({ input }) => {
-        return await upsertFloatingIcon(input);
+        return await upsertFloatingIcon(input.type, input.phoneNumber, input.isEnabled);
       }),
     delete: publicProcedure
       .input(z.object({ id: z.number() }))
@@ -196,8 +251,8 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         const buffer = Buffer.from(input.data, 'base64');
-        const url = await storagePut(input.name, buffer, input.type);
-        return { url };
+        const result = await storagePut(input.name, buffer, input.type);
+        return { url: result.url, key: result.key };
       }),
   }),
 });
