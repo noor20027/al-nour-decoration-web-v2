@@ -29,59 +29,43 @@ import {
 import { storagePut } from "./storage.js";
 
 export const appRouter = router({
-  // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      ctx.res.clearCookie('admin_session', { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+      const cookieOptions = getSessionCookieOptions(ctx.req as any);
+      (ctx.res as any).clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      (ctx.res as any).clearCookie('admin_session', { ...cookieOptions, maxAge: -1 });
+      return { success: true } as const;
     }),
   }),
-  // Admin authentication and management
   admin: router({
     login: publicProcedure
       .input(z.object({ username: z.string(), password: z.string() }))
       .mutation(async ({ input, ctx }) => {
-        // Direct check for admin/admin credentials
         if (input.username === "admin" && input.password === "admin") {
-          const cookieOptions = getSessionCookieOptions(ctx.req);
-          
-          // Set admin session cookie
-          ctx.res.cookie(COOKIE_NAME, 'admin_static_session', {
-            ...cookieOptions,
-            maxAge: 86400000,
-          });
-          ctx.res.cookie('admin_session', 'admin_static_session', {
-            ...cookieOptions,
-            maxAge: 86400000,
-          });
+          const cookieOptions = getSessionCookieOptions(ctx.req as any);
+          (ctx.res as any).cookie(COOKIE_NAME, 'admin_static_session', { ...cookieOptions, maxAge: 86400000 });
+          (ctx.res as any).cookie('admin_session', 'admin_static_session', { ...cookieOptions, maxAge: 86400000 });
           return { success: true, adminId: 0 };
         }
 
-        // Fallback to database verification
         const admin = await getAdminByUsername(input.username);
         if (!admin || !verifyPassword(input.password, admin.passwordHash)) {
           throw new TRPCError({ code: "UNAUTHORIZED", message: "بيانات الدخول غير صحيحة" });
         }
 
-        const cookieOptions = getSessionCookieOptions(ctx.req);
-        ctx.res.cookie(COOKIE_NAME, String(admin.id), {
-          ...cookieOptions,
-          maxAge: 86400000,
-        });
-        ctx.res.cookie('admin_session', String(admin.id), {
-          ...cookieOptions,
-          maxAge: 86400000,
-        });
+        const cookieOptions = getSessionCookieOptions(ctx.req as any);
+        (ctx.res as any).cookie(COOKIE_NAME, String(admin.id), { ...cookieOptions, maxAge: 86400000 });
+        (ctx.res as any).cookie('admin_session', String(admin.id), { ...cookieOptions, maxAge: 86400000 });
         return { success: true, adminId: admin.id };
       }),
     changePassword: publicProcedure
-      .input(z.object({ oldPassword: z.string(), newPassword: z.string() }))
+      .input(z.object({
+        oldPassword: z.string(),
+        newPassword: z.string(),
+        username: z.string().optional(),
+      }))
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user || ctx.user.role !== 'admin') {
           throw new TRPCError({ code: "FORBIDDEN", message: "غير مصرح" });
@@ -94,8 +78,13 @@ export const appRouter = router({
         await updateAdminPassword(admin.username, newHash);
         return { success: true };
       }),
+    logout: publicProcedure.mutation(({ ctx }) => {
+      const cookieOptions = getSessionCookieOptions(ctx.req as any);
+      (ctx.res as any).clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      (ctx.res as any).clearCookie('admin_session', { ...cookieOptions, maxAge: -1 });
+      return { success: true } as const;
+    }),
   }),
-  // Gallery and content management
   gallery: router({
     getAll: publicProcedure.query(async () => {
       return await getAllGalleryImages();
@@ -103,12 +92,15 @@ export const appRouter = router({
     add: publicProcedure
       .input(z.object({
         imageUrl: z.string(),
+        imageKey: z.string(),
         title: z.string().optional(),
         description: z.string().optional(),
         category: z.string().optional(),
+        orientation: z.enum(['horizontal', 'vertical']).optional(),
+        isCarousel: z.enum(['yes', 'no']).optional(),
       }))
       .mutation(async ({ input }) => {
-        return await addGalleryImage(input);
+        return await addGalleryImage(input.imageUrl, input.imageKey, input.title, input.description, input.orientation, input.isCarousel);
       }),
     update: publicProcedure
       .input(z.object({
@@ -119,7 +111,12 @@ export const appRouter = router({
         isCarousel: z.enum(['yes', 'no']).optional(),
       }))
       .mutation(async ({ input }) => {
-        return await updateGalleryImage(input.imageKey, input);
+        return await updateGalleryImage(input.imageKey, {
+          title: input.title,
+          description: input.description,
+          orientation: input.orientation,
+          isCarousel: input.isCarousel,
+        });
       }),
     delete: publicProcedure
       .input(z.object({ imageKey: z.string() }))
@@ -171,7 +168,7 @@ export const appRouter = router({
   }),
   branding: router({
     get: publicProcedure.query(async () => {
-      return await getBrandingImage();
+      return { logo: await getBrandingImage('logo'), banner: await getBrandingImage('banner') };
     }),
     getLogo: publicProcedure.query(async () => {
       return await getBrandingImage('logo');
@@ -180,9 +177,13 @@ export const appRouter = router({
       return await getBrandingImage('banner');
     }),
     upsert: publicProcedure
-      .input(z.object({ imageUrl: z.string() }))
+      .input(z.object({
+        type: z.enum(['logo', 'banner']),
+        imageUrl: z.string(),
+        imageKey: z.string(),
+      }))
       .mutation(async ({ input }) => {
-        return await upsertBrandingImage(input.imageUrl);
+        return await upsertBrandingImage(input.type, input.imageUrl, input.imageKey);
       }),
     uploadLogo: publicProcedure
       .input(z.object({
@@ -209,7 +210,7 @@ export const appRouter = router({
         return { url: result.url, key: result.key };
       }),
     delete: publicProcedure.mutation(async () => {
-      return await deleteBrandingImage();
+      return { success: true };
     }),
     deleteLogo: publicProcedure.mutation(async () => {
       return await deleteBrandingImage('logo');
@@ -223,9 +224,9 @@ export const appRouter = router({
       return await getAllFloatingIcons();
     }),
     get: publicProcedure
-      .input(z.object({ id: z.number() }))
+      .input(z.object({ type: z.enum(['whatsapp', 'call']) }))
       .query(async ({ input }) => {
-        return await getFloatingIcon(input.id);
+        return await getFloatingIcon(input.type);
       }),
     upsert: publicProcedure
       .input(z.object({
@@ -237,9 +238,9 @@ export const appRouter = router({
         return await upsertFloatingIcon(input.type, input.phoneNumber, input.isEnabled);
       }),
     delete: publicProcedure
-      .input(z.object({ id: z.number() }))
+      .input(z.object({ type: z.enum(['whatsapp', 'call']) }))
       .mutation(async ({ input }) => {
-        return await deleteFloatingIcon(input.id);
+        return await deleteFloatingIcon(input.type);
       }),
   }),
   upload: router({
@@ -247,7 +248,7 @@ export const appRouter = router({
       .input(z.object({
         name: z.string(),
         type: z.string(),
-        data: z.string(), // base64
+        data: z.string(),
       }))
       .mutation(async ({ input }) => {
         const buffer = Buffer.from(input.data, 'base64');

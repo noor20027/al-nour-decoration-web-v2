@@ -19,7 +19,7 @@ export async function storagePut(
 ): Promise<{ key: string; url: string }> {
   const key = appendHashSuffix(normalizeKey(relKey));
   
-  const blob = await put(key, data, {
+  const blob = await put(key, data as string, {
     access: 'public',
     contentType,
   });
