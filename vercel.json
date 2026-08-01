@@ -2,15 +2,18 @@
   "version": 2,
   "buildCommand": "pnpm run build",
   "installCommand": "pnpm install",
-  "outputDirectory": "dist/public",
-  "rewrites": [
+  "framework": "vite",
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/dist/_core/index.js"
+      "src": "/api/(.*)",
+      "dest": "/api/index.ts"
     },
     {
-      "source": "/(.*)",
-      "destination": "/$1"
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
