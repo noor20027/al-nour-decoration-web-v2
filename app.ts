@@ -62,14 +62,22 @@ app.use(
 );
 
 // Serve static files from dist/public
-const distPath = path.resolve(__dirname, "dist", "public");
-if (fs.existsSync(distPath)) {
+// In Vercel: static build output goes to /var/task/dist/public
+// In local: it's ./dist/public
+const distPaths = [
+  path.resolve(__dirname, "dist", "public"),
+  path.resolve("/var/task", "dist", "public"),
+  path.resolve(__dirname, "..", "dist", "public"),
+];
+
+let distPath = distPaths.find(p => fs.existsSync(p));
+if (distPath) {
   app.use(express.static(distPath));
   app.use("*", (_req, res) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 } else {
-  console.error(`Could not find build directory: ${distPath}`);
+  console.error("Could not find build directory in any of:", distPaths);
 }
 
 const port = parseInt(process.env.PORT || "3000");
