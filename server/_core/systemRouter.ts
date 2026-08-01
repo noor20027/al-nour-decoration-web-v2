@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { notifyOwner } from "./notification";
-import { adminProcedure, publicProcedure, router } from "./trpc.js";
-import { initializeSocialLinks } from "../db.js";
+import { adminProcedure, publicProcedure, router } from "./trpc";
 
 export const systemRouter = router({
   health: publicProcedure
@@ -10,10 +9,9 @@ export const systemRouter = router({
         timestamp: z.number().min(0, "timestamp cannot be negative"),
       })
     )
-    .query(async () => {
-      await initializeSocialLinks();
-      return { ok: true };
-    }),
+    .query(() => ({
+      ok: true,
+    })),
 
   notifyOwner: adminProcedure
     .input(

@@ -1,10 +1,10 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { appRouter } from "../server/routers.js";
-import { createContext } from "../server/_core/context.js";
-import { registerOAuthRoutes } from "../server/_core/oauth.js";
-import { registerStorageProxy } from "../server/_core/storageProxy.js";
+import { appRouter } from "../server/routers";
+import { createContext } from "../server/_core/context";
+import { registerOAuthRoutes } from "../server/_core/oauth";
+import { registerStorageProxy } from "../server/_core/storageProxy";
 
 const app = express();
 
@@ -28,4 +28,5 @@ app.use(
   })
 );
 
+// Export for Vercel
 export default app;

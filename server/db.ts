@@ -206,24 +206,12 @@ export async function updateSocialLink(platform: string, url: string | null) {
 export async function initializeSocialLinks() {
   const db = await getDb();
   if (!db) return;
-  const platforms = ['facebook', 'instagram', 'twitter', 'x', 'youtube', 'snapchat', 'linkedin', 'tiktok', 'whatsapp', 'call', 'mail'];
+  const platforms = ['facebook', 'instagram', 'twitter', 'x', 'youtube', 'snapchat', 'linkedin', 'tiktok'];
   for (const platform of platforms) {
     const existing = await getSocialLink(platform);
     if (!existing) {
       await db.insert(socialLinks).values({ platform, url: null });
     }
-  }
-  
-  // Initialize admin if not exists
-  try {
-    const existingAdmin = await db.select().from(adminCredentials).where(eq(adminCredentials.username, 'admin')).limit(1);
-    if (existingAdmin.length === 0) {
-      const { hashPassword } = await import('./_core/auth.js');
-      await createAdminCredentials('admin', hashPassword('admin'));
-      console.log('[DB] Admin user created');
-    }
-  } catch (err) {
-    console.error('[DB] Failed to initialize admin:', err);
   }
 }
 
