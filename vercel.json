@@ -1,28 +1,38 @@
 {
   "version": 2,
-  "buildCommand": "pnpm run build",
-  "installCommand": "pnpm install --no-frozen-lockfile",
-  "builds": [
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist",
+  "public": false,
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "api/index.ts": {
+      "runtime": "@vercel/node@3.1.0",
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+  "routes": [
     {
-      "src": "app.ts",
-      "use": "@vercel/node"
+      "src": "/api/(.*)",
+      "dest": "api/index.ts",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
     },
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist/public"
-      }
+      "src": "/(.*)",
+      "dest": "client/dist/$1"
     }
   ],
-  "rewrites": [
+  "headers": [
     {
       "source": "/api/(.*)",
-      "destination": "/app.ts"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/app.ts"
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
     }
   ]
 }
