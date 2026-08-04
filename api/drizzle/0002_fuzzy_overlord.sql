@@ -1,2 +1,0 @@
-ALTER TABLE `gallery_images` ADD `orientation` enum('horizontal','vertical') DEFAULT 'horizontal' NOT NULL;--> statement-breakpoint
-ALTER TABLE `gallery_images` ADD `isCarousel` enum('yes','no') DEFAULT 'no' NOT NULL;
