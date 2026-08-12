@@ -72709,13 +72709,18 @@ async function getCarouselImages() {
   const state = await getState();
   return state.galleryImages.filter((img) => img.isCarousel === "yes");
 }
-async function addGalleryImage(image) {
+async function addGalleryImage(imageUrl, imageKey, title, description, orientation, isCarousel) {
   const state = await getState();
   const maxOrder = state.galleryImages.length > 0 ? Math.max(...state.galleryImages.map((img) => img.displayOrder || 0)) : 0;
   state.galleryImages.push({
-    ...image,
     id: state.galleryImages.length > 0 ? Math.max(...state.galleryImages.map((img) => img.id)) + 1 : 1,
+    imageUrl,
+    imageKey,
+    title: title || null,
+    description: description || null,
     displayOrder: maxOrder + 1,
+    orientation: orientation || "horizontal",
+    isCarousel: isCarousel || "no",
     createdAt: (/* @__PURE__ */ new Date()).toISOString(),
     updatedAt: (/* @__PURE__ */ new Date()).toISOString()
   });

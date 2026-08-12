@@ -174,15 +174,20 @@ export async function getCarouselImages(): Promise<any[]> {
   return state.galleryImages.filter((img: any) => img.isCarousel === "yes");
 }
 
-export async function addGalleryImage(image: any): Promise<void> {
+export async function addGalleryImage(imageUrl: string, imageKey: string, title?: string, description?: string, orientation?: string, isCarousel?: string): Promise<void> {
   const state = await getState();
   const maxOrder = state.galleryImages.length > 0
     ? Math.max(...state.galleryImages.map((img: any) => img.displayOrder || 0))
     : 0;
   state.galleryImages.push({
-    ...image,
     id: state.galleryImages.length > 0 ? Math.max(...state.galleryImages.map((img: any) => img.id)) + 1 : 1,
+    imageUrl,
+    imageKey,
+    title: title || null,
+    description: description || null,
     displayOrder: maxOrder + 1,
+    orientation: orientation || "horizontal",
+    isCarousel: isCarousel || "no",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
