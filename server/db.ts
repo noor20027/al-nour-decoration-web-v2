@@ -1,8 +1,7 @@
-import { put, get, del, list } from "@vercel/blob";
+import { put, del, list } from "@vercel/blob";
 
 // Simple JSON-based storage in Vercel Blob
-// Always reads from Blob on every request - no in-memory caching
-// This ensures data consistency across all serverless instances
+// In-memory caching with TTL for fast reads + invalidation on writes
 
 const BLOB_PREFIX = "db/";
 
@@ -42,12 +41,22 @@ function getDefaultState(): DbState {
   };
 }
 
-// Load full DB state from Blob - always fresh read with retry
+// In-memory cache with TTL to reduce Blob fetch latency
+let cachedState: DbState | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL = 30000; // 30 seconds
+
+// Load full DB state from Blob - with in-memory caching for performance
 export async function loadDb(): Promise<DbState> {
+  // Return cached state if still fresh
+  if (cachedState && (Date.now() - cacheTimestamp) < CACHE_TTL) {
+    return cachedState;
+  }
+
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      // Use direct fetch with no-store cache to bypass Blob SDK issues
+      // Use cache-busting timestamp to force fresh read
       const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}`;
       const response = await fetch(blobUrl, {
         cache: "no-store",
@@ -57,7 +66,9 @@ export async function loadDb(): Promise<DbState> {
         throw new Error(`Failed to read state.json: ${response.status}`);
       }
       const text = await response.text();
-      return JSON.parse(text) as DbState;
+      cachedState = JSON.parse(text) as DbState;
+      cacheTimestamp = Date.now();
+      return cachedState;
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise(r => setTimeout(r, 100 * (attempt + 1)));
@@ -68,6 +79,12 @@ export async function loadDb(): Promise<DbState> {
     }
   }
   return getDefaultState();
+}
+
+// Invalidate cache after write to ensure consistency
+function invalidateCache(): void {
+  cachedState = null;
+  cacheTimestamp = 0;
 }
 
 // Save full DB state to Blob with retry
@@ -83,6 +100,7 @@ export async function saveDb(state: DbState): Promise<void> {
         allowOverwrite: true,
       });
       console.log("[DB] State saved to Blob storage");
+      invalidateCache();
       return;
     } catch (e) {
       if (attempt < maxRetries - 1) {
@@ -110,7 +128,6 @@ export async function upsertUser(user: any): Promise<void> {
     });
   }
   await saveDb(state);
-  invalidateCache();
 }
 
 export async function getUser(openId: string): Promise<any> {
@@ -129,7 +146,6 @@ export async function deleteUser(openId: string): Promise<void> {
   const state = await loadDb();
   state.users = state.users.filter((u: any) => u.openId !== openId);
   await saveDb(state);
-  invalidateCache();
 }
 
 // Admin operations
@@ -152,7 +168,6 @@ export async function upsertAdminCredential(cred: any): Promise<void> {
     });
   }
   await saveDb(state);
-  invalidateCache();
 }
 
 export { upsertAdminCredential as updateAdminPassword };
@@ -186,7 +201,6 @@ export async function addGalleryImage(imageUrl: string, imageKey: string, title?
     updatedAt: new Date().toISOString(),
   });
   await saveDb(state);
-  invalidateCache();
 }
 
 export async function updateGalleryImage(imageKey: string, updates: any): Promise<void> {
@@ -202,7 +216,6 @@ export async function deleteGalleryImage(imageKey: string): Promise<void> {
   const state = await loadDb();
   state.galleryImages = state.galleryImages.filter((img: any) => img.imageKey !== imageKey);
   await saveDb(state);
-  invalidateCache();
 }
 
 export async function getGalleryImage(imageKey: string): Promise<any> {
@@ -227,14 +240,12 @@ export async function upsertBrandingImage(type: string, imageUrl: string, imageK
     updatedAt: new Date().toISOString(),
   };
   await saveDb(state);
-  invalidateCache();
 }
 
 export async function deleteBrandingImage(type: string): Promise<void> {
   const state = await loadDb();
   delete state.branding[type];
   await saveDb(state);
-  invalidateCache();
 }
 
 // Social links
@@ -258,7 +269,6 @@ export async function upsertSocialLink(platform: string, url: string | null): Pr
     });
   }
   await saveDb(state);
-  invalidateCache();
 }
 
 export { upsertSocialLink as updateSocialLink };
@@ -289,28 +299,28 @@ export async function getFloatingIcon(type: string): Promise<any> {
   return state.floatingIcons.find((icon: any) => icon.type === type);
 }
 
-export async function upsertFloatingIcon(icon: any): Promise<void> {
+export async function upsertFloatingIcon(type: string, phoneNumber: string, isEnabled?: string): Promise<void> {
   const state = await loadDb();
-  const idx = state.floatingIcons.findIndex((i: any) => i.type === icon.type);
+  const idx = state.floatingIcons.findIndex((i: any) => i.type === type);
   if (idx >= 0) {
-    state.floatingIcons[idx] = { ...state.floatingIcons[idx], ...icon, updatedAt: new Date().toISOString() };
+    state.floatingIcons[idx] = { ...state.floatingIcons[idx], type, phoneNumber, isEnabled: isEnabled || 'yes', updatedAt: new Date().toISOString() };
   } else {
     state.floatingIcons.push({
-      ...icon,
+      type,
+      phoneNumber,
+      isEnabled: isEnabled || 'yes',
       id: state.floatingIcons.length + 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
   }
   await saveDb(state);
-  invalidateCache();
 }
 
 export async function deleteFloatingIcon(type: string): Promise<void> {
   const state = await loadDb();
   state.floatingIcons = state.floatingIcons.filter((i: any) => i.type !== type);
   await saveDb(state);
-  invalidateCache();
 }
 
 // SEO
@@ -323,5 +333,4 @@ export async function updateSeo(updates: any): Promise<void> {
   const state = await loadDb();
   state.seo = { ...state.seo, ...updates };
   await saveDb(state);
-  invalidateCache();
 }

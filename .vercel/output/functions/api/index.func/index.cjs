@@ -278,12 +278,12 @@ var require_depd = __commonJS({
       if ("value" in descriptor) {
         descriptor = convertDataDescriptorToAccessor(obj, prop, message2);
       }
-      var get2 = descriptor.get;
+      var get = descriptor.get;
       var set2 = descriptor.set;
-      if (typeof get2 === "function") {
+      if (typeof get === "function") {
         descriptor.get = function getter() {
           log.call(deprecate, message2, site);
-          return get2.apply(this, arguments);
+          return get.apply(this, arguments);
         };
       }
       if (typeof set2 === "function") {
@@ -17077,7 +17077,7 @@ var require_body_parser = __commonJS({
       };
     }
     function createParserGetter(name) {
-      return function get2() {
+      return function get() {
         return loadParser(name);
       };
     }
@@ -45739,19 +45739,19 @@ var require_fetch_jwks = __commonJS({
     var errors_js_1 = require_errors4();
     var buffer_utils_js_1 = require_buffer_utils();
     var fetchJwks = async (url3, timeout, options) => {
-      let get2;
+      let get;
       switch (url3.protocol) {
         case "https:":
-          get2 = https2.get;
+          get = https2.get;
           break;
         case "http:":
-          get2 = http2.get;
+          get = http2.get;
           break;
         default:
           throw new TypeError("Unsupported URL protocol.");
       }
       const { agent, headers } = options;
-      const req = get2(url3.href, {
+      const req = get(url3.href, {
         agent,
         timeout,
         headers
@@ -66620,14 +66620,14 @@ var require_follow_redirects = __commonJS({
           debug2("options", options);
           return new RedirectableRequest(options, callback);
         }
-        function get2(input, options, callback) {
+        function get(input, options, callback) {
           var wrappedRequest = wrappedProtocol.request(input, options, callback);
           wrappedRequest.end();
           return wrappedRequest;
         }
         Object.defineProperties(wrappedProtocol, {
           request: { value: request, configurable: true, enumerable: true, writable: true },
-          get: { value: get2, configurable: true, enumerable: true, writable: true }
+          get: { value: get, configurable: true, enumerable: true, writable: true }
         });
       });
       return exports3;
@@ -72488,7 +72488,13 @@ function getDefaultState() {
     }
   };
 }
+var cachedState = null;
+var cacheTimestamp = 0;
+var CACHE_TTL = 3e4;
 async function loadDb() {
+  if (cachedState && Date.now() - cacheTimestamp < CACHE_TTL) {
+    return cachedState;
+  }
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -72501,7 +72507,9 @@ async function loadDb() {
         throw new Error(`Failed to read state.json: ${response.status}`);
       }
       const text = await response.text();
-      return JSON.parse(text);
+      cachedState = JSON.parse(text);
+      cacheTimestamp = Date.now();
+      return cachedState;
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise((r) => setTimeout(r, 100 * (attempt + 1)));
@@ -72512,6 +72520,10 @@ async function loadDb() {
     }
   }
   return getDefaultState();
+}
+function invalidateCache() {
+  cachedState = null;
+  cacheTimestamp = 0;
 }
 async function saveDb(state) {
   const maxRetries = 3;
@@ -72525,6 +72537,7 @@ async function saveDb(state) {
         allowOverwrite: true
       });
       console.log("[DB] State saved to Blob storage");
+      invalidateCache();
       return;
     } catch (e) {
       if (attempt < maxRetries - 1) {
@@ -72550,7 +72563,6 @@ async function upsertUser(user) {
     });
   }
   await saveDb(state);
-  invalidateCache();
 }
 async function getUser(openId) {
   const state = await loadDb();
@@ -72574,7 +72586,6 @@ async function upsertAdminCredential(cred) {
     });
   }
   await saveDb(state);
-  invalidateCache();
 }
 async function getAllGalleryImages() {
   const state = await loadDb();
@@ -72600,7 +72611,6 @@ async function addGalleryImage(imageUrl, imageKey, title, description, orientati
     updatedAt: (/* @__PURE__ */ new Date()).toISOString()
   });
   await saveDb(state);
-  invalidateCache();
 }
 async function updateGalleryImage(imageKey, updates) {
   const state = await loadDb();
@@ -72614,7 +72624,6 @@ async function deleteGalleryImage(imageKey) {
   const state = await loadDb();
   state.galleryImages = state.galleryImages.filter((img) => img.imageKey !== imageKey);
   await saveDb(state);
-  invalidateCache();
 }
 async function getBrandingImage(type) {
   const state = await loadDb();
@@ -72631,13 +72640,11 @@ async function upsertBrandingImage(type, imageUrl, imageKey) {
     updatedAt: (/* @__PURE__ */ new Date()).toISOString()
   };
   await saveDb(state);
-  invalidateCache();
 }
 async function deleteBrandingImage(type) {
   const state = await loadDb();
   delete state.branding[type];
   await saveDb(state);
-  invalidateCache();
 }
 async function getAllSocialLinks() {
   const state = await loadDb();
@@ -72658,7 +72665,6 @@ async function upsertSocialLink(platform, url3) {
     });
   }
   await saveDb(state);
-  invalidateCache();
 }
 async function initializeSocialLinks() {
   const state = await loadDb();
@@ -72682,27 +72688,27 @@ async function getFloatingIcon(type) {
   const state = await loadDb();
   return state.floatingIcons.find((icon) => icon.type === type);
 }
-async function upsertFloatingIcon(icon) {
+async function upsertFloatingIcon(type, phoneNumber, isEnabled) {
   const state = await loadDb();
-  const idx = state.floatingIcons.findIndex((i) => i.type === icon.type);
+  const idx = state.floatingIcons.findIndex((i) => i.type === type);
   if (idx >= 0) {
-    state.floatingIcons[idx] = { ...state.floatingIcons[idx], ...icon, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
+    state.floatingIcons[idx] = { ...state.floatingIcons[idx], type, phoneNumber, isEnabled: isEnabled || "yes", updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
   } else {
     state.floatingIcons.push({
-      ...icon,
+      type,
+      phoneNumber,
+      isEnabled: isEnabled || "yes",
       id: state.floatingIcons.length + 1,
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     });
   }
   await saveDb(state);
-  invalidateCache();
 }
 async function deleteFloatingIcon(type) {
   const state = await loadDb();
   state.floatingIcons = state.floatingIcons.filter((i) => i.type !== type);
   await saveDb(state);
-  invalidateCache();
 }
 
 // server/_core/cookies.ts

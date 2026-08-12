@@ -6,9 +6,7 @@ import AdminLogin from "@/components/AdminLogin";
 import AdminDashboard from "@/components/AdminDashboard";
 import { trpc } from "@/lib/trpc";
 
-// Default fallback URLs (used if no branding is set in the database)
-const DEFAULT_LOGO_URL = "/manus-storage/PaQSzhpBRR8XnSvXpgm6lx_1779503904693_na1fn_L2hvbWUvdWJ1bnR1L2FsX25vdXJfbmV3X2JhY2tncm91bmQ_625bc8e1.webp";
-const DEFAULT_BANNER_URL = "/manus-storage/al_nour_luxury_banner_718dadb8.png";
+// Fallback: show nothing if no branding is set
 
 export default function Home() {
   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -42,8 +40,8 @@ export default function Home() {
   const floatingIconsQuery = trpc.floatingIcons.getAll.useQuery(undefined, { staleTime: 60000, retry: 3, retryDelay: 1000, refetchOnMount: true, refetchInterval: 30000 });
   
   // Use dynamic branding or fallback to defaults
-  const logoUrl = logoQuery.data?.imageUrl || DEFAULT_LOGO_URL;
-  const bannerUrl = bannerQuery.data?.imageUrl || DEFAULT_BANNER_URL;
+  const logoUrl = logoQuery.data?.imageUrl || null;
+  const bannerUrl = bannerQuery.data?.imageUrl || null;
   
   const galleryImages = galleryQuery.data || [];
   const carouselImages = carouselQuery.data || [];
