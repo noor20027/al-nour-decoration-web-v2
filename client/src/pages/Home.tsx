@@ -18,14 +18,24 @@ export default function Home() {
   const [carouselIndex, setCarouselIndex] = useState(0);
 
   // Fetch dynamic branding (logo and banner)
-  const logoQuery = trpc.branding.getLogo.useQuery();
-  const bannerQuery = trpc.branding.getBanner.useQuery();
+  const logoQuery = trpc.branding.getLogo.useQuery(undefined, {
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchInterval: 10000,
+  });
+  const bannerQuery = trpc.branding.getBanner.useQuery(undefined, {
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchInterval: 10000,
+  });
   
   // Fetch gallery and carousel images
-  const galleryQuery = trpc.gallery.getAll.useQuery();
-  const carouselQuery = trpc.gallery.getCarousel.useQuery();
-  const socialQuery = trpc.social.getAll.useQuery();
-  const floatingIconsQuery = trpc.floatingIcons.getAll.useQuery();
+  const galleryQuery = trpc.gallery.getAll.useQuery(undefined, { staleTime: 0, refetchOnMount: true, refetchInterval: 10000 });
+  const carouselQuery = trpc.gallery.getCarousel.useQuery(undefined, { staleTime: 0, refetchOnMount: true, refetchInterval: 10000 });
+  const socialQuery = trpc.social.getAll.useQuery(undefined, { staleTime: 0, refetchOnMount: true, refetchInterval: 10000 });
+  const floatingIconsQuery = trpc.floatingIcons.getAll.useQuery(undefined, { staleTime: 0, refetchOnMount: true, refetchInterval: 10000 });
   
   // Use dynamic branding or fallback to defaults
   const logoUrl = logoQuery.data?.imageUrl || DEFAULT_LOGO_URL;
