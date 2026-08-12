@@ -1,10 +1,8 @@
 import { put, get, del, list } from "@vercel/blob";
 
 // Simple JSON-based storage in Vercel Blob
-// This is more reliable than SQLite-in-Blob because:
-// 1. No WASM loading issues
-// 2. No binary serialization issues
-// 3. Direct JSON read/write with proper error handling
+// Always reads from Blob on every request - no in-memory caching
+// This ensures data consistency across all serverless instances
 
 const BLOB_PREFIX = "db/";
 
@@ -19,7 +17,6 @@ interface DbState {
   seo: Record<string, any>;
 }
 
-
 function getDefaultState(): DbState {
   return {
     users: [],
@@ -27,7 +24,7 @@ function getDefaultState(): DbState {
       {
         id: 1,
         username: "admin",
-        passwordHash: "admin", // Static fallback
+        passwordHash: "admin",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -45,57 +42,33 @@ function getDefaultState(): DbState {
   };
 }
 
-// Load full DB state from Blob
+// Load full DB state from Blob - always fresh read
 export async function loadDb(): Promise<DbState> {
-  // Always read from Blob storage directly - no caching
-  // This ensures data consistency across all serverless instances
-
   try {
-    // Try to load the full state JSON
     const blob = await get(`${BLOB_PREFIX}state.json`);
     const text = await blob.text();
-    const state: DbState = JSON.parse(text);
-
-
-    return state;
+    return JSON.parse(text) as DbState;
   } catch (e) {
-    // No existing state, return default
     console.log("[DB] No existing state found, using defaults");
-
-
-    return state;
+    return getDefaultState();
   }
 }
 
 // Save full DB state to Blob
 export async function saveDb(state: DbState): Promise<void> {
-  try {
-    const json = JSON.stringify(state);
-    await put(`${BLOB_PREFIX}state.json`, json, {
-      access: "public",
-      contentType: "application/json",
-      addRandomSuffix: false,
-      allowOverwrite: true,
-    });
-    console.log("[DB] State saved to Blob storage");
-
-
-  } catch (e) {
-    console.error("[DB] Failed to save state:", e);
-    throw e;
-  }
+  const json = JSON.stringify(state);
+  await put(`${BLOB_PREFIX}state.json`, json, {
+    access: "public",
+    contentType: "application/json",
+    addRandomSuffix: false,
+    allowOverwrite: true,
+  });
+  console.log("[DB] State saved to Blob storage");
 }
-
-// Always load from Blob storage on every request (no in-memory cache)
-// This ensures data consistency across all serverless instances
-async function getState(): Promise<DbState> {
-  return await loadDb();
-}
-
 
 // User operations
 export async function upsertUser(user: any): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   const idx = state.users.findIndex((u: any) => u.openId === user.openId);
   if (idx >= 0) {
     state.users[idx] = { ...state.users[idx], ...user, updatedAt: new Date().toISOString() };
@@ -107,35 +80,35 @@ export async function upsertUser(user: any): Promise<void> {
       updatedAt: new Date().toISOString(),
     });
   }
-
   await saveDb(state);
 }
 
 export async function getUser(openId: string): Promise<any> {
-  const state = await getState();
+  const state = await loadDb();
   return state.users.find((u: any) => u.openId === openId);
 }
 
+export { getUser as getUserByOpenId };
+
 export async function getAllUsers(): Promise<any[]> {
-  const state = await getState();
+  const state = await loadDb();
   return state.users;
 }
 
 export async function deleteUser(openId: string): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   state.users = state.users.filter((u: any) => u.openId !== openId);
-
   await saveDb(state);
 }
 
 // Admin operations
 export async function getAdminByUsername(username: string): Promise<any> {
-  const state = await getState();
+  const state = await loadDb();
   return state.adminCredentials.find((u: any) => u.username === username);
 }
 
 export async function upsertAdminCredential(cred: any): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   const idx = state.adminCredentials.findIndex((u: any) => u.username === cred.username);
   if (idx >= 0) {
     state.adminCredentials[idx] = { ...state.adminCredentials[idx], ...cred, updatedAt: new Date().toISOString() };
@@ -147,23 +120,24 @@ export async function upsertAdminCredential(cred: any): Promise<void> {
       updatedAt: new Date().toISOString(),
     });
   }
-
   await saveDb(state);
 }
 
+export { upsertAdminCredential as updateAdminPassword };
+
 // Gallery operations
 export async function getAllGalleryImages(): Promise<any[]> {
-  const state = await getState();
+  const state = await loadDb();
   return [...state.galleryImages].sort((a: any, b: any) => (a.displayOrder || 0) - (b.displayOrder || 0));
 }
 
 export async function getCarouselImages(): Promise<any[]> {
-  const state = await getState();
+  const state = await loadDb();
   return state.galleryImages.filter((img: any) => img.isCarousel === "yes");
 }
 
 export async function addGalleryImage(imageUrl: string, imageKey: string, title?: string, description?: string, orientation?: string, isCarousel?: string): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   const maxOrder = state.galleryImages.length > 0
     ? Math.max(...state.galleryImages.map((img: any) => img.displayOrder || 0))
     : 0;
@@ -179,40 +153,37 @@ export async function addGalleryImage(imageUrl: string, imageKey: string, title?
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
-
   await saveDb(state);
 }
 
 export async function updateGalleryImage(imageKey: string, updates: any): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   const idx = state.galleryImages.findIndex((img: any) => img.imageKey === imageKey);
   if (idx >= 0) {
     state.galleryImages[idx] = { ...state.galleryImages[idx], ...updates, updatedAt: new Date().toISOString() };
-  
     await saveDb(state);
   }
 }
 
 export async function deleteGalleryImage(imageKey: string): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   state.galleryImages = state.galleryImages.filter((img: any) => img.imageKey !== imageKey);
-
   await saveDb(state);
 }
 
 export async function getGalleryImage(imageKey: string): Promise<any> {
-  const state = await getState();
+  const state = await loadDb();
   return state.galleryImages.find((img: any) => img.imageKey === imageKey);
 }
 
 // Branding operations
 export async function getBrandingImage(type: string): Promise<any> {
-  const state = await getState();
+  const state = await loadDb();
   return state.branding[type] || null;
 }
 
 export async function upsertBrandingImage(type: string, imageUrl: string, imageKey: string): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   state.branding[type] = {
     id: Object.keys(state.branding).length + 1,
     type,
@@ -221,25 +192,23 @@ export async function upsertBrandingImage(type: string, imageUrl: string, imageK
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-
   await saveDb(state);
 }
 
 export async function deleteBrandingImage(type: string): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   delete state.branding[type];
-
   await saveDb(state);
 }
 
 // Social links
 export async function getAllSocialLinks(): Promise<any[]> {
-  const state = await getState();
+  const state = await loadDb();
   return state.socialLinks;
 }
 
 export async function upsertSocialLink(platform: string, url: string | null): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   const idx = state.socialLinks.findIndex((s: any) => s.platform === platform);
   if (idx >= 0) {
     state.socialLinks[idx] = { ...state.socialLinks[idx], url, updatedAt: new Date().toISOString() };
@@ -252,17 +221,15 @@ export async function upsertSocialLink(platform: string, url: string | null): Pr
       updatedAt: new Date().toISOString(),
     });
   }
-
   await saveDb(state);
 }
 
+export { upsertSocialLink as updateSocialLink };
+
 export async function initializeSocialLinks(): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   if (state.socialLinks.length === 0) {
-    const defaults = [
-      "facebook", "instagram", "twitter", "tiktok",
-      "snapchat", "youtube", "linkedin", "whatsapp",
-    ];
+    const defaults = ["facebook", "instagram", "twitter", "tiktok", "snapchat", "youtube", "linkedin", "whatsapp"];
     state.socialLinks = defaults.map((platform, i) => ({
       id: i + 1,
       platform,
@@ -270,61 +237,51 @@ export async function initializeSocialLinks(): Promise<void> {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }));
-  
     await saveDb(state);
   }
 }
 
 // Floating icons
 export async function getAllFloatingIcons(): Promise<any[]> {
-  const state = await getState();
+  const state = await loadDb();
   return state.floatingIcons;
 }
 
 export async function getFloatingIcon(type: string): Promise<any> {
-  const state = await getState();
+  const state = await loadDb();
   return state.floatingIcons.find((icon: any) => icon.type === type);
 }
 
 export async function upsertFloatingIcon(icon: any): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   const idx = state.floatingIcons.findIndex((i: any) => i.type === icon.type);
   if (idx >= 0) {
     state.floatingIcons[idx] = { ...state.floatingIcons[idx], ...icon, updatedAt: new Date().toISOString() };
   } else {
     state.floatingIcons.push({
       ...icon,
-      id: state.floatingIcons.length > 10 ? 1 : state.floatingIcons.length + 1,
+      id: state.floatingIcons.length + 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
   }
-
   await saveDb(state);
 }
 
 export async function deleteFloatingIcon(type: string): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   state.floatingIcons = state.floatingIcons.filter((i: any) => i.type !== type);
-
   await saveDb(state);
 }
 
 // SEO
 export async function getSeo(): Promise<any> {
-  const state = await getState();
+  const state = await loadDb();
   return state.seo;
 }
 
 export async function updateSeo(updates: any): Promise<void> {
-  const state = await getState();
+  const state = await loadDb();
   state.seo = { ...state.seo, ...updates };
-
   await saveDb(state);
 }
-// Alias for backward compatibility
-export { getUser as getUserByOpenId };
-
-// Additional aliases
-export { upsertAdminCredential as updateAdminPassword };
-export { upsertSocialLink as updateSocialLink };
