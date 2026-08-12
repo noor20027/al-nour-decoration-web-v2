@@ -4967,8 +4967,8 @@ var require_raw_body = __commonJS({
           type: "entity.too.large"
         }));
       }
-      var state = stream4._readableState;
-      if (stream4._decoder || state && (state.encoding || state.decoder)) {
+      var state2 = stream4._readableState;
+      if (stream4._decoder || state2 && (state2.encoding || state2.decoder)) {
         return done(createError(500, "stream encoding should not be set", {
           type: "stream.encoding.set"
         }));
@@ -47652,8 +47652,8 @@ var require_util2 = __commonJS({
       if (body == null) {
         return 0;
       } else if (isStream3(body)) {
-        const state = body._readableState;
-        return state && state.objectMode === false && state.ended === true && Number.isFinite(state.length) ? state.length : null;
+        const state2 = body._readableState;
+        return state2 && state2.objectMode === false && state2.ended === true && Number.isFinite(state2.length) ? state2.length : null;
       } else if (isBlobLike(body)) {
         return body.size != null ? body.size : null;
       } else if (isBuffer3(body)) {
@@ -51567,7 +51567,7 @@ var require_formdata = __commonJS({
         }
       }
       [nodeUtil.inspect.custom](depth, options) {
-        const state = this[kState].reduce((a, b) => {
+        const state2 = this[kState].reduce((a, b) => {
           if (a[b.name]) {
             if (Array.isArray(a[b.name])) {
               a[b.name].push(b.value);
@@ -51581,7 +51581,7 @@ var require_formdata = __commonJS({
         }, { __proto__: null });
         options.depth ??= depth;
         options.colors ??= true;
-        const output = nodeUtil.formatWithOptions(options, state);
+        const output = nodeUtil.formatWithOptions(options, state2);
         return `FormData ${output.slice(output.indexOf("]") + 2)}`;
       }
     };
@@ -52065,8 +52065,8 @@ Content-Type: ${value.type || "application/octet-stream"}\r
         source: body.source
       };
     }
-    function throwIfAborted(state) {
-      if (state.aborted) {
+    function throwIfAborted(state2) {
+      if (state2.aborted) {
         throw new DOMException("The operation was aborted.", "AbortError");
       }
     }
@@ -55556,7 +55556,7 @@ var require_retry_handler = __commonJS({
       onBodySent(chunk) {
         if (this.handler.onBodySent) return this.handler.onBodySent(chunk);
       }
-      static [kRetryHandlerDefaultRetry](err, { state, opts }, cb) {
+      static [kRetryHandlerDefaultRetry](err, { state: state2, opts }, cb) {
         const { statusCode, code, headers } = err;
         const { method, retryOptions } = opts;
         const {
@@ -55568,7 +55568,7 @@ var require_retry_handler = __commonJS({
           errorCodes,
           methods
         } = retryOptions;
-        const { counter } = state;
+        const { counter } = state2;
         if (code && code !== "UND_ERR_REQ_RETRY" && !errorCodes.includes(code)) {
           cb(err);
           return;
@@ -55992,19 +55992,19 @@ var require_readable = __commonJS({
       if (consume2.body === null) {
         return;
       }
-      const { _readableState: state } = consume2.stream;
-      if (state.bufferIndex) {
-        const start = state.bufferIndex;
-        const end = state.buffer.length;
+      const { _readableState: state2 } = consume2.stream;
+      if (state2.bufferIndex) {
+        const start = state2.bufferIndex;
+        const end = state2.buffer.length;
         for (let n = start; n < end; n++) {
-          consumePush(consume2, state.buffer[n]);
+          consumePush(consume2, state2.buffer[n]);
         }
       } else {
-        for (const chunk of state.buffer) {
+        for (const chunk of state2.buffer) {
           consumePush(consume2, chunk);
         }
       }
-      if (state.endEmitted) {
+      if (state2.endEmitted) {
         consumeEnd(this[kConsume]);
       } else {
         consume2.stream.on("end", function() {
@@ -58167,12 +58167,12 @@ var require_dns = __commonJS({
       #dispatch = null;
       #handler = null;
       #origin = null;
-      constructor(state, { origin: origin2, handler, dispatch }, opts) {
+      constructor(state2, { origin: origin2, handler, dispatch }, opts) {
         super(handler);
         this.#origin = origin2;
         this.#handler = handler;
         this.#opts = { ...opts };
-        this.#state = state;
+        this.#state = state2;
         this.#dispatch = dispatch;
       }
       onError(err) {
@@ -58960,17 +58960,17 @@ var require_response2 = __commonJS({
         response.status === 0
       );
     }
-    function makeFilteredResponse(response, state) {
-      state = {
+    function makeFilteredResponse(response, state2) {
+      state2 = {
         internalResponse: response,
-        ...state
+        ...state2
       };
       return new Proxy(response, {
         get(target, p) {
-          return p in state ? state[p] : target[p];
+          return p in state2 ? state2[p] : target[p];
         },
         set(target, p, value) {
-          assert2(!(p in state));
+          assert2(!(p in state2));
           target[p] = value;
           return true;
         }
@@ -65605,9 +65605,9 @@ var require_async = __commonJS({
 var require_abort = __commonJS({
   "node_modules/.pnpm/asynckit@0.4.0/node_modules/asynckit/lib/abort.js"(exports2, module2) {
     module2.exports = abort;
-    function abort(state) {
-      Object.keys(state.jobs).forEach(clean.bind(state));
-      state.jobs = {};
+    function abort(state2) {
+      Object.keys(state2.jobs).forEach(clean.bind(state2));
+      state2.jobs = {};
     }
     function clean(key) {
       if (typeof this.jobs[key] == "function") {
@@ -65623,19 +65623,19 @@ var require_iterate = __commonJS({
     var async = require_async();
     var abort = require_abort();
     module2.exports = iterate;
-    function iterate(list2, iterator2, state, callback) {
-      var key = state["keyedList"] ? state["keyedList"][state.index] : state.index;
-      state.jobs[key] = runJob(iterator2, key, list2[key], function(error46, output) {
-        if (!(key in state.jobs)) {
+    function iterate(list2, iterator2, state2, callback) {
+      var key = state2["keyedList"] ? state2["keyedList"][state2.index] : state2.index;
+      state2.jobs[key] = runJob(iterator2, key, list2[key], function(error46, output) {
+        if (!(key in state2.jobs)) {
           return;
         }
-        delete state.jobs[key];
+        delete state2.jobs[key];
         if (error46) {
-          abort(state);
+          abort(state2);
         } else {
-          state.results[key] = output;
+          state2.results[key] = output;
         }
-        callback(error46, state.results);
+        callback(error46, state2.results);
       });
     }
     function runJob(iterator2, key, item, callback) {
@@ -65653,8 +65653,8 @@ var require_iterate = __commonJS({
 // node_modules/.pnpm/asynckit@0.4.0/node_modules/asynckit/lib/state.js
 var require_state = __commonJS({
   "node_modules/.pnpm/asynckit@0.4.0/node_modules/asynckit/lib/state.js"(exports2, module2) {
-    module2.exports = state;
-    function state(list2, sortMethod) {
+    module2.exports = state2;
+    function state2(list2, sortMethod) {
       var isNamedList = !Array.isArray(list2), initState = {
         index: 0,
         keyedList: isNamedList || sortMethod ? Object.keys(list2) : null,
@@ -65697,21 +65697,21 @@ var require_parallel = __commonJS({
     var terminator = require_terminator();
     module2.exports = parallel;
     function parallel(list2, iterator2, callback) {
-      var state = initState(list2);
-      while (state.index < (state["keyedList"] || list2).length) {
-        iterate(list2, iterator2, state, function(error46, result) {
+      var state2 = initState(list2);
+      while (state2.index < (state2["keyedList"] || list2).length) {
+        iterate(list2, iterator2, state2, function(error46, result) {
           if (error46) {
             callback(error46, result);
             return;
           }
-          if (Object.keys(state.jobs).length === 0) {
-            callback(null, state.results);
+          if (Object.keys(state2.jobs).length === 0) {
+            callback(null, state2.results);
             return;
           }
         });
-        state.index++;
+        state2.index++;
       }
-      return terminator.bind(state, callback);
+      return terminator.bind(state2, callback);
     }
   }
 });
@@ -65726,20 +65726,20 @@ var require_serialOrdered = __commonJS({
     module2.exports.ascending = ascending;
     module2.exports.descending = descending;
     function serialOrdered(list2, iterator2, sortMethod, callback) {
-      var state = initState(list2, sortMethod);
-      iterate(list2, iterator2, state, function iteratorHandler(error46, result) {
+      var state2 = initState(list2, sortMethod);
+      iterate(list2, iterator2, state2, function iteratorHandler(error46, result) {
         if (error46) {
           callback(error46, result);
           return;
         }
-        state.index++;
-        if (state.index < (state["keyedList"] || list2).length) {
-          iterate(list2, iterator2, state, iteratorHandler);
+        state2.index++;
+        if (state2.index < (state2["keyedList"] || list2).length) {
+          iterate(list2, iterator2, state2, iteratorHandler);
           return;
         }
-        callback(null, state.results);
+        callback(null, state2.results);
       });
-      return terminator.bind(state, callback);
+      return terminator.bind(state2, callback);
     }
     function ascending(a, b) {
       return a < b ? -1 : a > b ? 1 : 0;
@@ -69494,19 +69494,19 @@ var import_awaitAsyncGenerator$3 = __toESM2(require_awaitAsyncGenerator(), 1);
 var import_wrapAsyncGenerator$4 = __toESM2(require_wrapAsyncGenerator(), 1);
 function createManagedIterator(iterable, onResult) {
   const iterator2 = iterable[Symbol.asyncIterator]();
-  let state = "idle";
+  let state2 = "idle";
   function cleanup() {
-    state = "done";
+    state2 = "done";
     onResult = () => {
     };
   }
   function pull() {
-    if (state !== "idle") return;
-    state = "pending";
+    if (state2 !== "idle") return;
+    state2 = "pending";
     const next = iterator2.next();
     next.then((result) => {
       if (result.done) {
-        state = "done";
+        state2 = "done";
         onResult({
           status: "return",
           value: result.value
@@ -69514,7 +69514,7 @@ function createManagedIterator(iterable, onResult) {
         cleanup();
         return;
       }
-      state = "idle";
+      state2 = "idle";
       onResult({
         status: "yield",
         value: result.value
@@ -69537,15 +69537,15 @@ function createManagedIterator(iterable, onResult) {
   };
 }
 function mergeAsyncIterables() {
-  let state = "idle";
+  let state2 = "idle";
   let flushSignal = createDeferred();
   const iterables = [];
   const iterators = /* @__PURE__ */ new Set();
   const buffer = [];
   function initIterable(iterable) {
-    if (state !== "pending") return;
+    if (state2 !== "pending") return;
     const iterator2 = createManagedIterator(iterable, (result) => {
-      if (state !== "pending") return;
+      if (state2 !== "pending") return;
       switch (result.status) {
         case "yield":
           buffer.push([iterator2, result]);
@@ -69565,7 +69565,7 @@ function mergeAsyncIterables() {
   }
   return {
     add(iterable) {
-      switch (state) {
+      switch (state2) {
         case "idle":
           iterables.push(iterable);
           break;
@@ -69580,10 +69580,10 @@ function mergeAsyncIterables() {
       return (0, import_wrapAsyncGenerator$4.default)(function* () {
         try {
           var _usingCtx$1 = (0, import_usingCtx$3.default)();
-          if (state !== "idle") throw new Error("Cannot iterate twice");
-          state = "pending";
+          if (state2 !== "idle") throw new Error("Cannot iterate twice");
+          state2 = "pending";
           const _finally = _usingCtx$1.a(makeAsyncResource({}, async () => {
-            state = "done";
+            state2 = "done";
             const errors = [];
             await Promise.all(Array.from(iterators.values()).map(async (it) => {
               try {
@@ -72590,54 +72590,20 @@ var completeMultipartUpload2 = createCompleteMultipartUploadMethod({
 
 // server/db.ts
 var BLOB_PREFIX = "db/";
-var _cache = null;
-var _cacheExpiry = 0;
-var CACHE_TTL = 5e3;
-function getDefaultState() {
-  return {
-    users: [],
-    adminCredentials: [
-      {
-        id: 1,
-        username: "admin",
-        passwordHash: "admin",
-        // Static fallback
-        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-      }
-    ],
-    galleryImages: [],
-    carouselImages: [],
-    branding: {},
-    socialLinks: [],
-    floatingIcons: [],
-    seo: {
-      metaTitle: "\u0645\u0624\u0633\u0633\u0629 \u0627\u0644\u0646\u0648\u0631 \u0644\u0644\u062F\u064A\u0643\u0648\u0631 | AL NOUR DECORATION EST",
-      metaDescription: "\u0645\u0624\u0633\u0633\u0629 \u0627\u0644\u0646\u0648\u0631 \u0644\u0644\u062F\u064A\u0643\u0648\u0631 - \u062E\u0628\u0631\u0629 \u062A\u0632\u064A\u062F \u0639\u0646 15 \u0633\u0646\u0629 \u0641\u064A \u0645\u062C\u0627\u0644 \u0627\u0644\u062F\u064A\u0643\u0648\u0631 \u0648\u0627\u0644\u0625\u0636\u0627\u0621\u0629 \u0627\u0644\u0627\u062D\u062A\u0631\u0627\u0641\u064A\u0629"
-    }
-  };
-}
 async function loadDb() {
-  if (_cache && Date.now() < _cacheExpiry) {
-    return _cache;
-  }
   try {
     const blob = await get(`${BLOB_PREFIX}state.json`);
     const text = await blob.text();
-    const state = JSON.parse(text);
-    _cache = state;
-    _cacheExpiry = Date.now() + CACHE_TTL;
-    return state;
+    const state2 = JSON.parse(text);
+    return state2;
   } catch (e) {
     console.log("[DB] No existing state found, using defaults");
-    _cache = getDefaultState();
-    _cacheExpiry = Date.now() + CACHE_TTL;
-    return _cache;
+    return state;
   }
 }
-async function saveDb(state) {
+async function saveDb(state2) {
   try {
-    const json2 = JSON.stringify(state);
+    const json2 = JSON.stringify(state2);
     await put(`${BLOB_PREFIX}state.json`, json2, {
       access: "public",
       contentType: "application/json",
@@ -72645,76 +72611,65 @@ async function saveDb(state) {
       allowOverwrite: true
     });
     console.log("[DB] State saved to Blob storage");
-    _cache = state;
-    _cacheExpiry = Date.now() + CACHE_TTL;
   } catch (e) {
     console.error("[DB] Failed to save state:", e);
     throw e;
   }
 }
-var _state = null;
 async function getState() {
-  if (!_state) {
-    _state = await loadDb();
-  }
-  return _state;
-}
-function markDirty() {
-  _cacheExpiry = 0;
+  return await loadDb();
 }
 async function upsertUser(user) {
-  const state = await getState();
-  const idx = state.users.findIndex((u) => u.openId === user.openId);
+  const state2 = await getState();
+  const idx = state2.users.findIndex((u) => u.openId === user.openId);
   if (idx >= 0) {
-    state.users[idx] = { ...state.users[idx], ...user, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
+    state2.users[idx] = { ...state2.users[idx], ...user, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
   } else {
-    state.users.push({
+    state2.users.push({
       ...user,
-      id: state.users.length > 0 ? Math.max(...state.users.map((u) => u.id)) + 1 : 1,
+      id: state2.users.length > 0 ? Math.max(...state2.users.map((u) => u.id)) + 1 : 1,
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     });
   }
-  markDirty();
-  await saveDb(state);
+  await saveDb(state2);
 }
 async function getUser(openId) {
-  const state = await getState();
-  return state.users.find((u) => u.openId === openId);
+  const state2 = await getState();
+  return state2.users.find((u) => u.openId === openId);
 }
 async function getAdminByUsername(username) {
-  const state = await getState();
-  return state.adminCredentials.find((u) => u.username === username);
+  const state2 = await getState();
+  return state2.adminCredentials.find((u) => u.username === username);
 }
 async function upsertAdminCredential(cred) {
-  const state = await getState();
-  const idx = state.adminCredentials.findIndex((u) => u.username === cred.username);
+  const state2 = await getState();
+  const idx = state2.adminCredentials.findIndex((u) => u.username === cred.username);
   if (idx >= 0) {
-    state.adminCredentials[idx] = { ...state.adminCredentials[idx], ...cred, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
+    state2.adminCredentials[idx] = { ...state2.adminCredentials[idx], ...cred, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
   } else {
-    state.adminCredentials.push({
+    state2.adminCredentials.push({
       ...cred,
-      id: state.adminCredentials.length + 1,
+      id: state2.adminCredentials.length + 1,
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     });
   }
-  markDirty();
-  await saveDb(state);
+  await saveDb(state2);
 }
 async function getAllGalleryImages() {
-  const state = await getState();
-  return [...state.galleryImages].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  const state2 = await getState();
+  return [...state2.galleryImages].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 }
 async function getCarouselImages() {
-  const state = await getState();
-  return state.galleryImages.filter((img) => img.isCarousel === "yes");
+  const state2 = await getState();
+  return state2.galleryImages.filter((img) => img.isCarousel === "yes");
 }
 async function addGalleryImage(imageUrl, imageKey, title, description, orientation, isCarousel) {
-  const state = await getState();
-  const maxOrder = state.galleryImages.length > 0 ? Math.max(...state.galleryImages.map((img) => img.displayOrder || 0)) : 0;
-  state.galleryImages.push({
-    id: state.galleryImages.length > 0 ? Math.max(...state.galleryImages.map((img) => img.id)) + 1 : 1,
+  const state2 = await getState();
+  const maxOrder = state2.galleryImages.length > 0 ? Math.max(...state2.galleryImages.map((img) => img.displayOrder || 0)) : 0;
+  state2.galleryImages.push({
+    id: state2.galleryImages.length > 0 ? Math.max(...state2.galleryImages.map((img) => img.id)) + 1 : 1,
     imageUrl,
     imageKey,
     title: title || null,
@@ -72725,71 +72680,65 @@ async function addGalleryImage(imageUrl, imageKey, title, description, orientati
     createdAt: (/* @__PURE__ */ new Date()).toISOString(),
     updatedAt: (/* @__PURE__ */ new Date()).toISOString()
   });
-  markDirty();
-  await saveDb(state);
+  await saveDb(state2);
 }
 async function updateGalleryImage(imageKey, updates) {
-  const state = await getState();
-  const idx = state.galleryImages.findIndex((img) => img.imageKey === imageKey);
+  const state2 = await getState();
+  const idx = state2.galleryImages.findIndex((img) => img.imageKey === imageKey);
   if (idx >= 0) {
-    state.galleryImages[idx] = { ...state.galleryImages[idx], ...updates, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
-    markDirty();
-    await saveDb(state);
+    state2.galleryImages[idx] = { ...state2.galleryImages[idx], ...updates, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
+    await saveDb(state2);
   }
 }
 async function deleteGalleryImage(imageKey) {
-  const state = await getState();
-  state.galleryImages = state.galleryImages.filter((img) => img.imageKey !== imageKey);
-  markDirty();
-  await saveDb(state);
+  const state2 = await getState();
+  state2.galleryImages = state2.galleryImages.filter((img) => img.imageKey !== imageKey);
+  await saveDb(state2);
 }
 async function getBrandingImage(type) {
-  const state = await getState();
-  return state.branding[type] || null;
+  const state2 = await getState();
+  return state2.branding[type] || null;
 }
 async function upsertBrandingImage(type, imageUrl, imageKey) {
-  const state = await getState();
-  state.branding[type] = {
-    id: Object.keys(state.branding).length + 1,
+  const state2 = await getState();
+  state2.branding[type] = {
+    id: Object.keys(state2.branding).length + 1,
     type,
     imageUrl,
     imageKey,
     createdAt: (/* @__PURE__ */ new Date()).toISOString(),
     updatedAt: (/* @__PURE__ */ new Date()).toISOString()
   };
-  markDirty();
-  await saveDb(state);
+  await saveDb(state2);
 }
 async function deleteBrandingImage(type) {
-  const state = await getState();
-  delete state.branding[type];
-  markDirty();
-  await saveDb(state);
+  const state2 = await getState();
+  delete state2.branding[type];
+  await saveDb(state2);
 }
 async function getAllSocialLinks() {
-  const state = await getState();
-  return state.socialLinks;
+  const state2 = await getState();
+  return state2.socialLinks;
 }
 async function upsertSocialLink(platform, url3) {
-  const state = await getState();
-  const idx = state.socialLinks.findIndex((s) => s.platform === platform);
+  const state2 = await getState();
+  const idx = state2.socialLinks.findIndex((s) => s.platform === platform);
   if (idx >= 0) {
-    state.socialLinks[idx] = { ...state.socialLinks[idx], url: url3, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
+    state2.socialLinks[idx] = { ...state2.socialLinks[idx], url: url3, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
   } else if (url3) {
-    state.socialLinks.push({
-      id: state.socialLinks.length + 1,
+    state2.socialLinks.push({
+      id: state2.socialLinks.length + 1,
       platform,
       url: url3,
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     });
   }
-  markDirty();
-  await saveDb(state);
+  await saveDb(state2);
 }
 async function initializeSocialLinks() {
-  const state = await getState();
-  if (state.socialLinks.length === 0) {
+  const state2 = await getState();
+  if (state2.socialLinks.length === 0) {
     const defaults2 = [
       "facebook",
       "instagram",
@@ -72800,46 +72749,43 @@ async function initializeSocialLinks() {
       "linkedin",
       "whatsapp"
     ];
-    state.socialLinks = defaults2.map((platform, i) => ({
+    state2.socialLinks = defaults2.map((platform, i) => ({
       id: i + 1,
       platform,
       url: null,
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     }));
-    markDirty();
-    await saveDb(state);
+    await saveDb(state2);
   }
 }
 async function getAllFloatingIcons() {
-  const state = await getState();
-  return state.floatingIcons;
+  const state2 = await getState();
+  return state2.floatingIcons;
 }
 async function getFloatingIcon(type) {
-  const state = await getState();
-  return state.floatingIcons.find((icon) => icon.type === type);
+  const state2 = await getState();
+  return state2.floatingIcons.find((icon) => icon.type === type);
 }
 async function upsertFloatingIcon(icon) {
-  const state = await getState();
-  const idx = state.floatingIcons.findIndex((i) => i.type === icon.type);
+  const state2 = await getState();
+  const idx = state2.floatingIcons.findIndex((i) => i.type === icon.type);
   if (idx >= 0) {
-    state.floatingIcons[idx] = { ...state.floatingIcons[idx], ...icon, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
+    state2.floatingIcons[idx] = { ...state2.floatingIcons[idx], ...icon, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
   } else {
-    state.floatingIcons.push({
+    state2.floatingIcons.push({
       ...icon,
-      id: state.floatingIcons.length > 10 ? 1 : state.floatingIcons.length + 1,
+      id: state2.floatingIcons.length > 10 ? 1 : state2.floatingIcons.length + 1,
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       updatedAt: (/* @__PURE__ */ new Date()).toISOString()
     });
   }
-  markDirty();
-  await saveDb(state);
+  await saveDb(state2);
 }
 async function deleteFloatingIcon(type) {
-  const state = await getState();
-  state.floatingIcons = state.floatingIcons.filter((i) => i.type !== type);
-  markDirty();
-  await saveDb(state);
+  const state2 = await getState();
+  state2.floatingIcons = state2.floatingIcons.filter((i) => i.type !== type);
+  await saveDb(state2);
 }
 
 // server/_core/cookies.ts
@@ -75793,7 +75739,7 @@ var adapters_default = {
     }
     if (!adapter2) {
       const reasons = Object.entries(rejectedReasons).map(
-        ([id, state]) => `adapter ${id} ` + (state === false ? "is not supported by the environment" : "is not available in the build")
+        ([id, state2]) => `adapter ${id} ` + (state2 === false ? "is not supported by the environment" : "is not available in the build")
       );
       let s = length ? reasons.length > 1 ? "since :\n" + reasons.map(renderReason).join("\n") : " " + renderReason(reasons[0]) : "as no adapter specified";
       throw new AxiosError_default(
@@ -77694,16 +77640,16 @@ var OAuthService = class {
       );
     }
   }
-  decodeState(state) {
-    const redirectUri = atob(state);
+  decodeState(state2) {
+    const redirectUri = atob(state2);
     return redirectUri;
   }
-  async getTokenByCode(code, state) {
+  async getTokenByCode(code, state2) {
     const payload = {
       clientId: ENV.appId,
       grantType: "authorization_code",
       code,
-      redirectUri: this.decodeState(state)
+      redirectUri: this.decodeState(state2)
     };
     const { data } = await this.client.post(
       EXCHANGE_TOKEN_PATH,
@@ -77752,8 +77698,8 @@ var SDKServer = class {
    * @example
    * const tokenResponse = await sdk.exchangeCodeForToken(code, state);
    */
-  async exchangeCodeForToken(code, state) {
-    return this.oauthService.getTokenByCode(code, state);
+  async exchangeCodeForToken(code, state2) {
+    return this.oauthService.getTokenByCode(code, state2);
   }
   /**
    * Get user information using access token
@@ -77941,13 +77887,13 @@ function getQueryParam(req, key) {
 function registerOAuthRoutes(app2) {
   app2.get("/api/oauth/callback", async (req, res) => {
     const code = getQueryParam(req, "code");
-    const state = getQueryParam(req, "state");
-    if (!code || !state) {
+    const state2 = getQueryParam(req, "state");
+    if (!code || !state2) {
       res.status(400).json({ error: "code and state are required" });
       return;
     }
     try {
-      const tokenResponse = await sdk.exchangeCodeForToken(code, state);
+      const tokenResponse = await sdk.exchangeCodeForToken(code, state2);
       const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
       if (!userInfo.openId) {
         res.status(400).json({ error: "openId missing from user info" });

@@ -19,9 +19,6 @@ interface DbState {
   seo: Record<string, any>;
 }
 
-let _cache: DbState | null = null;
-let _cacheExpiry = 0;
-const CACHE_TTL = 5000; // 5 second cache
 
 function getDefaultState(): DbState {
   return {
@@ -50,25 +47,23 @@ function getDefaultState(): DbState {
 
 // Load full DB state from Blob
 export async function loadDb(): Promise<DbState> {
-  // Use cache if valid
-  if (_cache && Date.now() < _cacheExpiry) {
-    return _cache;
-  }
+  // Always read from Blob storage directly - no caching
+  // This ensures data consistency across all serverless instances
 
   try {
     // Try to load the full state JSON
     const blob = await get(`${BLOB_PREFIX}state.json`);
     const text = await blob.text();
     const state: DbState = JSON.parse(text);
-    _cache = state;
-    _cacheExpiry = Date.now() + CACHE_TTL;
+
+
     return state;
   } catch (e) {
     // No existing state, return default
     console.log("[DB] No existing state found, using defaults");
-    _cache = getDefaultState();
-    _cacheExpiry = Date.now() + CACHE_TTL;
-    return _cache;
+
+
+    return state;
   }
 }
 
@@ -83,28 +78,20 @@ export async function saveDb(state: DbState): Promise<void> {
       allowOverwrite: true,
     });
     console.log("[DB] State saved to Blob storage");
-    _cache = state;
-    _cacheExpiry = Date.now() + CACHE_TTL;
+
+
   } catch (e) {
     console.error("[DB] Failed to save state:", e);
     throw e;
   }
 }
 
-// In-memory state (loaded once, modified, then saved)
-let _state: DbState | null = null;
-
+// Always load from Blob storage on every request (no in-memory cache)
+// This ensures data consistency across all serverless instances
 async function getState(): Promise<DbState> {
-  if (!_state) {
-    _state = await loadDb();
-  }
-  return _state;
+  return await loadDb();
 }
 
-function markDirty() {
-  // Force reload on next request (don't cache dirty state)
-  _cacheExpiry = 0;
-}
 
 // User operations
 export async function upsertUser(user: any): Promise<void> {
@@ -120,7 +107,7 @@ export async function upsertUser(user: any): Promise<void> {
       updatedAt: new Date().toISOString(),
     });
   }
-  markDirty();
+
   await saveDb(state);
 }
 
@@ -137,7 +124,7 @@ export async function getAllUsers(): Promise<any[]> {
 export async function deleteUser(openId: string): Promise<void> {
   const state = await getState();
   state.users = state.users.filter((u: any) => u.openId !== openId);
-  markDirty();
+
   await saveDb(state);
 }
 
@@ -160,7 +147,7 @@ export async function upsertAdminCredential(cred: any): Promise<void> {
       updatedAt: new Date().toISOString(),
     });
   }
-  markDirty();
+
   await saveDb(state);
 }
 
@@ -192,7 +179,7 @@ export async function addGalleryImage(imageUrl: string, imageKey: string, title?
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
-  markDirty();
+
   await saveDb(state);
 }
 
@@ -201,7 +188,7 @@ export async function updateGalleryImage(imageKey: string, updates: any): Promis
   const idx = state.galleryImages.findIndex((img: any) => img.imageKey === imageKey);
   if (idx >= 0) {
     state.galleryImages[idx] = { ...state.galleryImages[idx], ...updates, updatedAt: new Date().toISOString() };
-    markDirty();
+  
     await saveDb(state);
   }
 }
@@ -209,7 +196,7 @@ export async function updateGalleryImage(imageKey: string, updates: any): Promis
 export async function deleteGalleryImage(imageKey: string): Promise<void> {
   const state = await getState();
   state.galleryImages = state.galleryImages.filter((img: any) => img.imageKey !== imageKey);
-  markDirty();
+
   await saveDb(state);
 }
 
@@ -234,14 +221,14 @@ export async function upsertBrandingImage(type: string, imageUrl: string, imageK
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  markDirty();
+
   await saveDb(state);
 }
 
 export async function deleteBrandingImage(type: string): Promise<void> {
   const state = await getState();
   delete state.branding[type];
-  markDirty();
+
   await saveDb(state);
 }
 
@@ -265,7 +252,7 @@ export async function upsertSocialLink(platform: string, url: string | null): Pr
       updatedAt: new Date().toISOString(),
     });
   }
-  markDirty();
+
   await saveDb(state);
 }
 
@@ -283,7 +270,7 @@ export async function initializeSocialLinks(): Promise<void> {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }));
-    markDirty();
+  
     await saveDb(state);
   }
 }
@@ -312,14 +299,14 @@ export async function upsertFloatingIcon(icon: any): Promise<void> {
       updatedAt: new Date().toISOString(),
     });
   }
-  markDirty();
+
   await saveDb(state);
 }
 
 export async function deleteFloatingIcon(type: string): Promise<void> {
   const state = await getState();
   state.floatingIcons = state.floatingIcons.filter((i: any) => i.type !== type);
-  markDirty();
+
   await saveDb(state);
 }
 
@@ -332,7 +319,7 @@ export async function getSeo(): Promise<any> {
 export async function updateSeo(updates: any): Promise<void> {
   const state = await getState();
   state.seo = { ...state.seo, ...updates };
-  markDirty();
+
   await saveDb(state);
 }
 // Alias for backward compatibility
