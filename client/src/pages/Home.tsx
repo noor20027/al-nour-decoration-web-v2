@@ -42,6 +42,8 @@ export default function Home() {
   // Use dynamic branding or fallback to defaults
   const logoUrl = logoQuery.data?.imageUrl || null;
   const bannerUrl = bannerQuery.data?.imageUrl || null;
+  const logoLoading = logoQuery.isLoading;
+  const bannerLoading = bannerQuery.isLoading;
   
   const galleryImages = galleryQuery.data || [];
   const carouselImages = carouselQuery.data || [];
@@ -102,15 +104,26 @@ export default function Home() {
       <header className="sticky top-0 z-40 bg-gradient-to-r from-white via-white to-amber-50 border-b border-amber-100 shadow-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1">
-            <img 
-              src={logoUrl} 
-              alt="مؤسسة النور للديكور" 
-              className="h-20 md:h-24 w-auto object-contain transition-all duration-300 hover:drop-shadow-lg" 
-              style={{imageRendering: 'crisp-edges', WebkitFontSmoothing: 'antialiased'}}
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt="مؤسسة النور للديكور" 
+                className="h-20 md:h-24 w-auto object-contain transition-all duration-300 hover:drop-shadow-lg" 
+                style={{imageRendering: 'crisp-edges', WebkitFontSmoothing: 'antialiased'}}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  // Show text fallback when image fails
+                  const textEl = (e.target as HTMLImageElement).nextElementSibling;
+                  if (textEl) (textEl as HTMLElement).style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div 
+              className="h-20 md:h-24 flex items-center justify-center"
+              style={{display: logoUrl ? 'none' : 'flex'}}
+            >
+              <span className="text-xl md:text-2xl font-bold text-[#d4af37] whitespace-nowrap">مؤسسة النور للديكور</span>
+            </div>
           </div>
 
           {/* Desktop Menu */}
@@ -160,11 +173,20 @@ export default function Home() {
           src={bannerUrl} 
           alt="بنر مؤسسة النور للديكور" 
           className="w-screen h-auto object-cover" 
-            style={{imageRendering: 'crisp-edges', WebkitFontSmoothing: 'antialiased'}}
+            style={{imageRendering: 'crisp-edges', WebkitFontSmoothing: 'antialiased', display: bannerUrl ? 'block' : 'none'}}
           onError={(e) => {
             (e.target as HTMLImageElement).style.display = 'none';
+            const placeholder = (e.target as HTMLImageElement).nextElementSibling;
+            if (placeholder) (placeholder as HTMLElement).style.display = 'block';
           }}
         />
+        {!bannerUrl && (
+          <div 
+            className="w-screen h-64 md:h-96 bg-gradient-to-b from-[#1a1a2e] to-[#16213e] flex items-center justify-center"
+          >
+            <span className="text-2xl md:text-4xl font-bold text-[#d4af37]">مؤسسة النور للديكور</span>
+          </div>
+        )}
       </section>
 
       {/* About Section */}
