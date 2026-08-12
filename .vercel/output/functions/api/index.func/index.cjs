@@ -71305,12 +71305,6 @@ var addPresignedParams = (url3, presignedUrlPayload) => {
   );
   return urlObj.toString();
 };
-function isUrl(urlOrPathname) {
-  return urlOrPathname.startsWith("http://") || urlOrPathname.startsWith("https://");
-}
-function constructBlobUrl(storeId, pathname, access) {
-  return `https://${storeId}.${access}.blob.vercel-storage.com/${pathname}`;
-}
 var debugIsActive = false;
 var _a;
 var _b;
@@ -72425,125 +72419,6 @@ var utf8Encoder = new TextEncoder();
 
 // node_modules/.pnpm/@vercel+blob@2.6.0/node_modules/@vercel/blob/dist/index.js
 var import_undici2 = __toESM(require_undici(), 1);
-function extractPathnameFromUrl(url3) {
-  try {
-    const parsedUrl = new URL(url3);
-    return parsedUrl.pathname.slice(1);
-  } catch {
-    return url3;
-  }
-}
-async function get(urlOrPathname, options) {
-  if (!urlOrPathname) {
-    throw new BlobError("url or pathname is required");
-  }
-  if (!options) {
-    throw new BlobError("missing options, see usage");
-  }
-  if (options.access !== "public" && options.access !== "private") {
-    throw new BlobError(
-      'access must be "private" or "public", see https://vercel.com/docs/vercel-blob'
-    );
-  }
-  const auth = await resolveBlobAuth(options);
-  if (auth.kind === "presigned") {
-    throw new BlobError("Presigned URLs are not supported for the get method");
-  }
-  let blobUrl;
-  let pathname;
-  const access = options.access;
-  if (isUrl(urlOrPathname)) {
-    blobUrl = urlOrPathname;
-    pathname = extractPathnameFromUrl(urlOrPathname);
-    try {
-      const { hostname: hostname3 } = new URL(blobUrl);
-      if (!hostname3.endsWith(".blob.vercel-storage.com")) {
-        throw new BlobError(
-          "Invalid URL: the URL does not point to a Vercel Blob store. Use a pathname instead, see https://vercel.com/docs/vercel-blob"
-        );
-      }
-    } catch (error46) {
-      if (error46 instanceof BlobError) throw error46;
-      throw new BlobError("Invalid URL: unable to parse the provided URL");
-    }
-  } else {
-    if (!auth.storeId) {
-      throw new BlobError("Invalid token: unable to extract store ID");
-    }
-    pathname = urlOrPathname;
-    blobUrl = constructBlobUrl(auth.storeId, pathname, access);
-  }
-  const requestHeaders = {
-    ...options.ifNoneMatch ? { "If-None-Match": options.ifNoneMatch } : {},
-    authorization: `Bearer ${auth.token}`,
-    ...options.headers
-    // low-level escape hatch, applied last to override anything
-  };
-  let fetchUrl = blobUrl;
-  if (options.useCache === false && access === "private") {
-    const url3 = new URL(blobUrl);
-    url3.searchParams.set("cache", "0");
-    fetchUrl = url3.toString();
-  }
-  const response = await (0, import_undici2.fetch)(fetchUrl, {
-    method: "GET",
-    headers: requestHeaders,
-    signal: options.abortSignal
-  });
-  if (response.status === 304) {
-    const downloadUrlObj = new URL(blobUrl);
-    downloadUrlObj.searchParams.set("download", "1");
-    const lastModified2 = response.headers.get("last-modified");
-    return {
-      statusCode: 304,
-      stream: null,
-      headers: response.headers,
-      blob: {
-        url: blobUrl,
-        downloadUrl: downloadUrlObj.toString(),
-        pathname,
-        contentType: null,
-        contentDisposition: response.headers.get("content-disposition") || "",
-        cacheControl: response.headers.get("cache-control") || "",
-        size: null,
-        uploadedAt: lastModified2 ? new Date(lastModified2) : /* @__PURE__ */ new Date(),
-        etag: response.headers.get("etag") || ""
-      }
-    };
-  }
-  if (response.status === 404) {
-    return null;
-  }
-  if (!response.ok) {
-    throw new BlobError(
-      `Failed to fetch blob: ${response.status} ${response.statusText}`
-    );
-  }
-  const stream4 = response.body;
-  if (!stream4) {
-    throw new BlobError("Response body is null");
-  }
-  const contentLength = response.headers.get("content-length");
-  const lastModified = response.headers.get("last-modified");
-  const downloadUrl = new URL(blobUrl);
-  downloadUrl.searchParams.set("download", "1");
-  return {
-    statusCode: 200,
-    stream: stream4,
-    headers: response.headers,
-    blob: {
-      url: blobUrl,
-      downloadUrl: downloadUrl.toString(),
-      pathname,
-      contentType: response.headers.get("content-type") || "application/octet-stream",
-      contentDisposition: response.headers.get("content-disposition") || "",
-      cacheControl: response.headers.get("cache-control") || "",
-      size: contentLength ? parseInt(contentLength, 10) : 0,
-      uploadedAt: lastModified ? new Date(lastModified) : /* @__PURE__ */ new Date(),
-      etag: response.headers.get("etag") || ""
-    }
-  };
-}
 var put = createPutMethod({
   allowedOptions: [
     "cacheControlMaxAge",
@@ -72617,8 +72492,15 @@ async function loadDb() {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const blob = await get(`${BLOB_PREFIX}state.json`);
-      const text = await blob.text();
+      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json`;
+      const response = await fetch(blobUrl, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" }
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to read state.json: ${response.status}`);
+      }
+      const text = await response.text();
       return JSON.parse(text);
     } catch (e) {
       if (attempt < maxRetries - 1) {

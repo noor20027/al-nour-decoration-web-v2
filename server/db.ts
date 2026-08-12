@@ -47,8 +47,16 @@ export async function loadDb(): Promise<DbState> {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const blob = await get(`${BLOB_PREFIX}state.json`);
-      const text = await blob.text();
+      // Use direct fetch with no-store cache to bypass Blob SDK issues
+      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json`;
+      const response = await fetch(blobUrl, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" },
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to read state.json: ${response.status}`);
+      }
+      const text = await response.text();
       return JSON.parse(text) as DbState;
     } catch (e) {
       if (attempt < maxRetries - 1) {
