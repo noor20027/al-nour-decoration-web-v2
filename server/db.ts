@@ -77,7 +77,7 @@ export async function saveDb(state: DbState): Promise<void> {
   try {
     const json = JSON.stringify(state);
     await put(`${BLOB_PREFIX}state.json`, json, {
-      access: "private",
+      access: "public",
       contentType: "application/json",
       addRandomSuffix: false,
       allowOverwrite: true,

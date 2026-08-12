@@ -72639,7 +72639,7 @@ async function saveDb(state) {
   try {
     const json2 = JSON.stringify(state);
     await put(`${BLOB_PREFIX}state.json`, json2, {
-      access: "private",
+      access: "public",
       contentType: "application/json",
       addRandomSuffix: false,
       allowOverwrite: true
