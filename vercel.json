@@ -1,17 +1,9 @@
 {
   "version": 2,
   "buildCommand": "pnpm build",
-  "outputDirectory": "dist",
+  "outputDirectory": ".vercel/output",
   "framework": "vite",
   "env": {
     "NODE_ENV": "production"
-  },
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/index" },
-    { "src": "/api/trpc/(.*)", "dest": "/api/index" },
-    { "src": "/api/upload", "dest": "/api/index" },
-    { "src": "/api/oauth/(.*)", "dest": "/api/index" },
-    { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
-    { "src": "/(.*)", "dest": "/public/index.html" }
-  ]
+  }
 }
