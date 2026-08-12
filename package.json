@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
-    "build": "vite build && esbuild api/index.ts --platform=node --bundle --format=cjs --outfile=dist/api.cjs && mkdir -p .vercel/output/static .vercel/output/functions/api/index.func && cp -r dist/public/* .vercel/output/static/ && cp dist/api.cjs .vercel/output/functions/api/index.func/index.cjs && printf '{\"runtime\":\"nodejs20.x\",\"handler\":\"index.cjs\",\"launcherType\":\"Nodejs\",\"shouldAddHelpers\":true}' > .vercel/output/functions/api/index.func/.vc-config.json && printf '{\"version\":3,\"routes\":[{\"handle\":\"filesystem\"}]}' > .vercel/output/config.json",
+    "build": "vite build && esbuild api/index.ts --platform=node --bundle --format=cjs --outfile=dist/api.cjs && mkdir -p .vercel/output/static .vercel/output/functions/api/index.func && cp -r dist/public/* .vercel/output/static/ && cp dist/api.cjs .vercel/output/functions/api/index.func/index.cjs && printf '{\"runtime\":\"nodejs20.x\",\"handler\":\"index.cjs\",\"launcherType\":\"Nodejs\",\"shouldAddHelpers\":true}' > .vercel/output/functions/api/index.func/.vc-config.json && printf '{\"version\":3,\"routes\":[{\"src\":\"/api/(.*)\",\"dest\":\"/api/index\"},{\"handle\":\"filesystem\"}]}' > .vercel/output/config.json",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
