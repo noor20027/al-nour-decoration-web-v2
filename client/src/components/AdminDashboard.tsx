@@ -97,7 +97,50 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         toast.error("حجم الصورة يجب أن يكون أقل من 10 ميجابايت");
         return;
       }
-      setSelectedFile(file);
+      // Compress large images to fit within Vercel's 4.5MB body limit
+      if (file.size > 2 * 1024 * 1024) {
+        // Use canvas to resize/compress the image
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const maxSize = 1920;
+            let width = img.width;
+            let height = img.height;
+            if (width > maxSize || height > maxSize) {
+              if (width > height) {
+                height = Math.round(height * maxSize / width);
+                width = maxSize;
+              } else {
+                width = Math.round(width * maxSize / height);
+                height = maxSize;
+              }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, width, height);
+              canvas.toBlob((blob) => {
+                if (blob) {
+                  const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+                  setSelectedFile(compressedFile);
+                  toast.success("تم ضغط الصورة لتسريع الرفع");
+                } else {
+                  setSelectedFile(file);
+                }
+              }, 'image/jpeg', 0.8);
+            } else {
+              setSelectedFile(file);
+            }
+          };
+          img.src = ev.target?.result as string;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setSelectedFile(file);
+      }
     }
   };
 
