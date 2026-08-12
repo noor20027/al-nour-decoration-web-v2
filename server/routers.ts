@@ -121,6 +121,8 @@ export const appRouter = router({
             input.mimeType
           );
           
+          // Also persist the image in the database so it shows up in getAll
+          await addGalleryImage(url, key, input.fileName, null, 'horizontal', 'no');
           return { success: true, imageUrl: url, imageKey: key };
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Unknown error';

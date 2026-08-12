@@ -90690,6 +90690,7 @@ var appRouter = router({
           buffer,
           input.mimeType
         );
+        await addGalleryImage(url3, key, input.fileName, null, "horizontal", "no");
         return { success: true, imageUrl: url3, imageKey: key };
       } catch (error46) {
         const message2 = error46 instanceof Error ? error46.message : "Unknown error";
