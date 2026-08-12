@@ -52,6 +52,21 @@ const trpcClient = trpc.createClient({
   ],
 });
 
+// Prefetch branding data immediately to avoid cold start delay
+const prefetchBranding = async () => {
+  try {
+    await Promise.allSettled([
+      trpcClient.query(["branding", "getLogo"]),
+      trpcClient.query(["branding", "getBanner"]),
+      trpcClient.query(["gallery", "getAll"]),
+    ]);
+    console.log("[Prefetch] Branding data loaded");
+  } catch (e) {
+    console.log("[Prefetch] Failed:", e);
+  }
+};
+prefetchBranding();
+
 createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
     <QueryClientProvider client={queryClient}>
