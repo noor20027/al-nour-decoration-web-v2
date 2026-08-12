@@ -19,23 +19,27 @@ export default function Home() {
 
   // Fetch dynamic branding (logo and banner)
   const logoQuery = trpc.branding.getLogo.useQuery(undefined, {
-    staleTime: 0,
+    staleTime: 60000,
+    retry: 3,
+    retryDelay: 1000,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    refetchInterval: 10000,
+    refetchInterval: 30000,
   });
   const bannerQuery = trpc.branding.getBanner.useQuery(undefined, {
-    staleTime: 0,
+    staleTime: 60000,
+    retry: 3,
+    retryDelay: 1000,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    refetchInterval: 10000,
+    refetchInterval: 30000,
   });
   
   // Fetch gallery and carousel images
-  const galleryQuery = trpc.gallery.getAll.useQuery(undefined, { staleTime: 0, refetchOnMount: true, refetchInterval: 10000 });
-  const carouselQuery = trpc.gallery.getCarousel.useQuery(undefined, { staleTime: 0, refetchOnMount: true, refetchInterval: 10000 });
-  const socialQuery = trpc.social.getAll.useQuery(undefined, { staleTime: 0, refetchOnMount: true, refetchInterval: 10000 });
-  const floatingIconsQuery = trpc.floatingIcons.getAll.useQuery(undefined, { staleTime: 0, refetchOnMount: true, refetchInterval: 10000 });
+  const galleryQuery = trpc.gallery.getAll.useQuery(undefined, { staleTime: 60000, retry: 3, retryDelay: 1000, refetchOnMount: true, refetchInterval: 30000 });
+  const carouselQuery = trpc.gallery.getCarousel.useQuery(undefined, { staleTime: 60000, retry: 3, retryDelay: 1000, refetchOnMount: true, refetchInterval: 30000 });
+  const socialQuery = trpc.social.getAll.useQuery(undefined, { staleTime: 60000, retry: 3, retryDelay: 1000, refetchOnMount: true, refetchInterval: 30000 });
+  const floatingIconsQuery = trpc.floatingIcons.getAll.useQuery(undefined, { staleTime: 60000, retry: 3, retryDelay: 1000, refetchOnMount: true, refetchInterval: 30000 });
   
   // Use dynamic branding or fallback to defaults
   const logoUrl = logoQuery.data?.imageUrl || DEFAULT_LOGO_URL;

@@ -110,6 +110,7 @@ export async function upsertUser(user: any): Promise<void> {
     });
   }
   await saveDb(state);
+  invalidateCache();
 }
 
 export async function getUser(openId: string): Promise<any> {
@@ -128,6 +129,7 @@ export async function deleteUser(openId: string): Promise<void> {
   const state = await loadDb();
   state.users = state.users.filter((u: any) => u.openId !== openId);
   await saveDb(state);
+  invalidateCache();
 }
 
 // Admin operations
@@ -150,6 +152,7 @@ export async function upsertAdminCredential(cred: any): Promise<void> {
     });
   }
   await saveDb(state);
+  invalidateCache();
 }
 
 export { upsertAdminCredential as updateAdminPassword };
@@ -183,6 +186,7 @@ export async function addGalleryImage(imageUrl: string, imageKey: string, title?
     updatedAt: new Date().toISOString(),
   });
   await saveDb(state);
+  invalidateCache();
 }
 
 export async function updateGalleryImage(imageKey: string, updates: any): Promise<void> {
@@ -198,6 +202,7 @@ export async function deleteGalleryImage(imageKey: string): Promise<void> {
   const state = await loadDb();
   state.galleryImages = state.galleryImages.filter((img: any) => img.imageKey !== imageKey);
   await saveDb(state);
+  invalidateCache();
 }
 
 export async function getGalleryImage(imageKey: string): Promise<any> {
@@ -222,12 +227,14 @@ export async function upsertBrandingImage(type: string, imageUrl: string, imageK
     updatedAt: new Date().toISOString(),
   };
   await saveDb(state);
+  invalidateCache();
 }
 
 export async function deleteBrandingImage(type: string): Promise<void> {
   const state = await loadDb();
   delete state.branding[type];
   await saveDb(state);
+  invalidateCache();
 }
 
 // Social links
@@ -251,6 +258,7 @@ export async function upsertSocialLink(platform: string, url: string | null): Pr
     });
   }
   await saveDb(state);
+  invalidateCache();
 }
 
 export { upsertSocialLink as updateSocialLink };
@@ -295,12 +303,14 @@ export async function upsertFloatingIcon(icon: any): Promise<void> {
     });
   }
   await saveDb(state);
+  invalidateCache();
 }
 
 export async function deleteFloatingIcon(type: string): Promise<void> {
   const state = await loadDb();
   state.floatingIcons = state.floatingIcons.filter((i: any) => i.type !== type);
   await saveDb(state);
+  invalidateCache();
 }
 
 // SEO
@@ -313,4 +323,5 @@ export async function updateSeo(updates: any): Promise<void> {
   const state = await loadDb();
   state.seo = { ...state.seo, ...updates };
   await saveDb(state);
+  invalidateCache();
 }

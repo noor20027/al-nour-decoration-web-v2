@@ -72550,6 +72550,7 @@ async function upsertUser(user) {
     });
   }
   await saveDb(state);
+  invalidateCache();
 }
 async function getUser(openId) {
   const state = await loadDb();
@@ -72573,6 +72574,7 @@ async function upsertAdminCredential(cred) {
     });
   }
   await saveDb(state);
+  invalidateCache();
 }
 async function getAllGalleryImages() {
   const state = await loadDb();
@@ -72598,6 +72600,7 @@ async function addGalleryImage(imageUrl, imageKey, title, description, orientati
     updatedAt: (/* @__PURE__ */ new Date()).toISOString()
   });
   await saveDb(state);
+  invalidateCache();
 }
 async function updateGalleryImage(imageKey, updates) {
   const state = await loadDb();
@@ -72611,6 +72614,7 @@ async function deleteGalleryImage(imageKey) {
   const state = await loadDb();
   state.galleryImages = state.galleryImages.filter((img) => img.imageKey !== imageKey);
   await saveDb(state);
+  invalidateCache();
 }
 async function getBrandingImage(type) {
   const state = await loadDb();
@@ -72627,11 +72631,13 @@ async function upsertBrandingImage(type, imageUrl, imageKey) {
     updatedAt: (/* @__PURE__ */ new Date()).toISOString()
   };
   await saveDb(state);
+  invalidateCache();
 }
 async function deleteBrandingImage(type) {
   const state = await loadDb();
   delete state.branding[type];
   await saveDb(state);
+  invalidateCache();
 }
 async function getAllSocialLinks() {
   const state = await loadDb();
@@ -72652,6 +72658,7 @@ async function upsertSocialLink(platform, url3) {
     });
   }
   await saveDb(state);
+  invalidateCache();
 }
 async function initializeSocialLinks() {
   const state = await loadDb();
@@ -72689,11 +72696,13 @@ async function upsertFloatingIcon(icon) {
     });
   }
   await saveDb(state);
+  invalidateCache();
 }
 async function deleteFloatingIcon(type) {
   const state = await loadDb();
   state.floatingIcons = state.floatingIcons.filter((i) => i.type !== type);
   await saveDb(state);
+  invalidateCache();
 }
 
 // server/_core/cookies.ts
