@@ -48,7 +48,7 @@ export async function loadDb(): Promise<DbState> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       // Use direct fetch with no-store cache to bypass Blob SDK issues
-      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json`;
+      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}`;
       const response = await fetch(blobUrl, {
         cache: "no-store",
         headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" },
