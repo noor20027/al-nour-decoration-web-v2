@@ -72639,9 +72639,10 @@ async function saveDb(state) {
   try {
     const json2 = JSON.stringify(state);
     await put(`${BLOB_PREFIX}state.json`, json2, {
-      access: "public",
+      access: "private",
       contentType: "application/json",
-      addRandomSuffix: false
+      addRandomSuffix: false,
+      allowOverwrite: true
     });
     console.log("[DB] State saved to Blob storage");
     _cache = state;
