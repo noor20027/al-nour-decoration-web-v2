@@ -72614,24 +72614,45 @@ function getDefaultState() {
   };
 }
 async function loadDb() {
-  try {
-    const blob = await get(`${BLOB_PREFIX}state.json`);
-    const text = await blob.text();
-    return JSON.parse(text);
-  } catch (e) {
-    console.log("[DB] No existing state found, using defaults");
-    return getDefaultState();
+  const maxRetries = 3;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const blob = await get(`${BLOB_PREFIX}state.json`);
+      const text = await blob.text();
+      return JSON.parse(text);
+    } catch (e) {
+      if (attempt < maxRetries - 1) {
+        await new Promise((r) => setTimeout(r, 100 * (attempt + 1)));
+      } else {
+        console.log("[DB] No existing state found, using defaults");
+        return getDefaultState();
+      }
+    }
   }
+  return getDefaultState();
 }
 async function saveDb(state) {
-  const json2 = JSON.stringify(state);
-  await put(`${BLOB_PREFIX}state.json`, json2, {
-    access: "public",
-    contentType: "application/json",
-    addRandomSuffix: false,
-    allowOverwrite: true
-  });
-  console.log("[DB] State saved to Blob storage");
+  const maxRetries = 3;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const json2 = JSON.stringify(state);
+      await put(`${BLOB_PREFIX}state.json`, json2, {
+        access: "public",
+        contentType: "application/json",
+        addRandomSuffix: false,
+        allowOverwrite: true
+      });
+      console.log("[DB] State saved to Blob storage");
+      return;
+    } catch (e) {
+      if (attempt < maxRetries - 1) {
+        await new Promise((r) => setTimeout(r, 200 * (attempt + 1)));
+      } else {
+        console.error("[DB] Failed to save state after retries:", e);
+        throw e;
+      }
+    }
+  }
 }
 async function upsertUser(user) {
   const state = await loadDb();

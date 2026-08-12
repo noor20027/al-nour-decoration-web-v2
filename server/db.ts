@@ -42,28 +42,49 @@ function getDefaultState(): DbState {
   };
 }
 
-// Load full DB state from Blob - always fresh read
+// Load full DB state from Blob - always fresh read with retry
 export async function loadDb(): Promise<DbState> {
-  try {
-    const blob = await get(`${BLOB_PREFIX}state.json`);
-    const text = await blob.text();
-    return JSON.parse(text) as DbState;
-  } catch (e) {
-    console.log("[DB] No existing state found, using defaults");
-    return getDefaultState();
+  const maxRetries = 3;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const blob = await get(`${BLOB_PREFIX}state.json`);
+      const text = await blob.text();
+      return JSON.parse(text) as DbState;
+    } catch (e) {
+      if (attempt < maxRetries - 1) {
+        await new Promise(r => setTimeout(r, 100 * (attempt + 1)));
+      } else {
+        console.log("[DB] No existing state found, using defaults");
+        return getDefaultState();
+      }
+    }
   }
+  return getDefaultState();
 }
 
-// Save full DB state to Blob
+// Save full DB state to Blob with retry
 export async function saveDb(state: DbState): Promise<void> {
-  const json = JSON.stringify(state);
-  await put(`${BLOB_PREFIX}state.json`, json, {
-    access: "public",
-    contentType: "application/json",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-  });
-  console.log("[DB] State saved to Blob storage");
+  const maxRetries = 3;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const json = JSON.stringify(state);
+      await put(`${BLOB_PREFIX}state.json`, json, {
+        access: "public",
+        contentType: "application/json",
+        addRandomSuffix: false,
+        allowOverwrite: true,
+      });
+      console.log("[DB] State saved to Blob storage");
+      return;
+    } catch (e) {
+      if (attempt < maxRetries - 1) {
+        await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
+      } else {
+        console.error("[DB] Failed to save state after retries:", e);
+        throw e;
+      }
+    }
+  }
 }
 
 // User operations
