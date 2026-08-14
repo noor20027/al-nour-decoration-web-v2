@@ -180,13 +180,7 @@ export default function Home() {
             if (placeholder) (placeholder as HTMLElement).style.display = 'block';
           }}
         />
-        {!bannerUrl && (
-          <div 
-            className="w-screen h-64 md:h-96 bg-gradient-to-b from-[#1a1a2e] to-[#16213e] flex items-center justify-center"
-          >
-            <span className="text-2xl md:text-4xl font-bold text-[#d4af37]">مؤسسة النور للديكور</span>
-          </div>
-        )}
+
       </section>
 
       {/* About Section */}
