@@ -98,9 +98,8 @@ export async function saveDb(state: DbState): Promise<void> {
       if (!blobToken) {
         throw new Error("BLOB_READ_WRITE_TOKEN not set");
       }
-      const uploadUrl = "https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com";
       const uploadResponse = await fetch(
-        `${uploadUrl}/upload?filename=${BLOB_PREFIX}state.json&access=public`,
+        `https://vercel.com/api/blob/upload?access=public&pathname=${encodeURIComponent(BLOB_PREFIX + 'state.json')}`,
         {
           method: "POST",
           headers: {
@@ -111,7 +110,7 @@ export async function saveDb(state: DbState): Promise<void> {
         }
       );
       if (!uploadResponse.ok) {
-        throw new Error(`Blob upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+        throw new Error(`Blob upload failed: ${uploadResponse.status} ${await uploadResponse.text()}`);
       }
       console.log("[DB] State saved to Blob storage");
             return;

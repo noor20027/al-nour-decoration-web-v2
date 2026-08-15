@@ -22,9 +22,10 @@ export async function storagePut(
   if (!blobToken) {
     throw new Error("BLOB_READ_WRITE_TOKEN not set");
   }
-  const uploadUrl = "https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com";
+  // Use Vercel Blob API v1 - construct blob URL directly
+  const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${key}`;
   const uploadResponse = await fetch(
-    `${uploadUrl}/upload?filename=${encodeURIComponent(key)}&access=public`,
+    `https://vercel.com/api/blob/upload?access=public&pathname=${encodeURIComponent(key)}`,
     {
       method: "POST",
       headers: {
@@ -35,10 +36,11 @@ export async function storagePut(
     }
   );
   if (!uploadResponse.ok) {
-    throw new Error(`Blob upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+    const errorText = await uploadResponse.text();
+    throw new Error(`Blob upload failed: ${uploadResponse.status} ${errorText}`);
   }
   const result = await uploadResponse.json();
-  return { key: result.pathname || key, url: result.url || `${uploadUrl}/${key}` };
+  return { key: result.pathname || key, url: result.url || blobUrl };
 }
 
 export async function storageGet(relKey: string): Promise<{ key: string; url: string }> {

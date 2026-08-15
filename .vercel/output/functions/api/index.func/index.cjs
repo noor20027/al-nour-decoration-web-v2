@@ -28475,9 +28475,8 @@ async function saveDb(state) {
       if (!blobToken) {
         throw new Error("BLOB_READ_WRITE_TOKEN not set");
       }
-      const uploadUrl = "https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com";
       const uploadResponse = await fetch(
-        `${uploadUrl}/upload?filename=${BLOB_PREFIX}state.json&access=public`,
+        `https://vercel.com/api/blob/upload?access=public&pathname=${encodeURIComponent(BLOB_PREFIX + "state.json")}`,
         {
           method: "POST",
           headers: {
@@ -28488,7 +28487,7 @@ async function saveDb(state) {
         }
       );
       if (!uploadResponse.ok) {
-        throw new Error(`Blob upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+        throw new Error(`Blob upload failed: ${uploadResponse.status} ${await uploadResponse.text()}`);
       }
       console.log("[DB] State saved to Blob storage");
       return;
@@ -46577,9 +46576,9 @@ async function storagePut(relKey, data, contentType = "application/octet-stream"
   if (!blobToken) {
     throw new Error("BLOB_READ_WRITE_TOKEN not set");
   }
-  const uploadUrl = "https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com";
+  const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${key}`;
   const uploadResponse = await fetch(
-    `${uploadUrl}/upload?filename=${encodeURIComponent(key)}&access=public`,
+    `https://vercel.com/api/blob/upload?access=public&pathname=${encodeURIComponent(key)}`,
     {
       method: "POST",
       headers: {
@@ -46590,10 +46589,11 @@ async function storagePut(relKey, data, contentType = "application/octet-stream"
     }
   );
   if (!uploadResponse.ok) {
-    throw new Error(`Blob upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+    const errorText = await uploadResponse.text();
+    throw new Error(`Blob upload failed: ${uploadResponse.status} ${errorText}`);
   }
   const result = await uploadResponse.json();
-  return { key: result.pathname || key, url: result.url || `${uploadUrl}/${key}` };
+  return { key: result.pathname || key, url: result.url || blobUrl };
 }
 
 // server/routers.ts
