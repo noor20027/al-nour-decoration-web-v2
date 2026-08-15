@@ -5,6 +5,9 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
@@ -278,12 +281,12 @@ var require_depd = __commonJS({
       if ("value" in descriptor) {
         descriptor = convertDataDescriptorToAccessor(obj, prop, message2);
       }
-      var get = descriptor.get;
+      var get2 = descriptor.get;
       var set2 = descriptor.set;
-      if (typeof get === "function") {
+      if (typeof get2 === "function") {
         descriptor.get = function getter() {
           log.call(deprecate, message2, site);
-          return get.apply(this, arguments);
+          return get2.apply(this, arguments);
         };
       }
       if (typeof set2 === "function") {
@@ -15026,16 +15029,16 @@ var require_side_channel_list = __commonJS({
     "use strict";
     var inspect = require_object_inspect();
     var $TypeError = require_type();
-    var listGetNode = function(list2, key, isDelete) {
-      var prev = list2;
+    var listGetNode = function(list3, key, isDelete) {
+      var prev = list3;
       var curr;
       for (; (curr = prev.next) != null; prev = curr) {
         if (curr.key === key) {
           prev.next = curr.next;
           if (!isDelete) {
             curr.next = /** @type {NonNullable<typeof list.next>} */
-            list2.next;
-            list2.next = curr;
+            list3.next;
+            list3.next = curr;
           }
           return curr;
         }
@@ -17077,7 +17080,7 @@ var require_body_parser = __commonJS({
       };
     }
     function createParserGetter(name) {
-      return function get() {
+      return function get2() {
         return loadParser(name);
       };
     }
@@ -18121,11 +18124,11 @@ var require_router = __commonJS({
         return this;
       };
     });
-    function appendMethods(list2, addition) {
+    function appendMethods(list3, addition) {
       for (var i = 0; i < addition.length; i++) {
         var method = addition[i];
-        if (list2.indexOf(method) === -1) {
-          list2.push(method);
+        if (list3.indexOf(method) === -1) {
+          list3.push(method);
         }
       }
     }
@@ -18673,7 +18676,7 @@ var require_fresh = __commonJS({
     }
     function parseTokenList(str) {
       var end = 0;
-      var list2 = [];
+      var list3 = [];
       var start = 0;
       for (var i = 0, len = str.length; i < len; i++) {
         switch (str.charCodeAt(i)) {
@@ -18683,7 +18686,7 @@ var require_fresh = __commonJS({
             }
             break;
           case 44:
-            list2.push(str.substring(start, end));
+            list3.push(str.substring(start, end));
             start = end = i + 1;
             break;
           default:
@@ -18691,8 +18694,8 @@ var require_fresh = __commonJS({
             break;
         }
       }
-      list2.push(str.substring(start, end));
-      return list2;
+      list3.push(str.substring(start, end));
+      return list3;
     }
   }
 });
@@ -19451,13 +19454,13 @@ var require_send = __commonJS({
       return typeof res.headersSent !== "boolean" ? Boolean(res._header) : res.headersSent;
     }
     function normalizeList(val, name) {
-      var list2 = [].concat(val || []);
-      for (var i = 0; i < list2.length; i++) {
-        if (typeof list2[i] !== "string") {
+      var list3 = [].concat(val || []);
+      for (var i = 0; i < list3.length; i++) {
+        if (typeof list3[i] !== "string") {
           throw new TypeError(name + " must be array of strings or false");
         }
       }
-      return list2;
+      return list3;
     }
     function parseHttpDate(date5) {
       var timestamp = date5 && Date.parse(date5);
@@ -19465,7 +19468,7 @@ var require_send = __commonJS({
     }
     function parseTokenList(str) {
       var end = 0;
-      var list2 = [];
+      var list3 = [];
       var start = 0;
       for (var i = 0, len = str.length; i < len; i++) {
         switch (str.charCodeAt(i)) {
@@ -19476,7 +19479,7 @@ var require_send = __commonJS({
             break;
           case 44:
             if (start !== end) {
-              list2.push(str.substring(start, end));
+              list3.push(str.substring(start, end));
             }
             start = end = i + 1;
             break;
@@ -19486,9 +19489,9 @@ var require_send = __commonJS({
         }
       }
       if (start !== end) {
-        list2.push(str.substring(start, end));
+        list3.push(str.substring(start, end));
       }
-      return list2;
+      return list3;
     }
     function setHeaders(res, headers) {
       var keys = Object.keys(headers);
@@ -19519,7 +19522,7 @@ var require_forwarded = __commonJS({
     }
     function parse3(header) {
       var end = header.length;
-      var list2 = [];
+      var list3 = [];
       var start = header.length;
       for (var i = header.length - 1; i >= 0; i--) {
         switch (header.charCodeAt(i)) {
@@ -19530,7 +19533,7 @@ var require_forwarded = __commonJS({
             break;
           case 44:
             if (start !== end) {
-              list2.push(header.substring(start, end));
+              list3.push(header.substring(start, end));
             }
             start = end = i;
             break;
@@ -19540,9 +19543,9 @@ var require_forwarded = __commonJS({
         }
       }
       if (start !== end) {
-        list2.push(header.substring(start, end));
+        list3.push(header.substring(start, end));
       }
-      return list2;
+      return list3;
     }
   }
 });
@@ -21708,7 +21711,7 @@ var require_vary = __commonJS({
     }
     function parse3(header) {
       var end = 0;
-      var list2 = [];
+      var list3 = [];
       var start = 0;
       for (var i = 0, len = header.length; i < len; i++) {
         switch (header.charCodeAt(i)) {
@@ -21718,7 +21721,7 @@ var require_vary = __commonJS({
             }
             break;
           case 44:
-            list2.push(header.substring(start, end));
+            list3.push(header.substring(start, end));
             start = end = i + 1;
             break;
           default:
@@ -21726,8 +21729,8 @@ var require_vary = __commonJS({
             break;
         }
       }
-      list2.push(header.substring(start, end));
-      return list2;
+      list3.push(header.substring(start, end));
+      return list3;
     }
     function vary(res, field) {
       if (!res || !res.getHeader || !res.setHeader) {
@@ -22721,6 +22724,25 @@ var require_cookie_parser = __commonJS({
       }
       return ret;
     }
+  }
+});
+
+// node_modules/.pnpm/is-node-process@1.2.0/node_modules/is-node-process/lib/index.mjs
+function isNodeProcess() {
+  if (typeof navigator !== "undefined" && navigator.product === "ReactNative") {
+    return true;
+  }
+  if (typeof process !== "undefined") {
+    const type = process.type;
+    if (type === "renderer" || type === "worker") {
+      return false;
+    }
+    return !!(process.versions && process.versions.node);
+  }
+  return false;
+}
+var init_lib = __esm({
+  "node_modules/.pnpm/is-node-process@1.2.0/node_modules/is-node-process/lib/index.mjs"() {
   }
 });
 
@@ -45739,19 +45761,19 @@ var require_fetch_jwks = __commonJS({
     var errors_js_1 = require_errors4();
     var buffer_utils_js_1 = require_buffer_utils();
     var fetchJwks = async (url3, timeout, options) => {
-      let get;
+      let get2;
       switch (url3.protocol) {
         case "https:":
-          get = https2.get;
+          get2 = https2.get;
           break;
         case "http:":
-          get = http2.get;
+          get2 = http2.get;
           break;
         default:
           throw new TypeError("Unsupported URL protocol.");
       }
       const { agent, headers } = options;
-      const req = get(url3.href, {
+      const req = get2(url3.href, {
         agent,
         timeout,
         headers
@@ -51307,8 +51329,8 @@ var require_util3 = __commonJS({
       }
       return values;
     }
-    function getDecodeSplit(name, list2) {
-      const value = list2.get(name, true);
+    function getDecodeSplit(name, list3) {
+      const value = list3.get(name, true);
       if (value === null) {
         return null;
       }
@@ -52520,7 +52542,7 @@ var require_client_h1 = __commonJS({
           util3.destroy(this.socket, new HeadersOverflowError());
         }
       }
-      onUpgrade(head) {
+      onUpgrade(head2) {
         const { upgrade, client, socket, headers, statusCode } = this;
         assert2(upgrade);
         assert2(client[kSocket] === socket);
@@ -52535,7 +52557,7 @@ var require_client_h1 = __commonJS({
         this.shouldKeepAlive = null;
         this.headers = [];
         this.headersSize = 0;
-        socket.unshift(head);
+        socket.unshift(head2);
         socket[kParser].destroy();
         socket[kParser] = null;
         socket[kClient] = null;
@@ -58618,9 +58640,9 @@ var require_headers = __commonJS({
       // https://fetch.spec.whatwg.org/#dom-headers-getsetcookie
       getSetCookie() {
         webidl.brandCheck(this, _Headers);
-        const list2 = this.#headersList.cookies;
-        if (list2) {
-          return [...list2];
+        const list3 = this.#headersList.cookies;
+        if (list3) {
+          return [...list3];
         }
         return [];
       }
@@ -58660,8 +58682,8 @@ var require_headers = __commonJS({
       static getHeadersList(o) {
         return o.#headersList;
       }
-      static setHeadersList(o, list2) {
-        o.#headersList = list2;
+      static setHeadersList(o, list3) {
+        o.#headersList = list3;
       }
     };
     var { getHeadersGuard, setHeadersGuard, getHeadersList, setHeadersList } = Headers2;
@@ -59629,13 +59651,13 @@ var require_request3 = __commonJS({
         if (this.signal.aborted) {
           ac.abort(this.signal.reason);
         } else {
-          let list2 = dependentControllerMap.get(this.signal);
-          if (list2 === void 0) {
-            list2 = /* @__PURE__ */ new Set();
-            dependentControllerMap.set(this.signal, list2);
+          let list3 = dependentControllerMap.get(this.signal);
+          if (list3 === void 0) {
+            list3 = /* @__PURE__ */ new Set();
+            dependentControllerMap.set(this.signal, list3);
           }
           const acRef = new WeakRef(ac);
-          list2.add(acRef);
+          list3.add(acRef);
           util3.addAbortListener(
             ac.signal,
             buildAbort(acRef)
@@ -65303,6 +65325,2368 @@ var require_throttleit = __commonJS({
   }
 });
 
+// node_modules/.pnpm/@vercel+blob@2.6.0/node_modules/@vercel/blob/dist/chunk-UVSKRCEW.js
+async function toReadableStream(value) {
+  if (value instanceof ReadableStream) {
+    return value;
+  }
+  if (value instanceof Blob) {
+    return value.stream();
+  }
+  if (isNodeJsReadableStream(value)) {
+    return import_stream.Readable.toWeb(value);
+  }
+  let streamValue;
+  if (value instanceof ArrayBuffer) {
+    streamValue = new Uint8Array(value);
+  } else if (isNodeJsBuffer(value)) {
+    streamValue = value;
+  } else {
+    streamValue = stringToUint8Array(value);
+  }
+  if (await supportsNewBlobFromArrayBuffer) {
+    return new Blob([streamValue]).stream();
+  }
+  return new ReadableStream({
+    start(controller) {
+      controller.enqueue(streamValue);
+      controller.close();
+    }
+  });
+}
+function isNodeJsReadableStream(value) {
+  return typeof value === "object" && typeof value.pipe === "function" && value.readable && typeof value._read === "function" && // @ts-expect-error _readableState does exists on Readable
+  typeof value._readableState === "object";
+}
+function stringToUint8Array(s) {
+  const enc = new TextEncoder();
+  return enc.encode(s);
+}
+function isNodeJsBuffer(value) {
+  return (0, import_is_buffer.default)(value);
+}
+async function getVercelOidcToken2() {
+  try {
+    const token = (await (0, import_oidc.getVercelOidcToken)()).trim();
+    return token === "" ? void 0 : token;
+  } catch {
+    return void 0;
+  }
+}
+function bytes(val) {
+  if (typeof val === "number" && !Number.isNaN(val)) {
+    return val;
+  }
+  if (typeof val !== "string") {
+    return null;
+  }
+  const results = parseRegExp.exec(val);
+  let floatValue;
+  let unit = "b";
+  if (!results) {
+    floatValue = parseInt(val, 10);
+  } else {
+    const [, res, , , unitMatch] = results;
+    if (!res) {
+      return null;
+    }
+    floatValue = parseFloat(res);
+    if (unitMatch) {
+      unit = unitMatch.toLowerCase();
+    }
+  }
+  if (Number.isNaN(floatValue)) {
+    return null;
+  }
+  return Math.floor(map[unit] * floatValue);
+}
+function readEnv(name) {
+  try {
+    const value = process.env[name];
+    return typeof value === "string" && value.trim() !== "" ? value.trim() : void 0;
+  } catch {
+    return void 0;
+  }
+}
+function parseStoreIdFromReadWriteToken(token) {
+  const [, , , storeId = ""] = token.split("_");
+  return storeId;
+}
+function base64UrlDecodeDelegationSegment(segment) {
+  let base643 = segment.replace(/-/g, "+").replace(/_/g, "/");
+  const padding = 4 - base643.length % 4;
+  if (padding !== 4) {
+    base643 += "=".repeat(padding);
+  }
+  if (typeof atob === "function") {
+    return atob(base643);
+  }
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(base643, "base64").toString("utf8");
+  }
+  throw new BlobError("Cannot decode base64: no atob or Buffer available.");
+}
+function parseStoreIdFromDelegationToken(delegationToken) {
+  const dot = delegationToken.indexOf(".");
+  if (dot < 0) {
+    throw new BlobError("Invalid delegation token format.");
+  }
+  const payloadSeg = delegationToken.slice(0, dot);
+  let parsed;
+  try {
+    parsed = JSON.parse(base64UrlDecodeDelegationSegment(payloadSeg));
+  } catch {
+    throw new BlobError("Invalid delegation token payload.");
+  }
+  if (!parsed.storeId || typeof parsed.storeId !== "string") {
+    throw new BlobError("Delegation token payload is missing `storeId`.");
+  }
+  return normalizeStoreId(parsed.storeId);
+}
+function parseStoreIdFromPresignedUrl(presignedUrlPayload) {
+  const delegation = presignedUrlPayload.delegationToken;
+  return parseStoreIdFromDelegationToken(delegation);
+}
+function normalizeStoreId(storeId) {
+  return storeId.startsWith("store_") ? storeId.slice("store_".length) : storeId;
+}
+async function resolveBlobAuth(options) {
+  var _a3, _b2;
+  if (options == null ? void 0 : options.presignedUrlPayload) {
+    const storeId = parseStoreIdFromDelegationToken(
+      options.presignedUrlPayload.delegationToken
+    );
+    return { kind: "presigned", storeId };
+  }
+  if (options == null ? void 0 : options.token) {
+    const storeId = parseStoreIdFromReadWriteToken(options.token);
+    return { kind: "readWrite", token: options.token, storeId };
+  }
+  const manualOidcToken = (_a3 = options == null ? void 0 : options.oidcToken) == null ? void 0 : _a3.trim();
+  const oidcToken = manualOidcToken || await getVercelOidcToken2();
+  if (oidcToken) {
+    const manualStoreId = (_b2 = options == null ? void 0 : options.storeId) == null ? void 0 : _b2.trim();
+    if (manualStoreId) {
+      return {
+        kind: "oidc",
+        token: oidcToken,
+        storeId: normalizeStoreId(manualStoreId)
+      };
+    }
+    const blobStoreId = readEnv("BLOB_STORE_ID");
+    if (blobStoreId) {
+      return {
+        kind: "oidc",
+        token: oidcToken,
+        storeId: normalizeStoreId(blobStoreId)
+      };
+    }
+    if (manualOidcToken) {
+      throw new BlobError(
+        "oidcToken was passed, but no storeId was found. Pass a `storeId` option or set `BLOB_STORE_ID` to use OIDC auth"
+      );
+    }
+  }
+  const readWrite = readEnv("BLOB_READ_WRITE_TOKEN");
+  if (readWrite) {
+    const storeId = parseStoreIdFromReadWriteToken(readWrite);
+    return { kind: "readWrite", token: readWrite, storeId };
+  }
+  throw new BlobError(
+    "No blob credentials found. Pass a `token` option, set `BLOB_READ_WRITE_TOKEN`, or use `oidcToken` (or `VERCEL_OIDC_TOKEN`) with `storeId` or `BLOB_STORE_ID`."
+  );
+}
+function getDownloadUrl(blobUrl) {
+  const url3 = new URL(blobUrl);
+  url3.searchParams.set("download", "1");
+  return url3.toString();
+}
+function isPlainObject2(value) {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const prototype3 = Object.getPrototypeOf(value);
+  return (prototype3 === null || prototype3 === Object.prototype || Object.getPrototypeOf(prototype3) === null) && !(Symbol.toStringTag in value) && !(Symbol.iterator in value);
+}
+function getApiUrl(pathname = "") {
+  let baseUrl = null;
+  try {
+    baseUrl = process.env.VERCEL_BLOB_API_URL || process.env.NEXT_PUBLIC_VERCEL_BLOB_API_URL;
+  } catch {
+  }
+  return `${baseUrl || defaultVercelBlobApiUrl}${pathname}`;
+}
+function computeBodyLength(body) {
+  if (!body) {
+    return 0;
+  }
+  if (typeof body === "string") {
+    if (TEXT_ENCODER) {
+      return TEXT_ENCODER.encode(body).byteLength;
+    }
+    return new Blob([body]).size;
+  }
+  if ("byteLength" in body && typeof body.byteLength === "number") {
+    return body.byteLength;
+  }
+  if ("size" in body && typeof body.size === "number") {
+    return body.size;
+  }
+  return 0;
+}
+function isReadableStream(value) {
+  return globalThis.ReadableStream && // TODO: Can be removed once Node.js 16 is no more required internally
+  value instanceof ReadableStream;
+}
+function isStream(value) {
+  if (isReadableStream(value)) {
+    return true;
+  }
+  if (isNodeJsReadableStream(value)) {
+    return true;
+  }
+  return false;
+}
+function isUrl(urlOrPathname) {
+  return urlOrPathname.startsWith("http://") || urlOrPathname.startsWith("https://");
+}
+function constructBlobUrl(storeId, pathname, access) {
+  return `https://${storeId}.${access}.blob.vercel-storage.com/${pathname}`;
+}
+function debug(message2, ...args) {
+  if (debugIsActive) {
+    console.debug(`vercel-blob: ${message2}`, ...args);
+  }
+}
+function isNetworkError(error46) {
+  const isValid = error46 && isError(error46) && error46.name === "TypeError" && typeof error46.message === "string";
+  if (!isValid) {
+    return false;
+  }
+  if (error46.message === "Load failed") {
+    return error46.stack === void 0;
+  }
+  return errorMessages.has(error46.message);
+}
+function getApiVersion() {
+  let versionOverride = null;
+  try {
+    versionOverride = process.env.VERCEL_BLOB_API_VERSION_OVERRIDE || process.env.NEXT_PUBLIC_VERCEL_BLOB_API_VERSION_OVERRIDE;
+  } catch {
+  }
+  return `${versionOverride != null ? versionOverride : BLOB_API_VERSION}`;
+}
+function getRetries() {
+  try {
+    const retries = process.env.VERCEL_BLOB_RETRIES || "10";
+    return parseInt(retries, 10);
+  } catch {
+    return 10;
+  }
+}
+function createBlobServiceRateLimited(response) {
+  const retryAfter = response.headers.get("retry-after");
+  return new BlobServiceRateLimited(
+    retryAfter ? parseInt(retryAfter, 10) : void 0
+  );
+}
+async function getBlobError(response) {
+  var _a3, _b2, _c;
+  let code;
+  let message2;
+  try {
+    const data = await response.json();
+    code = (_b2 = (_a3 = data.error) == null ? void 0 : _a3.code) != null ? _b2 : "unknown_error";
+    message2 = (_c = data.error) == null ? void 0 : _c.message;
+  } catch {
+    code = "unknown_error";
+  }
+  if ((message2 == null ? void 0 : message2.includes("contentType")) && message2.includes("is not allowed")) {
+    code = "content_type_not_allowed";
+  }
+  if ((message2 == null ? void 0 : message2.includes('"pathname"')) && message2.includes("does not match the token payload")) {
+    code = "client_token_pathname_mismatch";
+  }
+  if (message2 === "Token expired") {
+    code = "client_token_expired";
+  }
+  if (message2 == null ? void 0 : message2.includes("the file length cannot be greater than")) {
+    code = "file_too_large";
+  }
+  if ((message2 == null ? void 0 : message2.startsWith("OIDC is enabled for this project, but not for the")) && message2.includes("environment.")) {
+    code = "oidc_environment_not_allowed";
+  }
+  let error46;
+  switch (code) {
+    case "store_suspended":
+      error46 = new BlobStoreSuspendedError();
+      break;
+    case "forbidden":
+      error46 = new BlobAccessError();
+      break;
+    case "oidc_environment_not_allowed":
+      error46 = new BlobOidcEnvironmentNotAllowedError(message2);
+      break;
+    case "content_type_not_allowed":
+      error46 = new BlobContentTypeNotAllowedError(message2);
+      break;
+    case "client_token_pathname_mismatch":
+      error46 = new BlobPathnameMismatchError(message2);
+      break;
+    case "client_token_expired":
+      error46 = new BlobClientTokenExpiredError();
+      break;
+    case "file_too_large":
+      error46 = new BlobFileTooLargeError(message2);
+      break;
+    case "not_found":
+      error46 = new BlobNotFoundError();
+      break;
+    case "client_token_not_allowed":
+      error46 = new BlobError(
+        message2 != null ? message2 : "This operation is not available when using a client token. Use a read\u2013write or OIDC token on the server."
+      );
+      break;
+    case "store_not_found":
+      error46 = new BlobStoreNotFoundError();
+      break;
+    case "bad_request":
+      error46 = new BlobError(message2 != null ? message2 : "Bad request");
+      break;
+    case "service_unavailable":
+      error46 = new BlobServiceNotAvailable();
+      break;
+    case "rate_limited":
+      error46 = createBlobServiceRateLimited(response);
+      break;
+    case "precondition_failed":
+      error46 = new BlobPreconditionFailedError();
+      break;
+    case "unknown_error":
+    case "not_allowed":
+    default:
+      error46 = new BlobUnknownError();
+      break;
+  }
+  return { code, error: error46 };
+}
+async function requestApi(pathname, init, commandOptions) {
+  const apiVersion = getApiVersion();
+  const auth = await resolveBlobAuth(commandOptions);
+  const bearerToken = auth.kind === "presigned" ? void 0 : auth.token;
+  const extraHeaders = getProxyThroughAlternativeApiHeaderFromEnv();
+  let requestInput = getApiUrl(pathname);
+  if (commandOptions == null ? void 0 : commandOptions.presignedUrlPayload) {
+    requestInput = addPresignedParams(
+      requestInput,
+      commandOptions.presignedUrlPayload
+    );
+  }
+  const requestId = `${auth.storeId}:${Date.now()}:${Math.random().toString(16).slice(2)}`;
+  let retryCount = 0;
+  let bodyLength = 0;
+  let totalLoaded = 0;
+  const sendBodyLength = (commandOptions == null ? void 0 : commandOptions.onUploadProgress) || shouldUseXContentLength();
+  if (init.body && // 1. For upload progress we always need to know the total size of the body
+  // 2. In development we need the header for put() to work correctly when passing a stream
+  sendBodyLength) {
+    bodyLength = computeBodyLength(init.body);
+  }
+  if (commandOptions == null ? void 0 : commandOptions.onUploadProgress) {
+    commandOptions.onUploadProgress({
+      loaded: 0,
+      total: bodyLength,
+      percentage: 0
+    });
+  }
+  const apiResponse = await (0, import_async_retry.default)(
+    async (bail) => {
+      let res;
+      try {
+        res = await blobRequest({
+          input: requestInput,
+          init: {
+            ...init,
+            headers: {
+              "x-api-blob-request-id": requestId,
+              // Store ID is not encoded in OIDC token, so pass it separately as a header
+              "x-vercel-blob-store-id": auth.storeId,
+              "x-api-blob-request-attempt": String(retryCount),
+              "x-api-version": apiVersion,
+              ...sendBodyLength ? { "x-content-length": String(bodyLength) } : {},
+              ...bearerToken !== void 0 ? { authorization: `Bearer ${bearerToken}` } : {},
+              ...extraHeaders,
+              ...init.headers
+            }
+          },
+          onUploadProgress: (commandOptions == null ? void 0 : commandOptions.onUploadProgress) ? (loaded) => {
+            var _a3;
+            const total = bodyLength !== 0 ? bodyLength : loaded;
+            totalLoaded = loaded;
+            const percentage = bodyLength > 0 ? Number((loaded / total * 100).toFixed(2)) : 0;
+            if (percentage === 100 && bodyLength > 0) {
+              return;
+            }
+            (_a3 = commandOptions.onUploadProgress) == null ? void 0 : _a3.call(commandOptions, {
+              loaded,
+              // When passing a stream to put(), we have no way to know the total size of the body.
+              // Instead of defining total as total?: number we decided to set the total to the currently
+              // loaded number. This is not inaccurate and way more practical for DX.
+              // Passing down a stream to put() is very rare
+              total,
+              percentage
+            });
+          } : void 0
+        });
+      } catch (error210) {
+        if (error210 instanceof DOMException2 && error210.name === "AbortError") {
+          bail(new BlobRequestAbortedError());
+          return;
+        }
+        if (isNetworkError(error210)) {
+          throw error210;
+        }
+        if (error210 instanceof TypeError) {
+          bail(error210);
+          return;
+        }
+        throw error210;
+      }
+      if (res.ok) {
+        return res;
+      }
+      const { code, error: error46 } = await getBlobError(res);
+      if (code === "unknown_error" || code === "service_unavailable" || code === "internal_server_error") {
+        throw error46;
+      }
+      bail(error46);
+    },
+    {
+      retries: getRetries(),
+      onRetry: (error46) => {
+        if (error46 instanceof Error) {
+          debug(`retrying API request to ${pathname}`, error46.message);
+        }
+        retryCount = retryCount + 1;
+      }
+    }
+  );
+  if (!apiResponse) {
+    throw new BlobUnknownError();
+  }
+  if (commandOptions == null ? void 0 : commandOptions.onUploadProgress) {
+    commandOptions.onUploadProgress({
+      loaded: totalLoaded,
+      total: totalLoaded,
+      percentage: 100
+    });
+  }
+  return await apiResponse.json();
+}
+function getProxyThroughAlternativeApiHeaderFromEnv() {
+  const extraHeaders = {};
+  try {
+    if ("VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API" in process.env && process.env.VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API !== void 0) {
+      extraHeaders["x-proxy-through-alternative-api"] = process.env.VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API;
+    } else if ("NEXT_PUBLIC_VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API" in process.env && process.env.NEXT_PUBLIC_VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API !== void 0) {
+      extraHeaders["x-proxy-through-alternative-api"] = process.env.NEXT_PUBLIC_VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API;
+    }
+  } catch {
+  }
+  return extraHeaders;
+}
+function shouldUseXContentLength() {
+  try {
+    return process.env.VERCEL_BLOB_USE_X_CONTENT_LENGTH === "1";
+  } catch {
+    return false;
+  }
+}
+function createPutHeaders(allowedOptions, options) {
+  const headers = {};
+  headers[putOptionHeaderMap.access] = options.access;
+  if (allowedOptions.includes("contentType") && options.contentType) {
+    headers[putOptionHeaderMap.contentType] = options.contentType;
+  }
+  if (allowedOptions.includes("addRandomSuffix") && options.addRandomSuffix !== void 0) {
+    headers[putOptionHeaderMap.addRandomSuffix] = options.addRandomSuffix ? "1" : "0";
+  }
+  if (allowedOptions.includes("ifMatch") && options.ifMatch) {
+    if (options.allowOverwrite === false) {
+      throw new BlobError(
+        "ifMatch and allowOverwrite: false are contradictory. ifMatch is used for conditional overwrites, which requires allowOverwrite to be true."
+      );
+    }
+    headers[putOptionHeaderMap.ifMatch] = options.ifMatch;
+    if (allowedOptions.includes("allowOverwrite") && options.allowOverwrite === void 0) {
+      headers[putOptionHeaderMap.allowOverwrite] = "1";
+    }
+  }
+  if (allowedOptions.includes("allowOverwrite") && options.allowOverwrite !== void 0) {
+    headers[putOptionHeaderMap.allowOverwrite] = options.allowOverwrite ? "1" : "0";
+  }
+  if (allowedOptions.includes("cacheControlMaxAge") && options.cacheControlMaxAge !== void 0) {
+    headers[putOptionHeaderMap.cacheControlMaxAge] = options.cacheControlMaxAge.toString();
+  }
+  return headers;
+}
+async function createPutOptions({
+  pathname,
+  options,
+  extraChecks,
+  getToken
+}) {
+  if (!pathname) {
+    throw new BlobError("pathname is required");
+  }
+  if (pathname.length > MAXIMUM_PATHNAME_LENGTH) {
+    throw new BlobError(
+      `pathname is too long, maximum length is ${MAXIMUM_PATHNAME_LENGTH}`
+    );
+  }
+  for (const invalidCharacter of disallowedPathnameCharacters) {
+    if (pathname.includes(invalidCharacter)) {
+      throw new BlobError(
+        `pathname cannot contain "${invalidCharacter}", please encode it if needed`
+      );
+    }
+  }
+  if (!options) {
+    throw new BlobError("missing options, see usage");
+  }
+  if (options.access !== "public" && options.access !== "private") {
+    throw new BlobError(
+      'access must be "private" or "public", see https://vercel.com/docs/vercel-blob'
+    );
+  }
+  if (extraChecks) {
+    extraChecks(options);
+  }
+  if (getToken) {
+    options.token = await getToken(pathname, options);
+  }
+  return options;
+}
+function createCompleteMultipartUploadMethod({ allowedOptions, getToken, extraChecks }) {
+  return async (pathname, parts, optionsInput) => {
+    const options = await createPutOptions({
+      pathname,
+      options: optionsInput,
+      extraChecks,
+      getToken
+    });
+    const headers = createPutHeaders(allowedOptions, options);
+    return completeMultipartUpload({
+      uploadId: options.uploadId,
+      key: options.key,
+      pathname,
+      headers,
+      options,
+      parts
+    });
+  };
+}
+async function completeMultipartUpload({
+  uploadId,
+  key,
+  pathname,
+  parts,
+  headers,
+  options
+}) {
+  const params = new URLSearchParams({ pathname });
+  try {
+    const response = await requestApi(
+      `/mpu?${params.toString()}`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "content-type": "application/json",
+          "x-mpu-action": "complete",
+          "x-mpu-upload-id": uploadId,
+          // key can be any utf8 character so we need to encode it as HTTP headers can only be us-ascii
+          // https://www.rfc-editor.org/rfc/rfc7230#swection-3.2.4
+          "x-mpu-key": encodeURIComponent(key)
+        },
+        body: JSON.stringify(parts),
+        signal: options.abortSignal
+      },
+      options
+    );
+    debug("mpu: complete", response);
+    return response;
+  } catch (error46) {
+    if (error46 instanceof TypeError && (error46.message === "Failed to fetch" || error46.message === "fetch failed")) {
+      throw new BlobServiceNotAvailable();
+    } else {
+      throw error46;
+    }
+  }
+}
+function createCreateMultipartUploadMethod({ allowedOptions, getToken, extraChecks }) {
+  return async (pathname, optionsInput) => {
+    const options = await createPutOptions({
+      pathname,
+      options: optionsInput,
+      extraChecks,
+      getToken
+    });
+    const headers = createPutHeaders(allowedOptions, options);
+    const createMultipartUploadResponse = await createMultipartUpload(
+      pathname,
+      headers,
+      options
+    );
+    return {
+      key: createMultipartUploadResponse.key,
+      uploadId: createMultipartUploadResponse.uploadId
+    };
+  };
+}
+async function createMultipartUpload(pathname, headers, options) {
+  debug("mpu: create", "pathname:", pathname);
+  const params = new URLSearchParams({ pathname });
+  try {
+    const response = await requestApi(
+      `/mpu?${params.toString()}`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "x-mpu-action": "create"
+        },
+        signal: options.abortSignal
+      },
+      options
+    );
+    debug("mpu: create", response);
+    return response;
+  } catch (error46) {
+    if (error46 instanceof TypeError && (error46.message === "Failed to fetch" || error46.message === "fetch failed")) {
+      throw new BlobServiceNotAvailable();
+    }
+    throw error46;
+  }
+}
+function createUploadPartMethod({ allowedOptions, getToken, extraChecks }) {
+  return async (pathname, body, optionsInput) => {
+    const options = await createPutOptions({
+      pathname,
+      options: optionsInput,
+      extraChecks,
+      getToken
+    });
+    const headers = createPutHeaders(allowedOptions, options);
+    if (isPlainObject2(body)) {
+      throw new BlobError(
+        "Body must be a string, buffer or stream. You sent a plain JavaScript object, double check what you're trying to upload."
+      );
+    }
+    const result = await uploadPart({
+      uploadId: options.uploadId,
+      key: options.key,
+      pathname,
+      part: { blob: body, partNumber: options.partNumber },
+      headers,
+      options
+    });
+    return {
+      etag: result.etag,
+      partNumber: options.partNumber
+    };
+  };
+}
+async function uploadPart({
+  uploadId,
+  key,
+  pathname,
+  headers,
+  options,
+  internalAbortController = new AbortController(),
+  part
+}) {
+  var _a3, _b2, _c;
+  const params = new URLSearchParams({ pathname });
+  const responsePromise = requestApi(
+    `/mpu?${params.toString()}`,
+    {
+      signal: internalAbortController.signal,
+      method: "POST",
+      headers: {
+        ...headers,
+        "x-mpu-action": "upload",
+        "x-mpu-key": encodeURIComponent(key),
+        "x-mpu-upload-id": uploadId,
+        "x-mpu-part-number": part.partNumber.toString()
+      },
+      // weird things between undici types and native fetch types
+      body: part.blob
+    },
+    options
+  );
+  function handleAbort() {
+    internalAbortController.abort();
+  }
+  if ((_a3 = options.abortSignal) == null ? void 0 : _a3.aborted) {
+    handleAbort();
+  } else {
+    (_b2 = options.abortSignal) == null ? void 0 : _b2.addEventListener("abort", handleAbort);
+  }
+  const response = await responsePromise;
+  (_c = options.abortSignal) == null ? void 0 : _c.removeEventListener("abort", handleAbort);
+  return response;
+}
+function uploadAllParts({
+  uploadId,
+  key,
+  pathname,
+  stream: stream4,
+  headers,
+  options,
+  totalToLoad
+}) {
+  debug("mpu: upload init", "key:", key);
+  const internalAbortController = new AbortController();
+  return new Promise((resolve, reject) => {
+    const partsToUpload = [];
+    const completedParts = [];
+    const reader = stream4.getReader();
+    let activeUploads = 0;
+    let reading = false;
+    let currentPartNumber = 1;
+    let rejected = false;
+    let currentBytesInMemory = 0;
+    let doneReading = false;
+    let bytesSent = 0;
+    let arrayBuffers = [];
+    let currentPartBytesRead = 0;
+    let onUploadProgress;
+    const totalLoadedPerPartNumber = {};
+    if (options.onUploadProgress) {
+      onUploadProgress = (0, import_throttleit.default)(() => {
+        var _a3;
+        const loaded = Object.values(totalLoadedPerPartNumber).reduce(
+          (acc, cur) => {
+            return acc + cur;
+          },
+          0
+        );
+        const total = totalToLoad || loaded;
+        const percentage = totalToLoad > 0 ? Number(((loaded / totalToLoad || loaded) * 100).toFixed(2)) : 0;
+        (_a3 = options.onUploadProgress) == null ? void 0 : _a3.call(options, { loaded, total, percentage });
+      }, 150);
+    }
+    read().catch(cancel);
+    async function read() {
+      debug(
+        "mpu: upload read start",
+        "activeUploads:",
+        activeUploads,
+        "currentBytesInMemory:",
+        `${bytes(currentBytesInMemory)}/${bytes(maxBytesInMemory)}`,
+        "bytesSent:",
+        bytes(bytesSent)
+      );
+      reading = true;
+      while (currentBytesInMemory < maxBytesInMemory && !rejected) {
+        try {
+          const { value, done } = await reader.read();
+          if (done) {
+            doneReading = true;
+            debug("mpu: upload read consumed the whole stream");
+            if (arrayBuffers.length > 0) {
+              partsToUpload.push({
+                partNumber: currentPartNumber++,
+                blob: new Blob(arrayBuffers, {
+                  type: "application/octet-stream"
+                })
+              });
+              sendParts();
+            } else if (activeUploads === 0) {
+              reader.releaseLock();
+              resolve(completedParts);
+            }
+            reading = false;
+            return;
+          }
+          currentBytesInMemory += value.byteLength;
+          let valueOffset = 0;
+          while (valueOffset < value.byteLength) {
+            const remainingPartSize = partSizeInBytes - currentPartBytesRead;
+            const endOffset = Math.min(
+              valueOffset + remainingPartSize,
+              value.byteLength
+            );
+            const chunk = value.slice(valueOffset, endOffset);
+            arrayBuffers.push(chunk);
+            currentPartBytesRead += chunk.byteLength;
+            valueOffset = endOffset;
+            if (currentPartBytesRead === partSizeInBytes) {
+              partsToUpload.push({
+                partNumber: currentPartNumber++,
+                blob: new Blob(arrayBuffers, {
+                  type: "application/octet-stream"
+                })
+              });
+              arrayBuffers = [];
+              currentPartBytesRead = 0;
+              sendParts();
+            }
+          }
+        } catch (error46) {
+          cancel(error46);
+        }
+      }
+      debug(
+        "mpu: upload read end",
+        "activeUploads:",
+        activeUploads,
+        "currentBytesInMemory:",
+        `${bytes(currentBytesInMemory)}/${bytes(maxBytesInMemory)}`,
+        "bytesSent:",
+        bytes(bytesSent)
+      );
+      reading = false;
+    }
+    async function sendPart(part) {
+      activeUploads++;
+      debug(
+        "mpu: upload send part start",
+        "partNumber:",
+        part.partNumber,
+        "size:",
+        part.blob.size,
+        "activeUploads:",
+        activeUploads,
+        "currentBytesInMemory:",
+        `${bytes(currentBytesInMemory)}/${bytes(maxBytesInMemory)}`,
+        "bytesSent:",
+        bytes(bytesSent)
+      );
+      try {
+        const uploadProgressForPart = options.onUploadProgress ? (event) => {
+          totalLoadedPerPartNumber[part.partNumber] = event.loaded;
+          if (onUploadProgress) {
+            onUploadProgress();
+          }
+        } : void 0;
+        const completedPart = await uploadPart({
+          uploadId,
+          key,
+          pathname,
+          headers,
+          options: {
+            ...options,
+            onUploadProgress: uploadProgressForPart
+          },
+          internalAbortController,
+          part
+        });
+        debug(
+          "mpu: upload send part end",
+          "partNumber:",
+          part.partNumber,
+          "activeUploads",
+          activeUploads,
+          "currentBytesInMemory:",
+          `${bytes(currentBytesInMemory)}/${bytes(maxBytesInMemory)}`,
+          "bytesSent:",
+          bytes(bytesSent)
+        );
+        if (rejected) {
+          return;
+        }
+        completedParts.push({
+          partNumber: part.partNumber,
+          etag: completedPart.etag
+        });
+        currentBytesInMemory -= part.blob.size;
+        activeUploads--;
+        bytesSent += part.blob.size;
+        if (partsToUpload.length > 0) {
+          sendParts();
+        }
+        if (doneReading) {
+          if (activeUploads === 0) {
+            reader.releaseLock();
+            resolve(completedParts);
+          }
+          return;
+        }
+        if (!reading) {
+          read().catch(cancel);
+        }
+      } catch (error46) {
+        cancel(error46);
+      }
+    }
+    function sendParts() {
+      if (rejected) {
+        return;
+      }
+      debug(
+        "send parts",
+        "activeUploads",
+        activeUploads,
+        "partsToUpload",
+        partsToUpload.length
+      );
+      while (activeUploads < maxConcurrentUploads && partsToUpload.length > 0) {
+        const partToSend = partsToUpload.shift();
+        if (partToSend) {
+          void sendPart(partToSend);
+        }
+      }
+    }
+    function cancel(error46) {
+      if (rejected) {
+        return;
+      }
+      rejected = true;
+      internalAbortController.abort();
+      reader.releaseLock();
+      if (error46 instanceof TypeError && (error46.message === "Failed to fetch" || error46.message === "fetch failed")) {
+        reject(new BlobServiceNotAvailable());
+      } else {
+        reject(error46);
+      }
+    }
+  });
+}
+function createCreateMultipartUploaderMethod({ allowedOptions, getToken, extraChecks }) {
+  return async (pathname, optionsInput) => {
+    const options = await createPutOptions({
+      pathname,
+      options: optionsInput,
+      extraChecks,
+      getToken
+    });
+    const headers = createPutHeaders(allowedOptions, options);
+    const createMultipartUploadResponse = await createMultipartUpload(
+      pathname,
+      headers,
+      options
+    );
+    return {
+      key: createMultipartUploadResponse.key,
+      uploadId: createMultipartUploadResponse.uploadId,
+      async uploadPart(partNumber, body) {
+        if (isPlainObject2(body)) {
+          throw new BlobError(
+            "Body must be a string, buffer or stream. You sent a plain JavaScript object, double check what you're trying to upload."
+          );
+        }
+        const result = await uploadPart({
+          uploadId: createMultipartUploadResponse.uploadId,
+          key: createMultipartUploadResponse.key,
+          pathname,
+          part: { partNumber, blob: body },
+          headers,
+          options
+        });
+        return {
+          etag: result.etag,
+          partNumber
+        };
+      },
+      async complete(parts) {
+        return completeMultipartUpload({
+          uploadId: createMultipartUploadResponse.uploadId,
+          key: createMultipartUploadResponse.key,
+          pathname,
+          parts,
+          headers,
+          options
+        });
+      }
+    };
+  };
+}
+async function uncontrolledMultipartUpload(pathname, body, headers, options) {
+  debug("mpu: init", "pathname:", pathname, "headers:", headers);
+  const optionsWithoutOnUploadProgress = {
+    ...options,
+    onUploadProgress: void 0
+  };
+  if (options.maximumSizeInBytes !== void 0 && !isStream(body) && computeBodyLength(body) > options.maximumSizeInBytes) {
+    throw new BlobError(
+      `Body size of ${computeBodyLength(body)} bytes exceeds the maximum allowed size of ${options.maximumSizeInBytes} bytes`
+    );
+  }
+  const createMultipartUploadResponse = await createMultipartUpload(
+    pathname,
+    headers,
+    optionsWithoutOnUploadProgress
+  );
+  const totalToLoad = computeBodyLength(body);
+  const stream4 = await toReadableStream(body);
+  const parts = await uploadAllParts({
+    uploadId: createMultipartUploadResponse.uploadId,
+    key: createMultipartUploadResponse.key,
+    pathname,
+    // @ts-expect-error ReadableStream<ArrayBuffer | Uint8Array> is compatible at runtime
+    stream: stream4,
+    headers,
+    options,
+    totalToLoad
+  });
+  const blob = await completeMultipartUpload({
+    uploadId: createMultipartUploadResponse.uploadId,
+    key: createMultipartUploadResponse.key,
+    pathname,
+    parts,
+    headers,
+    options: optionsWithoutOnUploadProgress
+  });
+  return blob;
+}
+function createPutMethod({
+  allowedOptions,
+  getToken,
+  getPresignedUrlPayload,
+  extraChecks
+}) {
+  return async function put2(pathname, body, optionsInput) {
+    if (!body) {
+      throw new BlobError("body is required");
+    }
+    if (isPlainObject2(body)) {
+      throw new BlobError(
+        "Body must be a string, buffer or stream. You sent a plain JavaScript object, double check what you're trying to upload."
+      );
+    }
+    const options = await createPutOptions({
+      pathname,
+      options: optionsInput,
+      extraChecks,
+      getToken
+    });
+    const presignedUrlPayload = await (getPresignedUrlPayload == null ? void 0 : getPresignedUrlPayload(
+      pathname,
+      options
+    ));
+    const optionsWithPresignedUrlPayload = {
+      ...options,
+      presignedUrlPayload
+    };
+    const headers = createPutHeaders(allowedOptions, options);
+    if (options.multipart === true) {
+      return uncontrolledMultipartUpload(
+        pathname,
+        body,
+        headers,
+        optionsWithPresignedUrlPayload
+      );
+    }
+    const onUploadProgress = options.onUploadProgress ? (0, import_throttleit2.default)(options.onUploadProgress, 100) : void 0;
+    const params = new URLSearchParams({ pathname });
+    const response = await requestApi(
+      `/?${params.toString()}`,
+      {
+        method: "PUT",
+        body,
+        headers,
+        signal: options.abortSignal
+      },
+      {
+        ...optionsWithPresignedUrlPayload,
+        onUploadProgress
+      }
+    );
+    return {
+      url: response.url,
+      downloadUrl: response.downloadUrl,
+      pathname: response.pathname,
+      contentType: response.contentType,
+      contentDisposition: response.contentDisposition,
+      etag: response.etag
+    };
+  };
+}
+function contentTypeAllowedByList(contentType, allowed) {
+  const [type] = contentType.split("/");
+  const wildcard = `${type}/*`;
+  return allowed.includes(contentType) || (type ? allowed.includes(wildcard) : false);
+}
+function assertAllowedContentTypesSubset(optionsTypes, delegationTypes, label) {
+  if (!(optionsTypes == null ? void 0 : optionsTypes.length)) {
+    return;
+  }
+  if (!(delegationTypes == null ? void 0 : delegationTypes.length)) {
+    return;
+  }
+  for (const ct of optionsTypes) {
+    if (!contentTypeAllowedByList(ct, delegationTypes)) {
+      throw new Error(
+        `${label}: allowedContentTypes entry "${ct}" is not permitted by the delegation token.`
+      );
+    }
+  }
+}
+function assertNumberSubset(name, optionVal, delegationVal, label, mode) {
+  if (optionVal === void 0) {
+    return;
+  }
+  if (delegationVal === void 0) {
+    return;
+  }
+  if (mode === "lte" && optionVal > delegationVal) {
+    throw new Error(
+      `${label}: ${name} must be \u2264 delegation (${String(delegationVal)}).`
+    );
+  }
+}
+function isPlausibleAbsoluteUrl(s) {
+  if (typeof URL !== "undefined" && typeof URL.canParse === "function") {
+    return URL.canParse(s);
+  }
+  try {
+    new URL(s);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function validatePresignUrlOnUploadCompletedWire(opt, label) {
+  if (!opt) {
+    return;
+  }
+  if (typeof opt.callbackUrl !== "string" || opt.callbackUrl.length === 0) {
+    throw new Error(
+      `${label}: onUploadCompleted.callbackUrl must be a non-empty string.`
+    );
+  }
+  if (opt.callbackUrl.length > MAX_PRESIGN_CALLBACK_URL_CHARS) {
+    throw new Error(`${label}: onUploadCompleted.callbackUrl is too long.`);
+  }
+  if (!isPlausibleAbsoluteUrl(opt.callbackUrl)) {
+    throw new Error(
+      `${label}: onUploadCompleted.callbackUrl must be a valid URL.`
+    );
+  }
+  if (opt.tokenPayload !== void 0 && opt.tokenPayload !== null) {
+    if (typeof opt.tokenPayload !== "string") {
+      throw new Error(
+        `${label}: onUploadCompleted.tokenPayload must be a string.`
+      );
+    }
+    if (opt.tokenPayload.length > MAX_PRESIGN_CALLBACK_TOKEN_PAYLOAD_CHARS) {
+      throw new Error(`${label}: onUploadCompleted.tokenPayload is too long.`);
+    }
+  }
+}
+function validateUrlOnlyPresignUploadOptions(urlOptions, label) {
+  if (urlOptions.cacheControlMaxAge !== void 0) {
+    const n = urlOptions.cacheControlMaxAge;
+    if (!Number.isInteger(n) || n < 0 || n > MAX_PRESIGN_CACHE_CONTROL_MAX_AGE_SECONDS) {
+      throw new Error(
+        `${label}: cacheControlMaxAge must be an integer between 0 and ${MAX_PRESIGN_CACHE_CONTROL_MAX_AGE_SECONDS}.`
+      );
+    }
+  }
+  if (urlOptions.ifMatch !== void 0) {
+    const im = urlOptions.ifMatch;
+    if (typeof im !== "string" || im.length === 0) {
+      throw new Error(`${label}: ifMatch must be a non-empty string.`);
+    }
+    if (im.length > MAX_PRESIGN_IF_MATCH_LENGTH) {
+      throw new Error(`${label}: ifMatch is too long.`);
+    }
+    if (IF_MATCH_CONTROL_CHARS_RE.test(im)) {
+      throw new Error(
+        `${label}: ifMatch contains disallowed control characters.`
+      );
+    }
+  }
+}
+function sortedContentTypesCsv(types) {
+  return [...types].sort((a, b) => a < b ? -1 : a > b ? 1 : 0).join(",");
+}
+function resolvePresignUrlValidUntilMs(args) {
+  const { delegationValidUntil, urlOptions, nowMs } = args;
+  let t2;
+  if ((urlOptions == null ? void 0 : urlOptions.validUntil) !== void 0) {
+    if (typeof urlOptions.validUntil !== "number" || !Number.isFinite(urlOptions.validUntil)) {
+      throw new Error("presignUrl: validUntil must be a finite number (ms).");
+    }
+    t2 = Math.trunc(urlOptions.validUntil);
+  } else {
+    t2 = Math.trunc(delegationValidUntil);
+  }
+  if (Number.isFinite(delegationValidUntil)) {
+    t2 = Math.min(t2, Math.trunc(delegationValidUntil));
+  }
+  if (t2 <= nowMs) {
+    throw new Error(
+      "presignUrl: resolved URL expiry is not after the current time; issue a new delegation token or pass a later validUntil."
+    );
+  }
+  return t2;
+}
+function buildPresignCanonicalQueryEntries(args) {
+  const { operation, delegation, urlOptions, nowMs } = args;
+  const label = "presignUrl";
+  const resolvedUntil = resolvePresignUrlValidUntilMs({
+    delegationValidUntil: delegation.validUntil,
+    urlOptions,
+    nowMs
+  });
+  const delegUntil = Math.trunc(delegation.validUntil);
+  const entries = [];
+  if (resolvedUntil < delegUntil) {
+    entries.push([BLOB_PRESIGN_QUERY_VALID_UNTIL, String(resolvedUntil)]);
+  }
+  if (operation === "delete") {
+    if ((urlOptions == null ? void 0 : urlOptions.ifMatch) !== void 0) {
+      entries.push([BLOB_PRESIGN_QUERY_IF_MATCH, urlOptions.ifMatch]);
+    }
+    return entries;
+  }
+  if (operation !== "put" || !urlOptions) {
+    return entries;
+  }
+  assertAllowedContentTypesSubset(
+    urlOptions.allowedContentTypes,
+    delegation.allowedContentTypes,
+    label
+  );
+  assertNumberSubset(
+    "maximumSizeInBytes",
+    urlOptions.maximumSizeInBytes,
+    delegation.maximumSizeInBytes,
+    label,
+    "lte"
+  );
+  validateUrlOnlyPresignUploadOptions(urlOptions, label);
+  validatePresignUrlOnUploadCompletedWire(urlOptions.onUploadCompleted, label);
+  if (urlOptions.allowedContentTypes !== void 0) {
+    const csv = sortedContentTypesCsv(urlOptions.allowedContentTypes);
+    if (csv.length > 16384) {
+      throw new Error(`${label}: allowedContentTypes query value is too long.`);
+    }
+    entries.push([BLOB_PRESIGN_QUERY_ALLOWED_CONTENT_TYPES, csv]);
+  }
+  if (urlOptions.maximumSizeInBytes !== void 0) {
+    entries.push([
+      BLOB_PRESIGN_QUERY_MAXIMUM_SIZE,
+      String(Math.trunc(urlOptions.maximumSizeInBytes))
+    ]);
+  }
+  if (urlOptions.addRandomSuffix !== void 0) {
+    entries.push([
+      BLOB_PRESIGN_QUERY_ADD_RANDOM_SUFFIX,
+      urlOptions.addRandomSuffix ? "true" : "false"
+    ]);
+  }
+  if (urlOptions.allowOverwrite !== void 0) {
+    entries.push([
+      BLOB_PRESIGN_QUERY_ALLOW_OVERWRITE,
+      urlOptions.allowOverwrite ? "true" : "false"
+    ]);
+  }
+  if (urlOptions.cacheControlMaxAge !== void 0) {
+    entries.push([
+      BLOB_PRESIGN_QUERY_CACHE_CONTROL_MAX_AGE,
+      String(Math.trunc(urlOptions.cacheControlMaxAge))
+    ]);
+  }
+  if (urlOptions.ifMatch !== void 0) {
+    entries.push([BLOB_PRESIGN_QUERY_IF_MATCH, urlOptions.ifMatch]);
+  }
+  if (urlOptions.onUploadCompleted !== void 0) {
+    const { callbackUrl, tokenPayload } = urlOptions.onUploadCompleted;
+    if (callbackUrl.length > MAX_PRESIGN_CALLBACK_URL_CHARS) {
+      throw new Error(`${label}: onUploadCompleted.callbackUrl is too long.`);
+    }
+    entries.push([BLOB_PRESIGN_QUERY_CALLBACK_URL, callbackUrl]);
+    if (tokenPayload !== void 0 && tokenPayload !== null && tokenPayload !== "") {
+      if (tokenPayload.length > MAX_PRESIGN_CALLBACK_TOKEN_PAYLOAD_CHARS) {
+        throw new Error(
+          `${label}: onUploadCompleted.tokenPayload is too long.`
+        );
+      }
+      entries.push([BLOB_PRESIGN_QUERY_CALLBACK_TOKEN_PAYLOAD, tokenPayload]);
+    }
+  }
+  return entries;
+}
+function assertIssueSignedTokenValidUntilOption(validUntil) {
+  const now = Date.now();
+  if (typeof validUntil !== "number" || !Number.isInteger(validUntil) || !Number.isFinite(validUntil)) {
+    throw new BlobError(
+      "`issueSignedToken`: validUntil must be an integer milliseconds timestamp."
+    );
+  }
+  if (validUntil <= now) {
+    throw new BlobError(
+      "`issueSignedToken`: validUntil must be in the future."
+    );
+  }
+}
+async function issueSignedToken(options) {
+  if (!options) {
+    throw new BlobError("`issueSignedToken` requires an options object");
+  }
+  const body = {};
+  if (options.pathname !== void 0) {
+    body.pathname = options.pathname;
+  }
+  if (options.operations !== void 0) {
+    if (options.operations.length === 0) {
+      throw new BlobError("`operations` must be a non-empty array if provided");
+    }
+    body.operations = dedupeOps(options.operations);
+  }
+  if (options.validUntil !== void 0) {
+    assertIssueSignedTokenValidUntilOption(options.validUntil);
+    body.validUntil = options.validUntil;
+  }
+  if (options.maximumSizeInBytes !== void 0) {
+    body.maximumSizeInBytes = options.maximumSizeInBytes;
+  }
+  if (options.allowedContentTypes !== void 0) {
+    body.allowedContentTypes = options.allowedContentTypes;
+  }
+  return requestApi(
+    "/signed-token",
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+      signal: options.abortSignal
+    },
+    options
+  );
+}
+function dedupeOps(operations) {
+  return Array.from(new Set(operations));
+}
+function base64UrlDecodeToString(segment) {
+  let base643 = segment.replace(/-/g, "+").replace(/_/g, "/");
+  const padding = 4 - base643.length % 4;
+  if (padding !== 4) {
+    base643 += "=".repeat(padding);
+  }
+  if (typeof atob === "function") {
+    return atob(base643);
+  }
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(base643, "base64").toString("utf8");
+  }
+  throw new BlobError("Cannot decode base64: no atob or Buffer available.");
+}
+function tryDecodePayload(delegationToken) {
+  const dot = delegationToken.indexOf(".");
+  if (dot < 0) {
+    return null;
+  }
+  const payloadSeg = delegationToken.slice(0, dot);
+  try {
+    return JSON.parse(
+      base64UrlDecodeToString(payloadSeg)
+    );
+  } catch {
+    return null;
+  }
+}
+function uint8ToBase64(bytes2) {
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(
+      bytes2.buffer,
+      bytes2.byteOffset,
+      bytes2.byteLength
+    ).toString("base64");
+  }
+  let s = "";
+  for (let i = 0; i < bytes2.length; i++) {
+    s += String.fromCharCode(bytes2[i]);
+  }
+  return btoa(s);
+}
+async function hmacSha256Base64Url(key, data) {
+  var _a3;
+  if (!((_a3 = globalThis.crypto) == null ? void 0 : _a3.subtle)) {
+    throw new BlobError(
+      "HMAC is not available: expected globalThis.crypto.subtle (Node 20+ or a modern browser)."
+    );
+  }
+  const enc = new TextEncoder();
+  const cryptoKey = await globalThis.crypto.subtle.importKey(
+    "raw",
+    enc.encode(key),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const buf = await globalThis.crypto.subtle.sign(
+    "HMAC",
+    cryptoKey,
+    enc.encode(data)
+  );
+  return toBase64Url(uint8ToBase64(new Uint8Array(buf)));
+}
+function toBase64Url(base643) {
+  return base643.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+async function presign(signedToken, options) {
+  var _a3, _b2, _c, _d;
+  if (!(signedToken == null ? void 0 : signedToken.clientSigningToken) || !(signedToken == null ? void 0 : signedToken.delegationToken)) {
+    throw new BlobError(
+      "`clientSigningToken` and `delegationToken` from `issueSignedToken` are required."
+    );
+  }
+  const scope = tryDecodePayload(signedToken.delegationToken);
+  if (!scope) {
+    throw new BlobError("Invalid or unreadable `delegationToken` payload.");
+  }
+  const p = scope.pathname;
+  if (p && p !== "*") {
+    if (options.pathname !== p) {
+      throw new BlobError(
+        `Blob path does not match the signed token scope; expected \`${p}\`, got \`${options.pathname}\`.`
+      );
+    }
+  }
+  if (Number.isFinite(scope.validUntil) && Date.now() > scope.validUntil) {
+    throw new BlobError(
+      "The signed delegation has expired; issue a new token first."
+    );
+  }
+  if (options.operation === "get" && !((_a3 = scope.operations) == null ? void 0 : _a3.includes("get"))) {
+    throw new BlobError(
+      'The delegation token is not valid for `GET` requests. Include `"get"` in `operations` when calling `issueSignedToken`.'
+    );
+  }
+  if (options.operation === "head" && !((_b2 = scope.operations) == null ? void 0 : _b2.includes("head"))) {
+    throw new BlobError(
+      'The delegation token is not valid for `HEAD` requests. Include `"head"` in `operations` when calling `issueSignedToken`.'
+    );
+  }
+  if (options.operation === "put" && !((_c = scope.operations) == null ? void 0 : _c.includes("put"))) {
+    throw new BlobError(
+      'The delegation token is not valid for presigned write requests. Include `"put"` in `operations` when calling `issueSignedToken`.'
+    );
+  }
+  if (options.operation === "delete" && !((_d = scope.operations) == null ? void 0 : _d.includes("delete"))) {
+    throw new BlobError(
+      'The delegation token is not valid for presigned delete requests. Include `"delete"` in `operations` when calling `issueSignedToken`.'
+    );
+  }
+  const delegationForOptions = {
+    validUntil: scope.validUntil,
+    maximumSizeInBytes: scope.maximumSizeInBytes,
+    allowedContentTypes: scope.allowedContentTypes
+  };
+  let presignEntries;
+  try {
+    presignEntries = buildPresignCanonicalQueryEntries({
+      operation: options.operation,
+      delegation: delegationForOptions,
+      urlOptions: options,
+      nowMs: Date.now()
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new BlobError(msg);
+  }
+  const canonical = canonicalString(
+    options.pathname,
+    presignEntries,
+    options.operation
+  );
+  const signature = await hmacSha256Base64Url(
+    signedToken.clientSigningToken,
+    canonical
+  );
+  return {
+    delegationToken: signedToken.delegationToken,
+    signature,
+    params: Object.fromEntries(presignEntries)
+  };
+}
+function buildPresignedGetUrl(pathnameOrUrl, presignedUrlPayload, options) {
+  const storeId = parseStoreIdFromDelegationToken(
+    presignedUrlPayload.delegationToken
+  );
+  const blobUrl = isUrl(pathnameOrUrl) ? pathnameOrUrl : constructBlobUrl(storeId, pathnameOrUrl, options.access);
+  return addPresignedParams(blobUrl, presignedUrlPayload);
+}
+function buildPresignedPutUrl(pathname, presignedUrlPayload) {
+  const params = new URLSearchParams({ pathname });
+  const apiUrl = getApiUrl(`/?${params.toString()}`);
+  return addPresignedParams(apiUrl, presignedUrlPayload);
+}
+function buildPresignedDeleteUrl(pathname, presignedUrlPayload) {
+  const params = new URLSearchParams({ pathname });
+  const apiUrl = getApiUrl(`/?${params.toString()}`);
+  return addPresignedParams(apiUrl, presignedUrlPayload);
+}
+async function presignUrl(signedToken, options) {
+  const payload = await presign(signedToken, options);
+  if (options.operation === "get" || options.operation === "head") {
+    return {
+      presignedUrl: buildPresignedGetUrl(options.pathname, payload, options)
+    };
+  }
+  if (options.operation === "put") {
+    return {
+      presignedUrl: buildPresignedPutUrl(options.pathname, payload)
+    };
+  }
+  if (options.operation === "delete") {
+    return {
+      presignedUrl: buildPresignedDeleteUrl(options.pathname, payload)
+    };
+  }
+  throw new BlobError(`Unknown operation`);
+}
+function canonicalString(pathname, presignEntries, operation) {
+  var _a3;
+  const lines = [`operation=${operation}`, `pathname=${pathname}`];
+  for (const k of PRESIGN_CANONICAL_QUERY_KEYS) {
+    const v = (_a3 = presignEntries.find(([key]) => key === k)) == null ? void 0 : _a3[1];
+    if (v) {
+      lines.push(`${k}=${v}`);
+    }
+  }
+  lines.sort((a, b) => compareUtf8(a, b));
+  return lines.join("\n");
+}
+function compareUtf8(a, b) {
+  const ab = utf8Encoder.encode(a);
+  const bb = utf8Encoder.encode(b);
+  const n = Math.min(ab.length, bb.length);
+  for (let i = 0; i < n; i++) {
+    const d = ab[i] - bb[i];
+    if (d !== 0) {
+      return d;
+    }
+  }
+  return ab.length - bb.length;
+}
+async function createFolder(pathname, options = { access: "public" }) {
+  var _a3;
+  const access = (_a3 = options.access) != null ? _a3 : "public";
+  const folderPathname = pathname.endsWith("/") ? pathname : `${pathname}/`;
+  const headers = {};
+  headers[putOptionHeaderMap.access] = access;
+  headers[putOptionHeaderMap.addRandomSuffix] = "0";
+  const params = new URLSearchParams({ pathname: folderPathname });
+  const response = await requestApi(
+    `/?${params.toString()}`,
+    {
+      method: "PUT",
+      headers,
+      signal: options.abortSignal
+    },
+    options
+  );
+  return {
+    url: response.url,
+    pathname: response.pathname
+  };
+}
+var import_is_buffer, import_stream, import_oidc, import_async_retry, import_undici, import_throttleit, import_throttleit2, supportsNewBlobFromArrayBuffer, parseRegExp, map, defaultVercelBlobApiUrl, BlobError, disallowedPathnameCharacters, supportsRequestStreams, TEXT_ENCODER, createChunkTransformStream, addPresignedParams, debugIsActive, _a, _b, _a2, DOMException2, objectToString, isError, errorMessages, hasFetch, hasFetchWithUploadProgress, CHUNK_SIZE, blobFetch, hasXhr, blobXhr, blobRequest, MAXIMUM_PATHNAME_LENGTH, BlobAccessError, BlobOidcEnvironmentNotAllowedError, BlobContentTypeNotAllowedError, BlobPathnameMismatchError, BlobClientTokenExpiredError, BlobFileTooLargeError, BlobStoreNotFoundError, BlobStoreSuspendedError, BlobUnknownError, BlobNotFoundError, BlobServiceNotAvailable, BlobServiceRateLimited, BlobRequestAbortedError, BlobPreconditionFailedError, BLOB_API_VERSION, putOptionHeaderMap, maxConcurrentUploads, partSizeInBytes, maxBytesInMemory, BLOB_PRESIGN_QUERY_VALID_UNTIL, BLOB_PRESIGN_QUERY_MAXIMUM_SIZE, BLOB_PRESIGN_QUERY_ALLOWED_CONTENT_TYPES, BLOB_PRESIGN_QUERY_ADD_RANDOM_SUFFIX, BLOB_PRESIGN_QUERY_ALLOW_OVERWRITE, BLOB_PRESIGN_QUERY_CACHE_CONTROL_MAX_AGE, BLOB_PRESIGN_QUERY_IF_MATCH, BLOB_PRESIGN_QUERY_CALLBACK_URL, BLOB_PRESIGN_QUERY_CALLBACK_TOKEN_PAYLOAD, PRESIGN_CANONICAL_QUERY_KEYS, MAX_PRESIGN_CALLBACK_URL_CHARS, MAX_PRESIGN_CALLBACK_TOKEN_PAYLOAD_CHARS, MAX_PRESIGN_CACHE_CONTROL_MAX_AGE_SECONDS, MAX_PRESIGN_IF_MATCH_LENGTH, IF_MATCH_CONTROL_CHARS_RE, utf8Encoder;
+var init_chunk_UVSKRCEW = __esm({
+  "node_modules/.pnpm/@vercel+blob@2.6.0/node_modules/@vercel/blob/dist/chunk-UVSKRCEW.js"() {
+    init_lib();
+    import_is_buffer = __toESM(require_is_buffer(), 1);
+    import_stream = require("stream");
+    import_oidc = __toESM(require_dist3(), 1);
+    import_async_retry = __toESM(require_lib6(), 1);
+    import_undici = __toESM(require_undici(), 1);
+    import_throttleit = __toESM(require_throttleit(), 1);
+    import_throttleit2 = __toESM(require_throttleit(), 1);
+    supportsNewBlobFromArrayBuffer = new Promise((resolve) => {
+      try {
+        const helloAsArrayBuffer = new Uint8Array([104, 101, 108, 108, 111]);
+        const blob = new Blob([helloAsArrayBuffer]);
+        blob.text().then((text) => {
+          resolve(text === "hello");
+        }).catch(() => {
+          resolve(false);
+        });
+      } catch {
+        resolve(false);
+      }
+    });
+    parseRegExp = /^((-|\+)?(\d+(?:\.\d+)?)) *(kb|mb|gb|tb|pb)$/i;
+    map = {
+      b: 1,
+      kb: 1 << 10,
+      mb: 1 << 20,
+      gb: 1 << 30,
+      tb: 1024 ** 4,
+      pb: 1024 ** 5
+    };
+    defaultVercelBlobApiUrl = "https://vercel.com/api/blob";
+    BlobError = class extends Error {
+      constructor(message2) {
+        super(`Vercel Blob: ${message2}`);
+      }
+    };
+    disallowedPathnameCharacters = ["//"];
+    supportsRequestStreams = (() => {
+      if (isNodeProcess()) {
+        return true;
+      }
+      const apiUrl = getApiUrl();
+      if (apiUrl.startsWith("http://localhost")) {
+        return false;
+      }
+      let duplexAccessed = false;
+      const hasContentType = new Request(getApiUrl(), {
+        body: new ReadableStream(),
+        method: "POST",
+        // @ts-expect-error -- TypeScript doesn't yet have duplex but it's in the spec: https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1729
+        get duplex() {
+          duplexAccessed = true;
+          return "half";
+        }
+      }).headers.has("Content-Type");
+      return duplexAccessed && !hasContentType;
+    })();
+    TEXT_ENCODER = typeof TextEncoder === "function" ? new TextEncoder() : null;
+    createChunkTransformStream = (chunkSize, onProgress) => {
+      let buffer = new Uint8Array(0);
+      return new TransformStream({
+        transform(chunk, controller) {
+          const newBuffer = new Uint8Array(buffer.length + chunk.byteLength);
+          newBuffer.set(buffer);
+          newBuffer.set(new Uint8Array(chunk), buffer.length);
+          buffer = newBuffer;
+          while (buffer.length >= chunkSize) {
+            const newChunk = buffer.slice(0, chunkSize);
+            controller.enqueue(newChunk);
+            onProgress == null ? void 0 : onProgress(newChunk.byteLength);
+            buffer = buffer.slice(chunkSize);
+          }
+        },
+        flush(controller) {
+          if (buffer.length > 0) {
+            controller.enqueue(buffer);
+            onProgress == null ? void 0 : onProgress(buffer.byteLength);
+          }
+        }
+      });
+    };
+    addPresignedParams = (url3, presignedUrlPayload) => {
+      const urlObj = new URL(url3);
+      for (const [key, value] of Object.entries(presignedUrlPayload.params)) {
+        urlObj.searchParams.set(key, value);
+      }
+      urlObj.searchParams.set(
+        "vercel-blob-delegation",
+        presignedUrlPayload.delegationToken
+      );
+      urlObj.searchParams.set(
+        "vercel-blob-signature",
+        presignedUrlPayload.signature
+      );
+      return urlObj.toString();
+    };
+    debugIsActive = false;
+    try {
+      if (((_a = process.env.DEBUG) == null ? void 0 : _a.includes("blob")) || ((_b = process.env.NEXT_PUBLIC_DEBUG) == null ? void 0 : _b.includes("blob"))) {
+        debugIsActive = true;
+      }
+    } catch {
+    }
+    DOMException2 = (_a2 = globalThis.DOMException) != null ? _a2 : (() => {
+      try {
+        atob("~");
+      } catch (err) {
+        return Object.getPrototypeOf(err).constructor;
+      }
+    })();
+    objectToString = Object.prototype.toString;
+    isError = (value) => objectToString.call(value) === "[object Error]";
+    errorMessages = /* @__PURE__ */ new Set([
+      "network error",
+      // Chrome
+      "Failed to fetch",
+      // Chrome
+      "NetworkError when attempting to fetch resource.",
+      // Firefox
+      "The Internet connection appears to be offline.",
+      // Safari 16
+      "Load failed",
+      // Safari 17+
+      "Network request failed",
+      // `cross-fetch`
+      "fetch failed",
+      // Undici (Node.js)
+      "terminated"
+      // Undici (Node.js)
+    ]);
+    hasFetch = typeof import_undici.fetch === "function";
+    hasFetchWithUploadProgress = hasFetch && supportsRequestStreams;
+    CHUNK_SIZE = 64 * 1024;
+    blobFetch = async ({
+      input,
+      init,
+      onUploadProgress
+    }) => {
+      debug("using fetch");
+      let body;
+      if (init.body) {
+        if (onUploadProgress) {
+          const stream4 = await toReadableStream(init.body);
+          let loaded = 0;
+          const chunkTransformStream = createChunkTransformStream(
+            CHUNK_SIZE,
+            (newLoaded) => {
+              loaded += newLoaded;
+              onUploadProgress(loaded);
+            }
+          );
+          body = stream4.pipeThrough(chunkTransformStream);
+        } else {
+          body = init.body;
+        }
+      }
+      const duplex = supportsRequestStreams && body && isStream(body) ? "half" : void 0;
+      return (0, import_undici.fetch)(
+        input,
+        // @ts-expect-error -- Blob and Nodejs Blob are triggering type errors, fine with it
+        {
+          ...init,
+          ...init.body ? { body } : {},
+          duplex
+        }
+      );
+    };
+    hasXhr = typeof XMLHttpRequest !== "undefined";
+    blobXhr = async ({
+      input,
+      init,
+      onUploadProgress
+    }) => {
+      debug("using xhr");
+      let body = null;
+      if (init.body) {
+        if (isReadableStream(init.body)) {
+          body = await new Response(init.body).blob();
+        } else {
+          body = init.body;
+        }
+      }
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(init.method || "GET", input.toString(), true);
+        if (onUploadProgress) {
+          xhr.upload.addEventListener("progress", (event) => {
+            if (event.lengthComputable) {
+              onUploadProgress(event.loaded);
+            }
+          });
+        }
+        xhr.onload = () => {
+          var _a3;
+          if ((_a3 = init.signal) == null ? void 0 : _a3.aborted) {
+            reject(new DOMException("The user aborted the request.", "AbortError"));
+            return;
+          }
+          const headers = new Headers();
+          const rawHeaders = xhr.getAllResponseHeaders().trim().split(/[\r\n]+/);
+          rawHeaders.forEach((line) => {
+            const parts = line.split(": ");
+            const key = parts.shift();
+            const value = parts.join(": ");
+            if (key) headers.set(key.toLowerCase(), value);
+          });
+          const response = new Response(xhr.response, {
+            status: xhr.status,
+            statusText: xhr.statusText,
+            headers
+          });
+          resolve(response);
+        };
+        xhr.onerror = () => {
+          reject(new TypeError("Network request failed"));
+        };
+        xhr.ontimeout = () => {
+          reject(new TypeError("Network request timed out"));
+        };
+        xhr.onabort = () => {
+          reject(new DOMException("The user aborted a request.", "AbortError"));
+        };
+        if (init.headers) {
+          const headers = new Headers(init.headers);
+          headers.forEach((value, key) => {
+            xhr.setRequestHeader(key, value);
+          });
+        }
+        if (init.signal) {
+          init.signal.addEventListener("abort", () => {
+            xhr.abort();
+          });
+          if (init.signal.aborted) {
+            xhr.abort();
+            return;
+          }
+        }
+        xhr.send(body);
+      });
+    };
+    blobRequest = async ({
+      input,
+      init,
+      onUploadProgress
+    }) => {
+      if (onUploadProgress) {
+        if (hasFetchWithUploadProgress) {
+          return blobFetch({ input, init, onUploadProgress });
+        }
+        if (hasXhr) {
+          return blobXhr({ input, init, onUploadProgress });
+        }
+      }
+      if (hasFetch) {
+        return blobFetch({ input, init });
+      }
+      if (hasXhr) {
+        return blobXhr({ input, init });
+      }
+      throw new Error("No request implementation available");
+    };
+    MAXIMUM_PATHNAME_LENGTH = 950;
+    BlobAccessError = class extends BlobError {
+      constructor() {
+        super("Access denied, please provide a valid token for this resource.");
+      }
+    };
+    BlobOidcEnvironmentNotAllowedError = class extends BlobError {
+      constructor(message2) {
+        super(
+          message2 != null ? message2 : "OIDC is enabled for this project, but not for this token's environment."
+        );
+      }
+    };
+    BlobContentTypeNotAllowedError = class extends BlobError {
+      constructor(message2) {
+        super(`Content type mismatch, ${message2}.`);
+      }
+    };
+    BlobPathnameMismatchError = class extends BlobError {
+      constructor(message2) {
+        super(
+          `Pathname mismatch, ${message2}. Check the pathname used in upload() or put() matches the one from the client token.`
+        );
+      }
+    };
+    BlobClientTokenExpiredError = class extends BlobError {
+      constructor() {
+        super("Client token has expired.");
+      }
+    };
+    BlobFileTooLargeError = class extends BlobError {
+      constructor(message2) {
+        super(`File is too large, ${message2}.`);
+      }
+    };
+    BlobStoreNotFoundError = class extends BlobError {
+      constructor() {
+        super("This store does not exist.");
+      }
+    };
+    BlobStoreSuspendedError = class extends BlobError {
+      constructor() {
+        super("This store has been suspended.");
+      }
+    };
+    BlobUnknownError = class extends BlobError {
+      constructor() {
+        super("Unknown error, please visit https://vercel.com/help.");
+      }
+    };
+    BlobNotFoundError = class extends BlobError {
+      constructor() {
+        super("The requested blob does not exist");
+      }
+    };
+    BlobServiceNotAvailable = class extends BlobError {
+      constructor() {
+        super("The blob service is currently not available. Please try again.");
+      }
+    };
+    BlobServiceRateLimited = class extends BlobError {
+      constructor(seconds) {
+        super(
+          `Too many requests please lower the number of concurrent requests ${seconds ? ` - try again in ${seconds} seconds` : ""}.`
+        );
+        this.retryAfter = seconds != null ? seconds : 0;
+      }
+    };
+    BlobRequestAbortedError = class extends BlobError {
+      constructor() {
+        super("The request was aborted.");
+      }
+    };
+    BlobPreconditionFailedError = class extends BlobError {
+      constructor() {
+        super("Precondition failed: ETag mismatch.");
+      }
+    };
+    BLOB_API_VERSION = 12;
+    putOptionHeaderMap = {
+      cacheControlMaxAge: "x-cache-control-max-age",
+      addRandomSuffix: "x-add-random-suffix",
+      allowOverwrite: "x-allow-overwrite",
+      contentType: "x-content-type",
+      access: "x-vercel-blob-access",
+      ifMatch: "x-if-match"
+    };
+    maxConcurrentUploads = typeof window !== "undefined" ? 6 : 8;
+    partSizeInBytes = 8 * 1024 * 1024;
+    maxBytesInMemory = maxConcurrentUploads * partSizeInBytes * 2;
+    BLOB_PRESIGN_QUERY_VALID_UNTIL = "vercel-blob-valid-until";
+    BLOB_PRESIGN_QUERY_MAXIMUM_SIZE = "vercel-blob-maximum-size-in-bytes";
+    BLOB_PRESIGN_QUERY_ALLOWED_CONTENT_TYPES = "vercel-blob-allowed-content-types";
+    BLOB_PRESIGN_QUERY_ADD_RANDOM_SUFFIX = "vercel-blob-add-random-suffix";
+    BLOB_PRESIGN_QUERY_ALLOW_OVERWRITE = "vercel-blob-allow-overwrite";
+    BLOB_PRESIGN_QUERY_CACHE_CONTROL_MAX_AGE = "vercel-blob-cache-control-max-age";
+    BLOB_PRESIGN_QUERY_IF_MATCH = "vercel-blob-if-match";
+    BLOB_PRESIGN_QUERY_CALLBACK_URL = "vercel-blob-callback-url";
+    BLOB_PRESIGN_QUERY_CALLBACK_TOKEN_PAYLOAD = "vercel-blob-callback-token-payload";
+    PRESIGN_CANONICAL_QUERY_KEYS = [
+      BLOB_PRESIGN_QUERY_ADD_RANDOM_SUFFIX,
+      BLOB_PRESIGN_QUERY_ALLOW_OVERWRITE,
+      BLOB_PRESIGN_QUERY_ALLOWED_CONTENT_TYPES,
+      BLOB_PRESIGN_QUERY_CACHE_CONTROL_MAX_AGE,
+      BLOB_PRESIGN_QUERY_CALLBACK_TOKEN_PAYLOAD,
+      BLOB_PRESIGN_QUERY_CALLBACK_URL,
+      BLOB_PRESIGN_QUERY_IF_MATCH,
+      BLOB_PRESIGN_QUERY_MAXIMUM_SIZE,
+      BLOB_PRESIGN_QUERY_VALID_UNTIL
+    ];
+    MAX_PRESIGN_CALLBACK_URL_CHARS = 4096;
+    MAX_PRESIGN_CALLBACK_TOKEN_PAYLOAD_CHARS = 8192;
+    MAX_PRESIGN_CACHE_CONTROL_MAX_AGE_SECONDS = 365 * 24 * 60 * 60;
+    MAX_PRESIGN_IF_MATCH_LENGTH = 256;
+    IF_MATCH_CONTROL_CHARS_RE = /[\x00-\x1f\x7f]/;
+    utf8Encoder = new TextEncoder();
+  }
+});
+
+// node_modules/.pnpm/@vercel+blob@2.6.0/node_modules/@vercel/blob/dist/index.js
+var dist_exports = {};
+__export(dist_exports, {
+  BlobAccessError: () => BlobAccessError,
+  BlobClientTokenExpiredError: () => BlobClientTokenExpiredError,
+  BlobContentTypeNotAllowedError: () => BlobContentTypeNotAllowedError,
+  BlobError: () => BlobError,
+  BlobFileTooLargeError: () => BlobFileTooLargeError,
+  BlobNotFoundError: () => BlobNotFoundError,
+  BlobPathnameMismatchError: () => BlobPathnameMismatchError,
+  BlobPreconditionFailedError: () => BlobPreconditionFailedError,
+  BlobRequestAbortedError: () => BlobRequestAbortedError,
+  BlobServiceNotAvailable: () => BlobServiceNotAvailable,
+  BlobServiceRateLimited: () => BlobServiceRateLimited,
+  BlobStoreNotFoundError: () => BlobStoreNotFoundError,
+  BlobStoreSuspendedError: () => BlobStoreSuspendedError,
+  BlobUnknownError: () => BlobUnknownError,
+  completeMultipartUpload: () => completeMultipartUpload2,
+  copy: () => copy,
+  createFolder: () => createFolder,
+  createMultipartUpload: () => createMultipartUpload2,
+  createMultipartUploader: () => createMultipartUploader,
+  del: () => del,
+  get: () => get,
+  getDownloadUrl: () => getDownloadUrl,
+  head: () => head,
+  issueSignedToken: () => issueSignedToken,
+  list: () => list,
+  parseStoreIdFromDelegationToken: () => parseStoreIdFromDelegationToken,
+  parseStoreIdFromPresignedUrl: () => parseStoreIdFromPresignedUrl,
+  presignUrl: () => presignUrl,
+  put: () => put,
+  rename: () => rename,
+  uploadPart: () => uploadPart2
+});
+async function del(urlOrPathname, options) {
+  const urls = Array.isArray(urlOrPathname) ? urlOrPathname : [urlOrPathname];
+  if ((options == null ? void 0 : options.ifMatch) && urls.length > 1) {
+    throw new BlobError("ifMatch can only be used when deleting a single URL.");
+  }
+  const headers = {
+    "content-type": "application/json"
+  };
+  if (options == null ? void 0 : options.ifMatch) {
+    headers["x-if-match"] = options.ifMatch;
+  }
+  await requestApi(
+    "/delete",
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ urls }),
+      signal: options == null ? void 0 : options.abortSignal
+    },
+    options
+  );
+}
+async function head(urlOrPathname, options) {
+  const searchParams = new URLSearchParams({ url: urlOrPathname });
+  const response = await requestApi(
+    `?${searchParams.toString()}`,
+    // HEAD can't have body as a response, so we use GET
+    {
+      method: "GET",
+      signal: options == null ? void 0 : options.abortSignal
+    },
+    options
+  );
+  return {
+    url: response.url,
+    downloadUrl: response.downloadUrl,
+    pathname: response.pathname,
+    size: response.size,
+    contentType: response.contentType,
+    contentDisposition: response.contentDisposition,
+    cacheControl: response.cacheControl,
+    uploadedAt: new Date(response.uploadedAt),
+    etag: response.etag
+  };
+}
+function extractPathnameFromUrl(url3) {
+  try {
+    const parsedUrl = new URL(url3);
+    return parsedUrl.pathname.slice(1);
+  } catch {
+    return url3;
+  }
+}
+async function get(urlOrPathname, options) {
+  if (!urlOrPathname) {
+    throw new BlobError("url or pathname is required");
+  }
+  if (!options) {
+    throw new BlobError("missing options, see usage");
+  }
+  if (options.access !== "public" && options.access !== "private") {
+    throw new BlobError(
+      'access must be "private" or "public", see https://vercel.com/docs/vercel-blob'
+    );
+  }
+  const auth = await resolveBlobAuth(options);
+  if (auth.kind === "presigned") {
+    throw new BlobError("Presigned URLs are not supported for the get method");
+  }
+  let blobUrl;
+  let pathname;
+  const access = options.access;
+  if (isUrl(urlOrPathname)) {
+    blobUrl = urlOrPathname;
+    pathname = extractPathnameFromUrl(urlOrPathname);
+    try {
+      const { hostname: hostname3 } = new URL(blobUrl);
+      if (!hostname3.endsWith(".blob.vercel-storage.com")) {
+        throw new BlobError(
+          "Invalid URL: the URL does not point to a Vercel Blob store. Use a pathname instead, see https://vercel.com/docs/vercel-blob"
+        );
+      }
+    } catch (error46) {
+      if (error46 instanceof BlobError) throw error46;
+      throw new BlobError("Invalid URL: unable to parse the provided URL");
+    }
+  } else {
+    if (!auth.storeId) {
+      throw new BlobError("Invalid token: unable to extract store ID");
+    }
+    pathname = urlOrPathname;
+    blobUrl = constructBlobUrl(auth.storeId, pathname, access);
+  }
+  const requestHeaders = {
+    ...options.ifNoneMatch ? { "If-None-Match": options.ifNoneMatch } : {},
+    authorization: `Bearer ${auth.token}`,
+    ...options.headers
+    // low-level escape hatch, applied last to override anything
+  };
+  let fetchUrl = blobUrl;
+  if (options.useCache === false && access === "private") {
+    const url3 = new URL(blobUrl);
+    url3.searchParams.set("cache", "0");
+    fetchUrl = url3.toString();
+  }
+  const response = await (0, import_undici2.fetch)(fetchUrl, {
+    method: "GET",
+    headers: requestHeaders,
+    signal: options.abortSignal
+  });
+  if (response.status === 304) {
+    const downloadUrlObj = new URL(blobUrl);
+    downloadUrlObj.searchParams.set("download", "1");
+    const lastModified2 = response.headers.get("last-modified");
+    return {
+      statusCode: 304,
+      stream: null,
+      headers: response.headers,
+      blob: {
+        url: blobUrl,
+        downloadUrl: downloadUrlObj.toString(),
+        pathname,
+        contentType: null,
+        contentDisposition: response.headers.get("content-disposition") || "",
+        cacheControl: response.headers.get("cache-control") || "",
+        size: null,
+        uploadedAt: lastModified2 ? new Date(lastModified2) : /* @__PURE__ */ new Date(),
+        etag: response.headers.get("etag") || ""
+      }
+    };
+  }
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    throw new BlobError(
+      `Failed to fetch blob: ${response.status} ${response.statusText}`
+    );
+  }
+  const stream4 = response.body;
+  if (!stream4) {
+    throw new BlobError("Response body is null");
+  }
+  const contentLength = response.headers.get("content-length");
+  const lastModified = response.headers.get("last-modified");
+  const downloadUrl = new URL(blobUrl);
+  downloadUrl.searchParams.set("download", "1");
+  return {
+    statusCode: 200,
+    stream: stream4,
+    headers: response.headers,
+    blob: {
+      url: blobUrl,
+      downloadUrl: downloadUrl.toString(),
+      pathname,
+      contentType: response.headers.get("content-type") || "application/octet-stream",
+      contentDisposition: response.headers.get("content-disposition") || "",
+      cacheControl: response.headers.get("cache-control") || "",
+      size: contentLength ? parseInt(contentLength, 10) : 0,
+      uploadedAt: lastModified ? new Date(lastModified) : /* @__PURE__ */ new Date(),
+      etag: response.headers.get("etag") || ""
+    }
+  };
+}
+async function list(options) {
+  var _a3;
+  const searchParams = new URLSearchParams();
+  if (options == null ? void 0 : options.limit) {
+    searchParams.set("limit", options.limit.toString());
+  }
+  if (options == null ? void 0 : options.prefix) {
+    searchParams.set("prefix", options.prefix);
+  }
+  if (options == null ? void 0 : options.cursor) {
+    searchParams.set("cursor", options.cursor);
+  }
+  if (options == null ? void 0 : options.mode) {
+    searchParams.set("mode", options.mode);
+  }
+  const response = await requestApi(
+    `?${searchParams.toString()}`,
+    {
+      method: "GET",
+      signal: options == null ? void 0 : options.abortSignal
+    },
+    options
+  );
+  if ((options == null ? void 0 : options.mode) === "folded") {
+    return {
+      folders: (_a3 = response.folders) != null ? _a3 : [],
+      cursor: response.cursor,
+      hasMore: response.hasMore,
+      blobs: response.blobs.map(mapBlobResult)
+    };
+  }
+  return {
+    cursor: response.cursor,
+    hasMore: response.hasMore,
+    blobs: response.blobs.map(mapBlobResult)
+  };
+}
+function mapBlobResult(blobResult) {
+  return {
+    url: blobResult.url,
+    downloadUrl: blobResult.downloadUrl,
+    pathname: blobResult.pathname,
+    size: blobResult.size,
+    uploadedAt: new Date(blobResult.uploadedAt),
+    etag: blobResult.etag
+  };
+}
+async function copy(fromUrlOrPathname, toPathname, options) {
+  if (!options) {
+    throw new BlobError("missing options, see usage");
+  }
+  if (options.access !== "public" && options.access !== "private") {
+    throw new BlobError(
+      'access must be "private" or "public", see https://vercel.com/docs/vercel-blob'
+    );
+  }
+  if (toPathname.length > MAXIMUM_PATHNAME_LENGTH) {
+    throw new BlobError(
+      `pathname is too long, maximum length is ${MAXIMUM_PATHNAME_LENGTH}`
+    );
+  }
+  for (const invalidCharacter of disallowedPathnameCharacters) {
+    if (toPathname.includes(invalidCharacter)) {
+      throw new BlobError(
+        `pathname cannot contain "${invalidCharacter}", please encode it if needed`
+      );
+    }
+  }
+  const headers = {};
+  headers["x-vercel-blob-access"] = options.access;
+  if (options.addRandomSuffix !== void 0) {
+    headers["x-add-random-suffix"] = options.addRandomSuffix ? "1" : "0";
+  }
+  if (options.allowOverwrite !== void 0) {
+    headers["x-allow-overwrite"] = options.allowOverwrite ? "1" : "0";
+  }
+  if (options.contentType) {
+    headers["x-content-type"] = options.contentType;
+  }
+  if (options.cacheControlMaxAge !== void 0) {
+    headers["x-cache-control-max-age"] = options.cacheControlMaxAge.toString();
+  }
+  if (options.ifMatch) {
+    headers["x-if-match"] = options.ifMatch;
+  }
+  const params = new URLSearchParams({
+    pathname: toPathname,
+    fromUrl: fromUrlOrPathname
+  });
+  const response = await requestApi(
+    `?${params.toString()}`,
+    {
+      method: "PUT",
+      headers,
+      signal: options.abortSignal
+    },
+    options
+  );
+  return {
+    url: response.url,
+    downloadUrl: response.downloadUrl,
+    pathname: response.pathname,
+    contentType: response.contentType,
+    contentDisposition: response.contentDisposition,
+    etag: response.etag
+  };
+}
+async function rename(fromUrlOrPathname, toPathname, options) {
+  if (!options) {
+    throw new BlobError("missing options, see usage");
+  }
+  if (options.access !== "public" && options.access !== "private") {
+    throw new BlobError(
+      'access must be "private" or "public", see https://vercel.com/docs/vercel-blob'
+    );
+  }
+  if (toPathname.length > MAXIMUM_PATHNAME_LENGTH) {
+    throw new BlobError(
+      `pathname is too long, maximum length is ${MAXIMUM_PATHNAME_LENGTH}`
+    );
+  }
+  for (const invalidCharacter of disallowedPathnameCharacters) {
+    if (toPathname.includes(invalidCharacter)) {
+      throw new BlobError(
+        `pathname cannot contain "${invalidCharacter}", please encode it if needed`
+      );
+    }
+  }
+  const headers = {};
+  headers["x-vercel-blob-access"] = options.access;
+  if (options.addRandomSuffix !== void 0) {
+    headers["x-add-random-suffix"] = options.addRandomSuffix ? "1" : "0";
+  }
+  if (options.allowOverwrite !== void 0) {
+    headers["x-allow-overwrite"] = options.allowOverwrite ? "1" : "0";
+  }
+  if (options.contentType) {
+    headers["x-content-type"] = options.contentType;
+  }
+  if (options.cacheControlMaxAge !== void 0) {
+    headers["x-cache-control-max-age"] = options.cacheControlMaxAge.toString();
+  }
+  if (options.ifMatch) {
+    headers["x-if-match"] = options.ifMatch;
+  }
+  const params = new URLSearchParams({
+    pathname: toPathname,
+    fromUrl: fromUrlOrPathname
+  });
+  const response = await requestApi(
+    `/rename?${params.toString()}`,
+    {
+      method: "POST",
+      headers,
+      signal: options.abortSignal
+    },
+    options
+  );
+  return {
+    url: response.url,
+    downloadUrl: response.downloadUrl,
+    pathname: response.pathname,
+    contentType: response.contentType,
+    contentDisposition: response.contentDisposition,
+    etag: response.etag
+  };
+}
+var import_undici2, put, createMultipartUpload2, createMultipartUploader, uploadPart2, completeMultipartUpload2;
+var init_dist = __esm({
+  "node_modules/.pnpm/@vercel+blob@2.6.0/node_modules/@vercel/blob/dist/index.js"() {
+    init_chunk_UVSKRCEW();
+    import_undici2 = __toESM(require_undici(), 1);
+    put = createPutMethod({
+      allowedOptions: [
+        "cacheControlMaxAge",
+        "addRandomSuffix",
+        "allowOverwrite",
+        "contentType",
+        "ifMatch"
+      ]
+    });
+    createMultipartUpload2 = createCreateMultipartUploadMethod({
+      allowedOptions: [
+        "cacheControlMaxAge",
+        "addRandomSuffix",
+        "allowOverwrite",
+        "contentType",
+        "ifMatch"
+      ]
+    });
+    createMultipartUploader = createCreateMultipartUploaderMethod({
+      allowedOptions: [
+        "cacheControlMaxAge",
+        "addRandomSuffix",
+        "allowOverwrite",
+        "contentType",
+        "ifMatch"
+      ]
+    });
+    uploadPart2 = createUploadPartMethod({
+      allowedOptions: [
+        "cacheControlMaxAge",
+        "addRandomSuffix",
+        "allowOverwrite",
+        "contentType"
+      ]
+    });
+    completeMultipartUpload2 = createCompleteMultipartUploadMethod({
+      allowedOptions: [
+        "cacheControlMaxAge",
+        "addRandomSuffix",
+        "allowOverwrite",
+        "contentType"
+      ]
+    });
+  }
+});
+
 // node_modules/.pnpm/delayed-stream@1.0.0/node_modules/delayed-stream/lib/delayed_stream.js
 var require_delayed_stream = __commonJS({
   "node_modules/.pnpm/delayed-stream@1.0.0/node_modules/delayed-stream/lib/delayed_stream.js"(exports2, module2) {
@@ -65623,9 +68007,9 @@ var require_iterate = __commonJS({
     var async = require_async();
     var abort = require_abort();
     module2.exports = iterate;
-    function iterate(list2, iterator2, state, callback) {
+    function iterate(list3, iterator2, state, callback) {
       var key = state["keyedList"] ? state["keyedList"][state.index] : state.index;
-      state.jobs[key] = runJob(iterator2, key, list2[key], function(error46, output) {
+      state.jobs[key] = runJob(iterator2, key, list3[key], function(error46, output) {
         if (!(key in state.jobs)) {
           return;
         }
@@ -65654,17 +68038,17 @@ var require_iterate = __commonJS({
 var require_state = __commonJS({
   "node_modules/.pnpm/asynckit@0.4.0/node_modules/asynckit/lib/state.js"(exports2, module2) {
     module2.exports = state;
-    function state(list2, sortMethod) {
-      var isNamedList = !Array.isArray(list2), initState = {
+    function state(list3, sortMethod) {
+      var isNamedList = !Array.isArray(list3), initState = {
         index: 0,
-        keyedList: isNamedList || sortMethod ? Object.keys(list2) : null,
+        keyedList: isNamedList || sortMethod ? Object.keys(list3) : null,
         jobs: {},
         results: isNamedList ? {} : [],
-        size: isNamedList ? Object.keys(list2).length : list2.length
+        size: isNamedList ? Object.keys(list3).length : list3.length
       };
       if (sortMethod) {
         initState.keyedList.sort(isNamedList ? sortMethod : function(a, b) {
-          return sortMethod(list2[a], list2[b]);
+          return sortMethod(list3[a], list3[b]);
         });
       }
       return initState;
@@ -65696,10 +68080,10 @@ var require_parallel = __commonJS({
     var initState = require_state();
     var terminator = require_terminator();
     module2.exports = parallel;
-    function parallel(list2, iterator2, callback) {
-      var state = initState(list2);
-      while (state.index < (state["keyedList"] || list2).length) {
-        iterate(list2, iterator2, state, function(error46, result) {
+    function parallel(list3, iterator2, callback) {
+      var state = initState(list3);
+      while (state.index < (state["keyedList"] || list3).length) {
+        iterate(list3, iterator2, state, function(error46, result) {
           if (error46) {
             callback(error46, result);
             return;
@@ -65725,16 +68109,16 @@ var require_serialOrdered = __commonJS({
     module2.exports = serialOrdered;
     module2.exports.ascending = ascending;
     module2.exports.descending = descending;
-    function serialOrdered(list2, iterator2, sortMethod, callback) {
-      var state = initState(list2, sortMethod);
-      iterate(list2, iterator2, state, function iteratorHandler(error46, result) {
+    function serialOrdered(list3, iterator2, sortMethod, callback) {
+      var state = initState(list3, sortMethod);
+      iterate(list3, iterator2, state, function iteratorHandler(error46, result) {
         if (error46) {
           callback(error46, result);
           return;
         }
         state.index++;
-        if (state.index < (state["keyedList"] || list2).length) {
-          iterate(list2, iterator2, state, iteratorHandler);
+        if (state.index < (state["keyedList"] || list3).length) {
+          iterate(list3, iterator2, state, iteratorHandler);
           return;
         }
         callback(null, state.results);
@@ -65755,8 +68139,8 @@ var require_serial = __commonJS({
   "node_modules/.pnpm/asynckit@0.4.0/node_modules/asynckit/serial.js"(exports2, module2) {
     var serialOrdered = require_serialOrdered();
     module2.exports = serial;
-    function serial(list2, iterator2, callback) {
-      return serialOrdered(list2, iterator2, null, callback);
+    function serial(list3, iterator2, callback) {
+      return serialOrdered(list3, iterator2, null, callback);
     }
   }
 });
@@ -66620,14 +69004,14 @@ var require_follow_redirects = __commonJS({
           debug2("options", options);
           return new RedirectableRequest(options, callback);
         }
-        function get(input, options, callback) {
+        function get2(input, options, callback) {
           var wrappedRequest = wrappedProtocol.request(input, options, callback);
           wrappedRequest.end();
           return wrappedRequest;
         }
         Object.defineProperties(wrappedProtocol, {
           request: { value: request, configurable: true, enumerable: true, writable: true },
-          get: { value: get, configurable: true, enumerable: true, writable: true }
+          get: { value: get2, configurable: true, enumerable: true, writable: true }
         });
       });
       return exports3;
@@ -68069,9 +70453,9 @@ var require_cjs3 = __commonJS({
         });
       }
     }
-    function copy(target, options = {}) {
+    function copy2(target, options = {}) {
       if (isWhat.isArray(target)) {
-        return target.map((item) => copy(item, options));
+        return target.map((item) => copy2(item, options));
       }
       if (!isWhat.isPlainObject(target)) {
         return target;
@@ -68083,12 +70467,12 @@ var require_cjs3 = __commonJS({
           return carry;
         }
         const val = target[key];
-        const newVal = copy(val, options);
+        const newVal = copy2(val, options);
         assignProp2(carry, key, newVal, target, options.nonenumerable);
         return carry;
       }, {});
     }
-    exports2.copy = copy;
+    exports2.copy = copy2;
   }
 });
 
@@ -70982,1488 +73366,8 @@ var AXIOS_TIMEOUT_MS = 3e4;
 var UNAUTHED_ERR_MSG = "Please login (10001)";
 var NOT_ADMIN_ERR_MSG = "You do not have required permission (10002)";
 
-// node_modules/.pnpm/is-node-process@1.2.0/node_modules/is-node-process/lib/index.mjs
-function isNodeProcess() {
-  if (typeof navigator !== "undefined" && navigator.product === "ReactNative") {
-    return true;
-  }
-  if (typeof process !== "undefined") {
-    const type = process.type;
-    if (type === "renderer" || type === "worker") {
-      return false;
-    }
-    return !!(process.versions && process.versions.node);
-  }
-  return false;
-}
-
-// node_modules/.pnpm/@vercel+blob@2.6.0/node_modules/@vercel/blob/dist/chunk-UVSKRCEW.js
-var import_is_buffer = __toESM(require_is_buffer(), 1);
-var import_stream = require("stream");
-var import_oidc = __toESM(require_dist3(), 1);
-var import_async_retry = __toESM(require_lib6(), 1);
-var import_undici = __toESM(require_undici(), 1);
-var import_throttleit = __toESM(require_throttleit(), 1);
-var import_throttleit2 = __toESM(require_throttleit(), 1);
-var supportsNewBlobFromArrayBuffer = new Promise((resolve) => {
-  try {
-    const helloAsArrayBuffer = new Uint8Array([104, 101, 108, 108, 111]);
-    const blob = new Blob([helloAsArrayBuffer]);
-    blob.text().then((text) => {
-      resolve(text === "hello");
-    }).catch(() => {
-      resolve(false);
-    });
-  } catch {
-    resolve(false);
-  }
-});
-async function toReadableStream(value) {
-  if (value instanceof ReadableStream) {
-    return value;
-  }
-  if (value instanceof Blob) {
-    return value.stream();
-  }
-  if (isNodeJsReadableStream(value)) {
-    return import_stream.Readable.toWeb(value);
-  }
-  let streamValue;
-  if (value instanceof ArrayBuffer) {
-    streamValue = new Uint8Array(value);
-  } else if (isNodeJsBuffer(value)) {
-    streamValue = value;
-  } else {
-    streamValue = stringToUint8Array(value);
-  }
-  if (await supportsNewBlobFromArrayBuffer) {
-    return new Blob([streamValue]).stream();
-  }
-  return new ReadableStream({
-    start(controller) {
-      controller.enqueue(streamValue);
-      controller.close();
-    }
-  });
-}
-function isNodeJsReadableStream(value) {
-  return typeof value === "object" && typeof value.pipe === "function" && value.readable && typeof value._read === "function" && // @ts-expect-error _readableState does exists on Readable
-  typeof value._readableState === "object";
-}
-function stringToUint8Array(s) {
-  const enc = new TextEncoder();
-  return enc.encode(s);
-}
-function isNodeJsBuffer(value) {
-  return (0, import_is_buffer.default)(value);
-}
-async function getVercelOidcToken2() {
-  try {
-    const token = (await (0, import_oidc.getVercelOidcToken)()).trim();
-    return token === "" ? void 0 : token;
-  } catch {
-    return void 0;
-  }
-}
-var parseRegExp = /^((-|\+)?(\d+(?:\.\d+)?)) *(kb|mb|gb|tb|pb)$/i;
-var map = {
-  b: 1,
-  kb: 1 << 10,
-  mb: 1 << 20,
-  gb: 1 << 30,
-  tb: 1024 ** 4,
-  pb: 1024 ** 5
-};
-function bytes(val) {
-  if (typeof val === "number" && !Number.isNaN(val)) {
-    return val;
-  }
-  if (typeof val !== "string") {
-    return null;
-  }
-  const results = parseRegExp.exec(val);
-  let floatValue;
-  let unit = "b";
-  if (!results) {
-    floatValue = parseInt(val, 10);
-  } else {
-    const [, res, , , unitMatch] = results;
-    if (!res) {
-      return null;
-    }
-    floatValue = parseFloat(res);
-    if (unitMatch) {
-      unit = unitMatch.toLowerCase();
-    }
-  }
-  if (Number.isNaN(floatValue)) {
-    return null;
-  }
-  return Math.floor(map[unit] * floatValue);
-}
-var defaultVercelBlobApiUrl = "https://vercel.com/api/blob";
-function readEnv(name) {
-  try {
-    const value = process.env[name];
-    return typeof value === "string" && value.trim() !== "" ? value.trim() : void 0;
-  } catch {
-    return void 0;
-  }
-}
-function parseStoreIdFromReadWriteToken(token) {
-  const [, , , storeId = ""] = token.split("_");
-  return storeId;
-}
-function base64UrlDecodeDelegationSegment(segment) {
-  let base643 = segment.replace(/-/g, "+").replace(/_/g, "/");
-  const padding = 4 - base643.length % 4;
-  if (padding !== 4) {
-    base643 += "=".repeat(padding);
-  }
-  if (typeof atob === "function") {
-    return atob(base643);
-  }
-  if (typeof Buffer !== "undefined") {
-    return Buffer.from(base643, "base64").toString("utf8");
-  }
-  throw new BlobError("Cannot decode base64: no atob or Buffer available.");
-}
-function parseStoreIdFromDelegationToken(delegationToken) {
-  const dot = delegationToken.indexOf(".");
-  if (dot < 0) {
-    throw new BlobError("Invalid delegation token format.");
-  }
-  const payloadSeg = delegationToken.slice(0, dot);
-  let parsed;
-  try {
-    parsed = JSON.parse(base64UrlDecodeDelegationSegment(payloadSeg));
-  } catch {
-    throw new BlobError("Invalid delegation token payload.");
-  }
-  if (!parsed.storeId || typeof parsed.storeId !== "string") {
-    throw new BlobError("Delegation token payload is missing `storeId`.");
-  }
-  return normalizeStoreId(parsed.storeId);
-}
-function normalizeStoreId(storeId) {
-  return storeId.startsWith("store_") ? storeId.slice("store_".length) : storeId;
-}
-async function resolveBlobAuth(options) {
-  var _a3, _b2;
-  if (options == null ? void 0 : options.presignedUrlPayload) {
-    const storeId = parseStoreIdFromDelegationToken(
-      options.presignedUrlPayload.delegationToken
-    );
-    return { kind: "presigned", storeId };
-  }
-  if (options == null ? void 0 : options.token) {
-    const storeId = parseStoreIdFromReadWriteToken(options.token);
-    return { kind: "readWrite", token: options.token, storeId };
-  }
-  const manualOidcToken = (_a3 = options == null ? void 0 : options.oidcToken) == null ? void 0 : _a3.trim();
-  const oidcToken = manualOidcToken || await getVercelOidcToken2();
-  if (oidcToken) {
-    const manualStoreId = (_b2 = options == null ? void 0 : options.storeId) == null ? void 0 : _b2.trim();
-    if (manualStoreId) {
-      return {
-        kind: "oidc",
-        token: oidcToken,
-        storeId: normalizeStoreId(manualStoreId)
-      };
-    }
-    const blobStoreId = readEnv("BLOB_STORE_ID");
-    if (blobStoreId) {
-      return {
-        kind: "oidc",
-        token: oidcToken,
-        storeId: normalizeStoreId(blobStoreId)
-      };
-    }
-    if (manualOidcToken) {
-      throw new BlobError(
-        "oidcToken was passed, but no storeId was found. Pass a `storeId` option or set `BLOB_STORE_ID` to use OIDC auth"
-      );
-    }
-  }
-  const readWrite = readEnv("BLOB_READ_WRITE_TOKEN");
-  if (readWrite) {
-    const storeId = parseStoreIdFromReadWriteToken(readWrite);
-    return { kind: "readWrite", token: readWrite, storeId };
-  }
-  throw new BlobError(
-    "No blob credentials found. Pass a `token` option, set `BLOB_READ_WRITE_TOKEN`, or use `oidcToken` (or `VERCEL_OIDC_TOKEN`) with `storeId` or `BLOB_STORE_ID`."
-  );
-}
-var BlobError = class extends Error {
-  constructor(message2) {
-    super(`Vercel Blob: ${message2}`);
-  }
-};
-function isPlainObject2(value) {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-  const prototype3 = Object.getPrototypeOf(value);
-  return (prototype3 === null || prototype3 === Object.prototype || Object.getPrototypeOf(prototype3) === null) && !(Symbol.toStringTag in value) && !(Symbol.iterator in value);
-}
-var disallowedPathnameCharacters = ["//"];
-var supportsRequestStreams = (() => {
-  if (isNodeProcess()) {
-    return true;
-  }
-  const apiUrl = getApiUrl();
-  if (apiUrl.startsWith("http://localhost")) {
-    return false;
-  }
-  let duplexAccessed = false;
-  const hasContentType = new Request(getApiUrl(), {
-    body: new ReadableStream(),
-    method: "POST",
-    // @ts-expect-error -- TypeScript doesn't yet have duplex but it's in the spec: https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1729
-    get duplex() {
-      duplexAccessed = true;
-      return "half";
-    }
-  }).headers.has("Content-Type");
-  return duplexAccessed && !hasContentType;
-})();
-function getApiUrl(pathname = "") {
-  let baseUrl = null;
-  try {
-    baseUrl = process.env.VERCEL_BLOB_API_URL || process.env.NEXT_PUBLIC_VERCEL_BLOB_API_URL;
-  } catch {
-  }
-  return `${baseUrl || defaultVercelBlobApiUrl}${pathname}`;
-}
-var TEXT_ENCODER = typeof TextEncoder === "function" ? new TextEncoder() : null;
-function computeBodyLength(body) {
-  if (!body) {
-    return 0;
-  }
-  if (typeof body === "string") {
-    if (TEXT_ENCODER) {
-      return TEXT_ENCODER.encode(body).byteLength;
-    }
-    return new Blob([body]).size;
-  }
-  if ("byteLength" in body && typeof body.byteLength === "number") {
-    return body.byteLength;
-  }
-  if ("size" in body && typeof body.size === "number") {
-    return body.size;
-  }
-  return 0;
-}
-var createChunkTransformStream = (chunkSize, onProgress) => {
-  let buffer = new Uint8Array(0);
-  return new TransformStream({
-    transform(chunk, controller) {
-      const newBuffer = new Uint8Array(buffer.length + chunk.byteLength);
-      newBuffer.set(buffer);
-      newBuffer.set(new Uint8Array(chunk), buffer.length);
-      buffer = newBuffer;
-      while (buffer.length >= chunkSize) {
-        const newChunk = buffer.slice(0, chunkSize);
-        controller.enqueue(newChunk);
-        onProgress == null ? void 0 : onProgress(newChunk.byteLength);
-        buffer = buffer.slice(chunkSize);
-      }
-    },
-    flush(controller) {
-      if (buffer.length > 0) {
-        controller.enqueue(buffer);
-        onProgress == null ? void 0 : onProgress(buffer.byteLength);
-      }
-    }
-  });
-};
-function isReadableStream(value) {
-  return globalThis.ReadableStream && // TODO: Can be removed once Node.js 16 is no more required internally
-  value instanceof ReadableStream;
-}
-function isStream(value) {
-  if (isReadableStream(value)) {
-    return true;
-  }
-  if (isNodeJsReadableStream(value)) {
-    return true;
-  }
-  return false;
-}
-var addPresignedParams = (url3, presignedUrlPayload) => {
-  const urlObj = new URL(url3);
-  for (const [key, value] of Object.entries(presignedUrlPayload.params)) {
-    urlObj.searchParams.set(key, value);
-  }
-  urlObj.searchParams.set(
-    "vercel-blob-delegation",
-    presignedUrlPayload.delegationToken
-  );
-  urlObj.searchParams.set(
-    "vercel-blob-signature",
-    presignedUrlPayload.signature
-  );
-  return urlObj.toString();
-};
-var debugIsActive = false;
-var _a;
-var _b;
-try {
-  if (((_a = process.env.DEBUG) == null ? void 0 : _a.includes("blob")) || ((_b = process.env.NEXT_PUBLIC_DEBUG) == null ? void 0 : _b.includes("blob"))) {
-    debugIsActive = true;
-  }
-} catch {
-}
-function debug(message2, ...args) {
-  if (debugIsActive) {
-    console.debug(`vercel-blob: ${message2}`, ...args);
-  }
-}
-var _a2;
-var DOMException2 = (_a2 = globalThis.DOMException) != null ? _a2 : (() => {
-  try {
-    atob("~");
-  } catch (err) {
-    return Object.getPrototypeOf(err).constructor;
-  }
-})();
-var objectToString = Object.prototype.toString;
-var isError = (value) => objectToString.call(value) === "[object Error]";
-var errorMessages = /* @__PURE__ */ new Set([
-  "network error",
-  // Chrome
-  "Failed to fetch",
-  // Chrome
-  "NetworkError when attempting to fetch resource.",
-  // Firefox
-  "The Internet connection appears to be offline.",
-  // Safari 16
-  "Load failed",
-  // Safari 17+
-  "Network request failed",
-  // `cross-fetch`
-  "fetch failed",
-  // Undici (Node.js)
-  "terminated"
-  // Undici (Node.js)
-]);
-function isNetworkError(error46) {
-  const isValid = error46 && isError(error46) && error46.name === "TypeError" && typeof error46.message === "string";
-  if (!isValid) {
-    return false;
-  }
-  if (error46.message === "Load failed") {
-    return error46.stack === void 0;
-  }
-  return errorMessages.has(error46.message);
-}
-var hasFetch = typeof import_undici.fetch === "function";
-var hasFetchWithUploadProgress = hasFetch && supportsRequestStreams;
-var CHUNK_SIZE = 64 * 1024;
-var blobFetch = async ({
-  input,
-  init,
-  onUploadProgress
-}) => {
-  debug("using fetch");
-  let body;
-  if (init.body) {
-    if (onUploadProgress) {
-      const stream4 = await toReadableStream(init.body);
-      let loaded = 0;
-      const chunkTransformStream = createChunkTransformStream(
-        CHUNK_SIZE,
-        (newLoaded) => {
-          loaded += newLoaded;
-          onUploadProgress(loaded);
-        }
-      );
-      body = stream4.pipeThrough(chunkTransformStream);
-    } else {
-      body = init.body;
-    }
-  }
-  const duplex = supportsRequestStreams && body && isStream(body) ? "half" : void 0;
-  return (0, import_undici.fetch)(
-    input,
-    // @ts-expect-error -- Blob and Nodejs Blob are triggering type errors, fine with it
-    {
-      ...init,
-      ...init.body ? { body } : {},
-      duplex
-    }
-  );
-};
-var hasXhr = typeof XMLHttpRequest !== "undefined";
-var blobXhr = async ({
-  input,
-  init,
-  onUploadProgress
-}) => {
-  debug("using xhr");
-  let body = null;
-  if (init.body) {
-    if (isReadableStream(init.body)) {
-      body = await new Response(init.body).blob();
-    } else {
-      body = init.body;
-    }
-  }
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open(init.method || "GET", input.toString(), true);
-    if (onUploadProgress) {
-      xhr.upload.addEventListener("progress", (event) => {
-        if (event.lengthComputable) {
-          onUploadProgress(event.loaded);
-        }
-      });
-    }
-    xhr.onload = () => {
-      var _a3;
-      if ((_a3 = init.signal) == null ? void 0 : _a3.aborted) {
-        reject(new DOMException("The user aborted the request.", "AbortError"));
-        return;
-      }
-      const headers = new Headers();
-      const rawHeaders = xhr.getAllResponseHeaders().trim().split(/[\r\n]+/);
-      rawHeaders.forEach((line) => {
-        const parts = line.split(": ");
-        const key = parts.shift();
-        const value = parts.join(": ");
-        if (key) headers.set(key.toLowerCase(), value);
-      });
-      const response = new Response(xhr.response, {
-        status: xhr.status,
-        statusText: xhr.statusText,
-        headers
-      });
-      resolve(response);
-    };
-    xhr.onerror = () => {
-      reject(new TypeError("Network request failed"));
-    };
-    xhr.ontimeout = () => {
-      reject(new TypeError("Network request timed out"));
-    };
-    xhr.onabort = () => {
-      reject(new DOMException("The user aborted a request.", "AbortError"));
-    };
-    if (init.headers) {
-      const headers = new Headers(init.headers);
-      headers.forEach((value, key) => {
-        xhr.setRequestHeader(key, value);
-      });
-    }
-    if (init.signal) {
-      init.signal.addEventListener("abort", () => {
-        xhr.abort();
-      });
-      if (init.signal.aborted) {
-        xhr.abort();
-        return;
-      }
-    }
-    xhr.send(body);
-  });
-};
-var blobRequest = async ({
-  input,
-  init,
-  onUploadProgress
-}) => {
-  if (onUploadProgress) {
-    if (hasFetchWithUploadProgress) {
-      return blobFetch({ input, init, onUploadProgress });
-    }
-    if (hasXhr) {
-      return blobXhr({ input, init, onUploadProgress });
-    }
-  }
-  if (hasFetch) {
-    return blobFetch({ input, init });
-  }
-  if (hasXhr) {
-    return blobXhr({ input, init });
-  }
-  throw new Error("No request implementation available");
-};
-var MAXIMUM_PATHNAME_LENGTH = 950;
-var BlobAccessError = class extends BlobError {
-  constructor() {
-    super("Access denied, please provide a valid token for this resource.");
-  }
-};
-var BlobOidcEnvironmentNotAllowedError = class extends BlobError {
-  constructor(message2) {
-    super(
-      message2 != null ? message2 : "OIDC is enabled for this project, but not for this token's environment."
-    );
-  }
-};
-var BlobContentTypeNotAllowedError = class extends BlobError {
-  constructor(message2) {
-    super(`Content type mismatch, ${message2}.`);
-  }
-};
-var BlobPathnameMismatchError = class extends BlobError {
-  constructor(message2) {
-    super(
-      `Pathname mismatch, ${message2}. Check the pathname used in upload() or put() matches the one from the client token.`
-    );
-  }
-};
-var BlobClientTokenExpiredError = class extends BlobError {
-  constructor() {
-    super("Client token has expired.");
-  }
-};
-var BlobFileTooLargeError = class extends BlobError {
-  constructor(message2) {
-    super(`File is too large, ${message2}.`);
-  }
-};
-var BlobStoreNotFoundError = class extends BlobError {
-  constructor() {
-    super("This store does not exist.");
-  }
-};
-var BlobStoreSuspendedError = class extends BlobError {
-  constructor() {
-    super("This store has been suspended.");
-  }
-};
-var BlobUnknownError = class extends BlobError {
-  constructor() {
-    super("Unknown error, please visit https://vercel.com/help.");
-  }
-};
-var BlobNotFoundError = class extends BlobError {
-  constructor() {
-    super("The requested blob does not exist");
-  }
-};
-var BlobServiceNotAvailable = class extends BlobError {
-  constructor() {
-    super("The blob service is currently not available. Please try again.");
-  }
-};
-var BlobServiceRateLimited = class extends BlobError {
-  constructor(seconds) {
-    super(
-      `Too many requests please lower the number of concurrent requests ${seconds ? ` - try again in ${seconds} seconds` : ""}.`
-    );
-    this.retryAfter = seconds != null ? seconds : 0;
-  }
-};
-var BlobRequestAbortedError = class extends BlobError {
-  constructor() {
-    super("The request was aborted.");
-  }
-};
-var BlobPreconditionFailedError = class extends BlobError {
-  constructor() {
-    super("Precondition failed: ETag mismatch.");
-  }
-};
-var BLOB_API_VERSION = 12;
-function getApiVersion() {
-  let versionOverride = null;
-  try {
-    versionOverride = process.env.VERCEL_BLOB_API_VERSION_OVERRIDE || process.env.NEXT_PUBLIC_VERCEL_BLOB_API_VERSION_OVERRIDE;
-  } catch {
-  }
-  return `${versionOverride != null ? versionOverride : BLOB_API_VERSION}`;
-}
-function getRetries() {
-  try {
-    const retries = process.env.VERCEL_BLOB_RETRIES || "10";
-    return parseInt(retries, 10);
-  } catch {
-    return 10;
-  }
-}
-function createBlobServiceRateLimited(response) {
-  const retryAfter = response.headers.get("retry-after");
-  return new BlobServiceRateLimited(
-    retryAfter ? parseInt(retryAfter, 10) : void 0
-  );
-}
-async function getBlobError(response) {
-  var _a3, _b2, _c;
-  let code;
-  let message2;
-  try {
-    const data = await response.json();
-    code = (_b2 = (_a3 = data.error) == null ? void 0 : _a3.code) != null ? _b2 : "unknown_error";
-    message2 = (_c = data.error) == null ? void 0 : _c.message;
-  } catch {
-    code = "unknown_error";
-  }
-  if ((message2 == null ? void 0 : message2.includes("contentType")) && message2.includes("is not allowed")) {
-    code = "content_type_not_allowed";
-  }
-  if ((message2 == null ? void 0 : message2.includes('"pathname"')) && message2.includes("does not match the token payload")) {
-    code = "client_token_pathname_mismatch";
-  }
-  if (message2 === "Token expired") {
-    code = "client_token_expired";
-  }
-  if (message2 == null ? void 0 : message2.includes("the file length cannot be greater than")) {
-    code = "file_too_large";
-  }
-  if ((message2 == null ? void 0 : message2.startsWith("OIDC is enabled for this project, but not for the")) && message2.includes("environment.")) {
-    code = "oidc_environment_not_allowed";
-  }
-  let error46;
-  switch (code) {
-    case "store_suspended":
-      error46 = new BlobStoreSuspendedError();
-      break;
-    case "forbidden":
-      error46 = new BlobAccessError();
-      break;
-    case "oidc_environment_not_allowed":
-      error46 = new BlobOidcEnvironmentNotAllowedError(message2);
-      break;
-    case "content_type_not_allowed":
-      error46 = new BlobContentTypeNotAllowedError(message2);
-      break;
-    case "client_token_pathname_mismatch":
-      error46 = new BlobPathnameMismatchError(message2);
-      break;
-    case "client_token_expired":
-      error46 = new BlobClientTokenExpiredError();
-      break;
-    case "file_too_large":
-      error46 = new BlobFileTooLargeError(message2);
-      break;
-    case "not_found":
-      error46 = new BlobNotFoundError();
-      break;
-    case "client_token_not_allowed":
-      error46 = new BlobError(
-        message2 != null ? message2 : "This operation is not available when using a client token. Use a read\u2013write or OIDC token on the server."
-      );
-      break;
-    case "store_not_found":
-      error46 = new BlobStoreNotFoundError();
-      break;
-    case "bad_request":
-      error46 = new BlobError(message2 != null ? message2 : "Bad request");
-      break;
-    case "service_unavailable":
-      error46 = new BlobServiceNotAvailable();
-      break;
-    case "rate_limited":
-      error46 = createBlobServiceRateLimited(response);
-      break;
-    case "precondition_failed":
-      error46 = new BlobPreconditionFailedError();
-      break;
-    case "unknown_error":
-    case "not_allowed":
-    default:
-      error46 = new BlobUnknownError();
-      break;
-  }
-  return { code, error: error46 };
-}
-async function requestApi(pathname, init, commandOptions) {
-  const apiVersion = getApiVersion();
-  const auth = await resolveBlobAuth(commandOptions);
-  const bearerToken = auth.kind === "presigned" ? void 0 : auth.token;
-  const extraHeaders = getProxyThroughAlternativeApiHeaderFromEnv();
-  let requestInput = getApiUrl(pathname);
-  if (commandOptions == null ? void 0 : commandOptions.presignedUrlPayload) {
-    requestInput = addPresignedParams(
-      requestInput,
-      commandOptions.presignedUrlPayload
-    );
-  }
-  const requestId = `${auth.storeId}:${Date.now()}:${Math.random().toString(16).slice(2)}`;
-  let retryCount = 0;
-  let bodyLength = 0;
-  let totalLoaded = 0;
-  const sendBodyLength = (commandOptions == null ? void 0 : commandOptions.onUploadProgress) || shouldUseXContentLength();
-  if (init.body && // 1. For upload progress we always need to know the total size of the body
-  // 2. In development we need the header for put() to work correctly when passing a stream
-  sendBodyLength) {
-    bodyLength = computeBodyLength(init.body);
-  }
-  if (commandOptions == null ? void 0 : commandOptions.onUploadProgress) {
-    commandOptions.onUploadProgress({
-      loaded: 0,
-      total: bodyLength,
-      percentage: 0
-    });
-  }
-  const apiResponse = await (0, import_async_retry.default)(
-    async (bail) => {
-      let res;
-      try {
-        res = await blobRequest({
-          input: requestInput,
-          init: {
-            ...init,
-            headers: {
-              "x-api-blob-request-id": requestId,
-              // Store ID is not encoded in OIDC token, so pass it separately as a header
-              "x-vercel-blob-store-id": auth.storeId,
-              "x-api-blob-request-attempt": String(retryCount),
-              "x-api-version": apiVersion,
-              ...sendBodyLength ? { "x-content-length": String(bodyLength) } : {},
-              ...bearerToken !== void 0 ? { authorization: `Bearer ${bearerToken}` } : {},
-              ...extraHeaders,
-              ...init.headers
-            }
-          },
-          onUploadProgress: (commandOptions == null ? void 0 : commandOptions.onUploadProgress) ? (loaded) => {
-            var _a3;
-            const total = bodyLength !== 0 ? bodyLength : loaded;
-            totalLoaded = loaded;
-            const percentage = bodyLength > 0 ? Number((loaded / total * 100).toFixed(2)) : 0;
-            if (percentage === 100 && bodyLength > 0) {
-              return;
-            }
-            (_a3 = commandOptions.onUploadProgress) == null ? void 0 : _a3.call(commandOptions, {
-              loaded,
-              // When passing a stream to put(), we have no way to know the total size of the body.
-              // Instead of defining total as total?: number we decided to set the total to the currently
-              // loaded number. This is not inaccurate and way more practical for DX.
-              // Passing down a stream to put() is very rare
-              total,
-              percentage
-            });
-          } : void 0
-        });
-      } catch (error210) {
-        if (error210 instanceof DOMException2 && error210.name === "AbortError") {
-          bail(new BlobRequestAbortedError());
-          return;
-        }
-        if (isNetworkError(error210)) {
-          throw error210;
-        }
-        if (error210 instanceof TypeError) {
-          bail(error210);
-          return;
-        }
-        throw error210;
-      }
-      if (res.ok) {
-        return res;
-      }
-      const { code, error: error46 } = await getBlobError(res);
-      if (code === "unknown_error" || code === "service_unavailable" || code === "internal_server_error") {
-        throw error46;
-      }
-      bail(error46);
-    },
-    {
-      retries: getRetries(),
-      onRetry: (error46) => {
-        if (error46 instanceof Error) {
-          debug(`retrying API request to ${pathname}`, error46.message);
-        }
-        retryCount = retryCount + 1;
-      }
-    }
-  );
-  if (!apiResponse) {
-    throw new BlobUnknownError();
-  }
-  if (commandOptions == null ? void 0 : commandOptions.onUploadProgress) {
-    commandOptions.onUploadProgress({
-      loaded: totalLoaded,
-      total: totalLoaded,
-      percentage: 100
-    });
-  }
-  return await apiResponse.json();
-}
-function getProxyThroughAlternativeApiHeaderFromEnv() {
-  const extraHeaders = {};
-  try {
-    if ("VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API" in process.env && process.env.VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API !== void 0) {
-      extraHeaders["x-proxy-through-alternative-api"] = process.env.VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API;
-    } else if ("NEXT_PUBLIC_VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API" in process.env && process.env.NEXT_PUBLIC_VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API !== void 0) {
-      extraHeaders["x-proxy-through-alternative-api"] = process.env.NEXT_PUBLIC_VERCEL_BLOB_PROXY_THROUGH_ALTERNATIVE_API;
-    }
-  } catch {
-  }
-  return extraHeaders;
-}
-function shouldUseXContentLength() {
-  try {
-    return process.env.VERCEL_BLOB_USE_X_CONTENT_LENGTH === "1";
-  } catch {
-    return false;
-  }
-}
-var putOptionHeaderMap = {
-  cacheControlMaxAge: "x-cache-control-max-age",
-  addRandomSuffix: "x-add-random-suffix",
-  allowOverwrite: "x-allow-overwrite",
-  contentType: "x-content-type",
-  access: "x-vercel-blob-access",
-  ifMatch: "x-if-match"
-};
-function createPutHeaders(allowedOptions, options) {
-  const headers = {};
-  headers[putOptionHeaderMap.access] = options.access;
-  if (allowedOptions.includes("contentType") && options.contentType) {
-    headers[putOptionHeaderMap.contentType] = options.contentType;
-  }
-  if (allowedOptions.includes("addRandomSuffix") && options.addRandomSuffix !== void 0) {
-    headers[putOptionHeaderMap.addRandomSuffix] = options.addRandomSuffix ? "1" : "0";
-  }
-  if (allowedOptions.includes("ifMatch") && options.ifMatch) {
-    if (options.allowOverwrite === false) {
-      throw new BlobError(
-        "ifMatch and allowOverwrite: false are contradictory. ifMatch is used for conditional overwrites, which requires allowOverwrite to be true."
-      );
-    }
-    headers[putOptionHeaderMap.ifMatch] = options.ifMatch;
-    if (allowedOptions.includes("allowOverwrite") && options.allowOverwrite === void 0) {
-      headers[putOptionHeaderMap.allowOverwrite] = "1";
-    }
-  }
-  if (allowedOptions.includes("allowOverwrite") && options.allowOverwrite !== void 0) {
-    headers[putOptionHeaderMap.allowOverwrite] = options.allowOverwrite ? "1" : "0";
-  }
-  if (allowedOptions.includes("cacheControlMaxAge") && options.cacheControlMaxAge !== void 0) {
-    headers[putOptionHeaderMap.cacheControlMaxAge] = options.cacheControlMaxAge.toString();
-  }
-  return headers;
-}
-async function createPutOptions({
-  pathname,
-  options,
-  extraChecks,
-  getToken
-}) {
-  if (!pathname) {
-    throw new BlobError("pathname is required");
-  }
-  if (pathname.length > MAXIMUM_PATHNAME_LENGTH) {
-    throw new BlobError(
-      `pathname is too long, maximum length is ${MAXIMUM_PATHNAME_LENGTH}`
-    );
-  }
-  for (const invalidCharacter of disallowedPathnameCharacters) {
-    if (pathname.includes(invalidCharacter)) {
-      throw new BlobError(
-        `pathname cannot contain "${invalidCharacter}", please encode it if needed`
-      );
-    }
-  }
-  if (!options) {
-    throw new BlobError("missing options, see usage");
-  }
-  if (options.access !== "public" && options.access !== "private") {
-    throw new BlobError(
-      'access must be "private" or "public", see https://vercel.com/docs/vercel-blob'
-    );
-  }
-  if (extraChecks) {
-    extraChecks(options);
-  }
-  if (getToken) {
-    options.token = await getToken(pathname, options);
-  }
-  return options;
-}
-function createCompleteMultipartUploadMethod({ allowedOptions, getToken, extraChecks }) {
-  return async (pathname, parts, optionsInput) => {
-    const options = await createPutOptions({
-      pathname,
-      options: optionsInput,
-      extraChecks,
-      getToken
-    });
-    const headers = createPutHeaders(allowedOptions, options);
-    return completeMultipartUpload({
-      uploadId: options.uploadId,
-      key: options.key,
-      pathname,
-      headers,
-      options,
-      parts
-    });
-  };
-}
-async function completeMultipartUpload({
-  uploadId,
-  key,
-  pathname,
-  parts,
-  headers,
-  options
-}) {
-  const params = new URLSearchParams({ pathname });
-  try {
-    const response = await requestApi(
-      `/mpu?${params.toString()}`,
-      {
-        method: "POST",
-        headers: {
-          ...headers,
-          "content-type": "application/json",
-          "x-mpu-action": "complete",
-          "x-mpu-upload-id": uploadId,
-          // key can be any utf8 character so we need to encode it as HTTP headers can only be us-ascii
-          // https://www.rfc-editor.org/rfc/rfc7230#swection-3.2.4
-          "x-mpu-key": encodeURIComponent(key)
-        },
-        body: JSON.stringify(parts),
-        signal: options.abortSignal
-      },
-      options
-    );
-    debug("mpu: complete", response);
-    return response;
-  } catch (error46) {
-    if (error46 instanceof TypeError && (error46.message === "Failed to fetch" || error46.message === "fetch failed")) {
-      throw new BlobServiceNotAvailable();
-    } else {
-      throw error46;
-    }
-  }
-}
-function createCreateMultipartUploadMethod({ allowedOptions, getToken, extraChecks }) {
-  return async (pathname, optionsInput) => {
-    const options = await createPutOptions({
-      pathname,
-      options: optionsInput,
-      extraChecks,
-      getToken
-    });
-    const headers = createPutHeaders(allowedOptions, options);
-    const createMultipartUploadResponse = await createMultipartUpload(
-      pathname,
-      headers,
-      options
-    );
-    return {
-      key: createMultipartUploadResponse.key,
-      uploadId: createMultipartUploadResponse.uploadId
-    };
-  };
-}
-async function createMultipartUpload(pathname, headers, options) {
-  debug("mpu: create", "pathname:", pathname);
-  const params = new URLSearchParams({ pathname });
-  try {
-    const response = await requestApi(
-      `/mpu?${params.toString()}`,
-      {
-        method: "POST",
-        headers: {
-          ...headers,
-          "x-mpu-action": "create"
-        },
-        signal: options.abortSignal
-      },
-      options
-    );
-    debug("mpu: create", response);
-    return response;
-  } catch (error46) {
-    if (error46 instanceof TypeError && (error46.message === "Failed to fetch" || error46.message === "fetch failed")) {
-      throw new BlobServiceNotAvailable();
-    }
-    throw error46;
-  }
-}
-function createUploadPartMethod({ allowedOptions, getToken, extraChecks }) {
-  return async (pathname, body, optionsInput) => {
-    const options = await createPutOptions({
-      pathname,
-      options: optionsInput,
-      extraChecks,
-      getToken
-    });
-    const headers = createPutHeaders(allowedOptions, options);
-    if (isPlainObject2(body)) {
-      throw new BlobError(
-        "Body must be a string, buffer or stream. You sent a plain JavaScript object, double check what you're trying to upload."
-      );
-    }
-    const result = await uploadPart({
-      uploadId: options.uploadId,
-      key: options.key,
-      pathname,
-      part: { blob: body, partNumber: options.partNumber },
-      headers,
-      options
-    });
-    return {
-      etag: result.etag,
-      partNumber: options.partNumber
-    };
-  };
-}
-async function uploadPart({
-  uploadId,
-  key,
-  pathname,
-  headers,
-  options,
-  internalAbortController = new AbortController(),
-  part
-}) {
-  var _a3, _b2, _c;
-  const params = new URLSearchParams({ pathname });
-  const responsePromise = requestApi(
-    `/mpu?${params.toString()}`,
-    {
-      signal: internalAbortController.signal,
-      method: "POST",
-      headers: {
-        ...headers,
-        "x-mpu-action": "upload",
-        "x-mpu-key": encodeURIComponent(key),
-        "x-mpu-upload-id": uploadId,
-        "x-mpu-part-number": part.partNumber.toString()
-      },
-      // weird things between undici types and native fetch types
-      body: part.blob
-    },
-    options
-  );
-  function handleAbort() {
-    internalAbortController.abort();
-  }
-  if ((_a3 = options.abortSignal) == null ? void 0 : _a3.aborted) {
-    handleAbort();
-  } else {
-    (_b2 = options.abortSignal) == null ? void 0 : _b2.addEventListener("abort", handleAbort);
-  }
-  const response = await responsePromise;
-  (_c = options.abortSignal) == null ? void 0 : _c.removeEventListener("abort", handleAbort);
-  return response;
-}
-var maxConcurrentUploads = typeof window !== "undefined" ? 6 : 8;
-var partSizeInBytes = 8 * 1024 * 1024;
-var maxBytesInMemory = maxConcurrentUploads * partSizeInBytes * 2;
-function uploadAllParts({
-  uploadId,
-  key,
-  pathname,
-  stream: stream4,
-  headers,
-  options,
-  totalToLoad
-}) {
-  debug("mpu: upload init", "key:", key);
-  const internalAbortController = new AbortController();
-  return new Promise((resolve, reject) => {
-    const partsToUpload = [];
-    const completedParts = [];
-    const reader = stream4.getReader();
-    let activeUploads = 0;
-    let reading = false;
-    let currentPartNumber = 1;
-    let rejected = false;
-    let currentBytesInMemory = 0;
-    let doneReading = false;
-    let bytesSent = 0;
-    let arrayBuffers = [];
-    let currentPartBytesRead = 0;
-    let onUploadProgress;
-    const totalLoadedPerPartNumber = {};
-    if (options.onUploadProgress) {
-      onUploadProgress = (0, import_throttleit.default)(() => {
-        var _a3;
-        const loaded = Object.values(totalLoadedPerPartNumber).reduce(
-          (acc, cur) => {
-            return acc + cur;
-          },
-          0
-        );
-        const total = totalToLoad || loaded;
-        const percentage = totalToLoad > 0 ? Number(((loaded / totalToLoad || loaded) * 100).toFixed(2)) : 0;
-        (_a3 = options.onUploadProgress) == null ? void 0 : _a3.call(options, { loaded, total, percentage });
-      }, 150);
-    }
-    read().catch(cancel);
-    async function read() {
-      debug(
-        "mpu: upload read start",
-        "activeUploads:",
-        activeUploads,
-        "currentBytesInMemory:",
-        `${bytes(currentBytesInMemory)}/${bytes(maxBytesInMemory)}`,
-        "bytesSent:",
-        bytes(bytesSent)
-      );
-      reading = true;
-      while (currentBytesInMemory < maxBytesInMemory && !rejected) {
-        try {
-          const { value, done } = await reader.read();
-          if (done) {
-            doneReading = true;
-            debug("mpu: upload read consumed the whole stream");
-            if (arrayBuffers.length > 0) {
-              partsToUpload.push({
-                partNumber: currentPartNumber++,
-                blob: new Blob(arrayBuffers, {
-                  type: "application/octet-stream"
-                })
-              });
-              sendParts();
-            } else if (activeUploads === 0) {
-              reader.releaseLock();
-              resolve(completedParts);
-            }
-            reading = false;
-            return;
-          }
-          currentBytesInMemory += value.byteLength;
-          let valueOffset = 0;
-          while (valueOffset < value.byteLength) {
-            const remainingPartSize = partSizeInBytes - currentPartBytesRead;
-            const endOffset = Math.min(
-              valueOffset + remainingPartSize,
-              value.byteLength
-            );
-            const chunk = value.slice(valueOffset, endOffset);
-            arrayBuffers.push(chunk);
-            currentPartBytesRead += chunk.byteLength;
-            valueOffset = endOffset;
-            if (currentPartBytesRead === partSizeInBytes) {
-              partsToUpload.push({
-                partNumber: currentPartNumber++,
-                blob: new Blob(arrayBuffers, {
-                  type: "application/octet-stream"
-                })
-              });
-              arrayBuffers = [];
-              currentPartBytesRead = 0;
-              sendParts();
-            }
-          }
-        } catch (error46) {
-          cancel(error46);
-        }
-      }
-      debug(
-        "mpu: upload read end",
-        "activeUploads:",
-        activeUploads,
-        "currentBytesInMemory:",
-        `${bytes(currentBytesInMemory)}/${bytes(maxBytesInMemory)}`,
-        "bytesSent:",
-        bytes(bytesSent)
-      );
-      reading = false;
-    }
-    async function sendPart(part) {
-      activeUploads++;
-      debug(
-        "mpu: upload send part start",
-        "partNumber:",
-        part.partNumber,
-        "size:",
-        part.blob.size,
-        "activeUploads:",
-        activeUploads,
-        "currentBytesInMemory:",
-        `${bytes(currentBytesInMemory)}/${bytes(maxBytesInMemory)}`,
-        "bytesSent:",
-        bytes(bytesSent)
-      );
-      try {
-        const uploadProgressForPart = options.onUploadProgress ? (event) => {
-          totalLoadedPerPartNumber[part.partNumber] = event.loaded;
-          if (onUploadProgress) {
-            onUploadProgress();
-          }
-        } : void 0;
-        const completedPart = await uploadPart({
-          uploadId,
-          key,
-          pathname,
-          headers,
-          options: {
-            ...options,
-            onUploadProgress: uploadProgressForPart
-          },
-          internalAbortController,
-          part
-        });
-        debug(
-          "mpu: upload send part end",
-          "partNumber:",
-          part.partNumber,
-          "activeUploads",
-          activeUploads,
-          "currentBytesInMemory:",
-          `${bytes(currentBytesInMemory)}/${bytes(maxBytesInMemory)}`,
-          "bytesSent:",
-          bytes(bytesSent)
-        );
-        if (rejected) {
-          return;
-        }
-        completedParts.push({
-          partNumber: part.partNumber,
-          etag: completedPart.etag
-        });
-        currentBytesInMemory -= part.blob.size;
-        activeUploads--;
-        bytesSent += part.blob.size;
-        if (partsToUpload.length > 0) {
-          sendParts();
-        }
-        if (doneReading) {
-          if (activeUploads === 0) {
-            reader.releaseLock();
-            resolve(completedParts);
-          }
-          return;
-        }
-        if (!reading) {
-          read().catch(cancel);
-        }
-      } catch (error46) {
-        cancel(error46);
-      }
-    }
-    function sendParts() {
-      if (rejected) {
-        return;
-      }
-      debug(
-        "send parts",
-        "activeUploads",
-        activeUploads,
-        "partsToUpload",
-        partsToUpload.length
-      );
-      while (activeUploads < maxConcurrentUploads && partsToUpload.length > 0) {
-        const partToSend = partsToUpload.shift();
-        if (partToSend) {
-          void sendPart(partToSend);
-        }
-      }
-    }
-    function cancel(error46) {
-      if (rejected) {
-        return;
-      }
-      rejected = true;
-      internalAbortController.abort();
-      reader.releaseLock();
-      if (error46 instanceof TypeError && (error46.message === "Failed to fetch" || error46.message === "fetch failed")) {
-        reject(new BlobServiceNotAvailable());
-      } else {
-        reject(error46);
-      }
-    }
-  });
-}
-function createCreateMultipartUploaderMethod({ allowedOptions, getToken, extraChecks }) {
-  return async (pathname, optionsInput) => {
-    const options = await createPutOptions({
-      pathname,
-      options: optionsInput,
-      extraChecks,
-      getToken
-    });
-    const headers = createPutHeaders(allowedOptions, options);
-    const createMultipartUploadResponse = await createMultipartUpload(
-      pathname,
-      headers,
-      options
-    );
-    return {
-      key: createMultipartUploadResponse.key,
-      uploadId: createMultipartUploadResponse.uploadId,
-      async uploadPart(partNumber, body) {
-        if (isPlainObject2(body)) {
-          throw new BlobError(
-            "Body must be a string, buffer or stream. You sent a plain JavaScript object, double check what you're trying to upload."
-          );
-        }
-        const result = await uploadPart({
-          uploadId: createMultipartUploadResponse.uploadId,
-          key: createMultipartUploadResponse.key,
-          pathname,
-          part: { partNumber, blob: body },
-          headers,
-          options
-        });
-        return {
-          etag: result.etag,
-          partNumber
-        };
-      },
-      async complete(parts) {
-        return completeMultipartUpload({
-          uploadId: createMultipartUploadResponse.uploadId,
-          key: createMultipartUploadResponse.key,
-          pathname,
-          parts,
-          headers,
-          options
-        });
-      }
-    };
-  };
-}
-async function uncontrolledMultipartUpload(pathname, body, headers, options) {
-  debug("mpu: init", "pathname:", pathname, "headers:", headers);
-  const optionsWithoutOnUploadProgress = {
-    ...options,
-    onUploadProgress: void 0
-  };
-  if (options.maximumSizeInBytes !== void 0 && !isStream(body) && computeBodyLength(body) > options.maximumSizeInBytes) {
-    throw new BlobError(
-      `Body size of ${computeBodyLength(body)} bytes exceeds the maximum allowed size of ${options.maximumSizeInBytes} bytes`
-    );
-  }
-  const createMultipartUploadResponse = await createMultipartUpload(
-    pathname,
-    headers,
-    optionsWithoutOnUploadProgress
-  );
-  const totalToLoad = computeBodyLength(body);
-  const stream4 = await toReadableStream(body);
-  const parts = await uploadAllParts({
-    uploadId: createMultipartUploadResponse.uploadId,
-    key: createMultipartUploadResponse.key,
-    pathname,
-    // @ts-expect-error ReadableStream<ArrayBuffer | Uint8Array> is compatible at runtime
-    stream: stream4,
-    headers,
-    options,
-    totalToLoad
-  });
-  const blob = await completeMultipartUpload({
-    uploadId: createMultipartUploadResponse.uploadId,
-    key: createMultipartUploadResponse.key,
-    pathname,
-    parts,
-    headers,
-    options: optionsWithoutOnUploadProgress
-  });
-  return blob;
-}
-function createPutMethod({
-  allowedOptions,
-  getToken,
-  getPresignedUrlPayload,
-  extraChecks
-}) {
-  return async function put2(pathname, body, optionsInput) {
-    if (!body) {
-      throw new BlobError("body is required");
-    }
-    if (isPlainObject2(body)) {
-      throw new BlobError(
-        "Body must be a string, buffer or stream. You sent a plain JavaScript object, double check what you're trying to upload."
-      );
-    }
-    const options = await createPutOptions({
-      pathname,
-      options: optionsInput,
-      extraChecks,
-      getToken
-    });
-    const presignedUrlPayload = await (getPresignedUrlPayload == null ? void 0 : getPresignedUrlPayload(
-      pathname,
-      options
-    ));
-    const optionsWithPresignedUrlPayload = {
-      ...options,
-      presignedUrlPayload
-    };
-    const headers = createPutHeaders(allowedOptions, options);
-    if (options.multipart === true) {
-      return uncontrolledMultipartUpload(
-        pathname,
-        body,
-        headers,
-        optionsWithPresignedUrlPayload
-      );
-    }
-    const onUploadProgress = options.onUploadProgress ? (0, import_throttleit2.default)(options.onUploadProgress, 100) : void 0;
-    const params = new URLSearchParams({ pathname });
-    const response = await requestApi(
-      `/?${params.toString()}`,
-      {
-        method: "PUT",
-        body,
-        headers,
-        signal: options.abortSignal
-      },
-      {
-        ...optionsWithPresignedUrlPayload,
-        onUploadProgress
-      }
-    );
-    return {
-      url: response.url,
-      downloadUrl: response.downloadUrl,
-      pathname: response.pathname,
-      contentType: response.contentType,
-      contentDisposition: response.contentDisposition,
-      etag: response.etag
-    };
-  };
-}
-var MAX_PRESIGN_CACHE_CONTROL_MAX_AGE_SECONDS = 365 * 24 * 60 * 60;
-var utf8Encoder = new TextEncoder();
-
-// node_modules/.pnpm/@vercel+blob@2.6.0/node_modules/@vercel/blob/dist/index.js
-var import_undici2 = __toESM(require_undici(), 1);
-var put = createPutMethod({
-  allowedOptions: [
-    "cacheControlMaxAge",
-    "addRandomSuffix",
-    "allowOverwrite",
-    "contentType",
-    "ifMatch"
-  ]
-});
-var createMultipartUpload2 = createCreateMultipartUploadMethod({
-  allowedOptions: [
-    "cacheControlMaxAge",
-    "addRandomSuffix",
-    "allowOverwrite",
-    "contentType",
-    "ifMatch"
-  ]
-});
-var createMultipartUploader = createCreateMultipartUploaderMethod({
-  allowedOptions: [
-    "cacheControlMaxAge",
-    "addRandomSuffix",
-    "allowOverwrite",
-    "contentType",
-    "ifMatch"
-  ]
-});
-var uploadPart2 = createUploadPartMethod({
-  allowedOptions: [
-    "cacheControlMaxAge",
-    "addRandomSuffix",
-    "allowOverwrite",
-    "contentType"
-  ]
-});
-var completeMultipartUpload2 = createCompleteMultipartUploadMethod({
-  allowedOptions: [
-    "cacheControlMaxAge",
-    "addRandomSuffix",
-    "allowOverwrite",
-    "contentType"
-  ]
-});
-
 // server/db.ts
+init_dist();
 var BLOB_PREFIX = "db/";
 function getDefaultState() {
   return {
@@ -72492,30 +73396,33 @@ async function loadDb() {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}_${Math.random()}_${Math.random()}`;
-      const response = await fetch(blobUrl, {
-        cache: "no-store",
-        headers: {
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0"
-        }
+      const { get: get2 } = await Promise.resolve().then(() => (init_dist(), dist_exports));
+      const result = await get2(`${BLOB_PREFIX}state.json`, {
+        access: "private",
+        useCache: false
       });
-      if (!response.ok) {
-        throw new Error(`Failed to read state.json: ${response.status}`);
+      if (!result.body) {
+        throw new Error("No body in result");
       }
-      const text = await response.text();
+      const reader = result.body.getReader();
+      const decoder2 = new TextDecoder();
+      let text = "";
+      let done = false;
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        if (value) {
+          text += decoder2.decode(value, { stream: true });
+        }
+        done = streamDone;
+      }
+      reader.releaseLock();
       const state = JSON.parse(text);
-      if (!state.galleryImages && !state.branding) {
-        console.log("[DB] Invalid state format, using defaults");
-        return getDefaultState();
-      }
       return state;
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise((r) => setTimeout(r, 200 * (attempt + 1)));
       } else {
-        console.log("[DB] No existing state found, using defaults");
+        console.log("[DB] Error reading state.json:", e instanceof Error ? e.message : String(e));
         return getDefaultState();
       }
     }
@@ -74363,7 +75270,7 @@ function speedometer(samplesCount, min) {
   samplesCount = samplesCount || 10;
   const bytes2 = new Array(samplesCount);
   const timestamps = new Array(samplesCount);
-  let head = 0;
+  let head2 = 0;
   let tail = 0;
   let firstSampleTS;
   min = min !== void 0 ? min : 1e3;
@@ -74373,16 +75280,16 @@ function speedometer(samplesCount, min) {
     if (!firstSampleTS) {
       firstSampleTS = now;
     }
-    bytes2[head] = chunkLength;
-    timestamps[head] = now;
+    bytes2[head2] = chunkLength;
+    timestamps[head2] = now;
     let i = tail;
     let bytesCount = 0;
-    while (i !== head) {
+    while (i !== head2) {
       bytesCount += bytes2[i++];
       i = i % samplesCount;
     }
-    head = (head + 1) % samplesCount;
-    if (head === tail) {
+    head2 = (head2 + 1) % samplesCount;
+    if (head2 === tail) {
       tail = (tail + 1) % samplesCount;
     }
     if (now - firstSampleTS < min) {
@@ -90596,6 +91503,9 @@ function verifyPassword(password, hash2) {
   const computedHash = import_crypto2.default.pbkdf2Sync(password, salt, 1e5, 64, "sha512").toString("hex");
   return computedHash === storedHash;
 }
+
+// server/storage.ts
+init_dist();
 
 // node_modules/.pnpm/nanoid@5.1.6/node_modules/nanoid/index.js
 var import_node_crypto = require("node:crypto");

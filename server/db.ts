@@ -41,36 +41,45 @@ function getDefaultState(): DbState {
   };
 }
 
-// Fetch state.json from Blob public URL with aggressive cache-busting
+// Fetch state.json using authenticated get() - bypasses CDN entirely
 export async function loadDb(): Promise<DbState> {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}_${Math.random()}_${Math.random()}`;
-      const response = await fetch(blobUrl, {
-        cache: "no-store",
-        headers: { 
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0",
-        },
+      // Import get dynamically to avoid issues with bundling
+      const { get } = await import("@vercel/blob");
+      const result = await get(`${BLOB_PREFIX}state.json`, {
+        access: "private",
+        useCache: false,
       });
-      if (!response.ok) {
-        throw new Error(`Failed to read state.json: ${response.status}`);
+      
+      // result.body is a ReadableStream<Uint8Array>
+      if (!result.body) {
+        throw new Error("No body in result");
       }
-      const text = await response.text();
+      
+      // Read the stream to a string
+      const reader = result.body.getReader();
+      const decoder = new TextDecoder();
+      let text = "";
+      let done = false;
+      while (!done) {
+        const { value, done: streamDone } = await reader.read();
+        if (value) {
+          text += decoder.decode(value, { stream: true });
+        }
+        done = streamDone;
+      }
+      reader.releaseLock();
+      
       const state = JSON.parse(text) as DbState;
-      // Validate state has required structure
-      if (!state.galleryImages && !state.branding) {
-        console.log("[DB] Invalid state format, using defaults");
-        return getDefaultState();
-      }
       return state;
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
       } else {
-        console.log("[DB] No existing state found, using defaults");
+        console.log("[DB] Error reading state.json:", e instanceof Error ? e.message : String(e));
+        // Return default state with admin credentials
         return getDefaultState();
       }
     }
@@ -107,8 +116,8 @@ function withSaveMutex<T>(fn: () => Promise<T>): Promise<T> {
 // Save full DB state to Blob with mutex serialization and merge logic
 export function saveDb(state: DbState): Promise<void> {
   return withSaveMutex(async () => {
-    // Always re-read fresh state and merge our changes to prevent lost updates
-    const freshState = await loadDb(); // always fresh read
+    // Always re-read fresh state using authenticated get() (not CDN cached)
+    const freshState = await loadDb(); // always fresh read via authenticated API
     // Merge galleryImages: keep all from fresh state, add any missing from our state
     for (const img of state.galleryImages) {
       if (!freshState.galleryImages.find((f: any) => f.imageKey === img.imageKey)) {
