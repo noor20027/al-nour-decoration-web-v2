@@ -41,49 +41,34 @@ function getDefaultState(): DbState {
   };
 }
 
-// Use @vercel/blob requestApi for authenticated reads (not CDN cached)
+// Fetch state.json from Blob public URL with aggressive cache-busting
 export async function loadDb(): Promise<DbState> {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      // Use requestApi from @vercel/blob - this handles auth headers correctly
-      const token = process.env.BLOB_READ_WRITE_TOKEN || "";
-      const storeId = token.split("_").length >= 5 ? token.split("_")[4] : "";
-      if (!storeId) {
-        throw new Error("No store ID found in BLOB_READ_WRITE_TOKEN");
-      }
-      
-      // Fetch directly from Blob API with proper auth
-      const apiUrl = `https://vercel.com/api/blob/?pathname=${encodeURIComponent(BLOB_PREFIX + "state.json")}`;
-      const response = await fetch(apiUrl, {
-        method: "GET",
-        headers: {
-          authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
-          "x-vercel-blob-store-id": storeId,
-          "x-api-blob-request-id": `${storeId}:${Date.now()}:${Math.random().toString(16).slice(2)}`,
-          "x-api-version": "1",
-        },
+      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}_${Math.random()}_${Math.random()}`;
+      const response = await fetch(blobUrl, {
         cache: "no-store",
+        headers: { 
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0",
+        },
       });
       if (!response.ok) {
-        throw new Error(`Failed to read state.json: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to read state.json: ${response.status}`);
       }
-      const json = await response.json();
-      // Blob API returns { body: "..." } or { downloadUrl: "..." }
-      if (json.body && typeof json.body === "string") {
-        return JSON.parse(json.body) as DbState;
-      } else if (json.downloadUrl) {
-        const dlResponse = await fetch(json.downloadUrl, { cache: "no-store" });
-        if (!dlResponse.ok) throw new Error("Failed to download");
-        return JSON.parse(await dlResponse.text()) as DbState;
-      } else if (json.data && typeof json.data === "string") {
-        return JSON.parse(json.data) as DbState;
-      } else {
-        throw new Error("Unexpected response format");
+      const text = await response.text();
+      const state = JSON.parse(text) as DbState;
+      // Validate state has required structure
+      if (!state.galleryImages && !state.branding) {
+        console.log("[DB] Invalid state format, using defaults");
+        return getDefaultState();
       }
+      return state;
     } catch (e) {
       if (attempt < maxRetries - 1) {
-        await new Promise(r => setTimeout(r, 100 * (attempt + 1)));
+        await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
       } else {
         console.log("[DB] No existing state found, using defaults");
         return getDefaultState();

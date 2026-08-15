@@ -72492,40 +72492,28 @@ async function loadDb() {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const token = process.env.BLOB_READ_WRITE_TOKEN || "";
-      const storeId = token.split("_").length >= 5 ? token.split("_")[4] : "";
-      if (!storeId) {
-        throw new Error("No store ID found in BLOB_READ_WRITE_TOKEN");
-      }
-      const apiUrl = `https://vercel.com/api/blob/?pathname=${encodeURIComponent(BLOB_PREFIX + "state.json")}`;
-      const response = await fetch(apiUrl, {
-        method: "GET",
+      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}_${Math.random()}_${Math.random()}`;
+      const response = await fetch(blobUrl, {
+        cache: "no-store",
         headers: {
-          authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
-          "x-vercel-blob-store-id": storeId,
-          "x-api-blob-request-id": `${storeId}:${Date.now()}:${Math.random().toString(16).slice(2)}`,
-          "x-api-version": "1"
-        },
-        cache: "no-store"
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0"
+        }
       });
       if (!response.ok) {
-        throw new Error(`Failed to read state.json: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to read state.json: ${response.status}`);
       }
-      const json2 = await response.json();
-      if (json2.body && typeof json2.body === "string") {
-        return JSON.parse(json2.body);
-      } else if (json2.downloadUrl) {
-        const dlResponse = await fetch(json2.downloadUrl, { cache: "no-store" });
-        if (!dlResponse.ok) throw new Error("Failed to download");
-        return JSON.parse(await dlResponse.text());
-      } else if (json2.data && typeof json2.data === "string") {
-        return JSON.parse(json2.data);
-      } else {
-        throw new Error("Unexpected response format");
+      const text = await response.text();
+      const state = JSON.parse(text);
+      if (!state.galleryImages && !state.branding) {
+        console.log("[DB] Invalid state format, using defaults");
+        return getDefaultState();
       }
+      return state;
     } catch (e) {
       if (attempt < maxRetries - 1) {
-        await new Promise((r) => setTimeout(r, 100 * (attempt + 1)));
+        await new Promise((r) => setTimeout(r, 200 * (attempt + 1)));
       } else {
         console.log("[DB] No existing state found, using defaults");
         return getDefaultState();
