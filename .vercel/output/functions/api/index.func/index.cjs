@@ -73398,7 +73398,7 @@ async function loadDb() {
     try {
       const { get: get2 } = await Promise.resolve().then(() => (init_dist(), dist_exports));
       const result = await get2(`${BLOB_PREFIX}state.json`, {
-        access: "private",
+        access: "public",
         useCache: false
       });
       if (!result.body) {

@@ -49,7 +49,7 @@ export async function loadDb(): Promise<DbState> {
       // Import get dynamically to avoid issues with bundling
       const { get } = await import("@vercel/blob");
       const result = await get(`${BLOB_PREFIX}state.json`, {
-        access: "private",
+        access: "public",
         useCache: false,
       });
       
