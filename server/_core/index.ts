@@ -11,6 +11,14 @@ const app = express();
 
 // Configure body parser with larger size limit for file uploads
 app.use(express.json({ limit: "50mb" }));
+
+// Prevent caching of API responses
+app.use((req, res, next) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Register middleware
