@@ -1,4 +1,4 @@
-import { put, del, list, get } from "@vercel/blob";
+import { put, del, list } from "@vercel/blob";
 
 // Simple JSON-based storage in Vercel Blob
 // In-memory caching with TTL for fast reads + invalidation on writes
@@ -41,31 +41,38 @@ function getDefaultState(): DbState {
   };
 }
 
-// Always fetch fresh from Blob using authenticated get() (not CDN cached)
+// Always fetch fresh from Blob using authenticated fetch (not CDN cached)
 export async function loadDb(): Promise<DbState> {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      // Use @vercel/blob get() with options - this uses Bearer token (not CDN cached)
-      const result = await get(`${BLOB_PREFIX}state.json`, {
-        access: "public",
-        useCache: false,
-      });
-      if (result.blob) {
-        // For Vercel Blob, when access is "public" and useCache is false,
-        // it adds ?cache=0 to private URLs. For public, it reads directly.
-        // We need to read the stream/body
-        if (result.body) {
-          // Read from stream
-          const chunks: Buffer[] = [];
-          for await (const chunk of result.body as any) {
-            chunks.push(Buffer.from(chunk));
-          }
-          const text = Buffer.concat(chunks).toString();
-          return JSON.parse(text) as DbState;
-        }
+      // Use Bearer token to bypass CDN cache
+      const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+      if (!blobToken) {
+        // No token - fallback to public URL (CDN cached)
+        const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}_${Math.random()}_${Math.random()}`;
+        const response = await fetch(blobUrl, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const text = await response.text();
+        return JSON.parse(text) as DbState;
       }
-      throw new Error("Failed to read blob data");
+      
+      // Authenticated fetch - bypasses CDN
+      const storeId = blobToken.split("_")[4] || "";
+      const blobUrl = `https://${storeId}.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json`;
+      const response = await fetch(blobUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${blobToken}`,
+          "x-vercel-blob-store-id": storeId,
+        },
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to read state.json: ${response.status} ${response.statusText}`);
+      }
+      const text = await response.text();
+      return JSON.parse(text) as DbState;
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise(r => setTimeout(r, 100 * (attempt + 1)));
