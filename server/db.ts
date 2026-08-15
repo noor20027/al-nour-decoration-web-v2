@@ -99,12 +99,13 @@ export async function saveDb(state: DbState): Promise<void> {
         throw new Error("BLOB_READ_WRITE_TOKEN not set");
       }
       const uploadResponse = await fetch(
-        `https://vercel.com/api/blob/upload?access=public&pathname=${encodeURIComponent(BLOB_PREFIX + 'state.json')}`,
+        `https://vercel.com/api/blob/?pathname=${encodeURIComponent(BLOB_PREFIX + 'state.json')}`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             Authorization: `Bearer ${blobToken}`,
             "Content-Type": "application/json",
+            "x-vercel-blob-access": "public",
           },
           body: json,
         }

@@ -22,15 +22,16 @@ export async function storagePut(
   if (!blobToken) {
     throw new Error("BLOB_READ_WRITE_TOKEN not set");
   }
-  // Use Vercel Blob API v1 - construct blob URL directly
+  // Use Vercel Blob API - PUT method with pathname query param
   const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${key}`;
   const uploadResponse = await fetch(
-    `https://vercel.com/api/blob/upload?access=public&pathname=${encodeURIComponent(key)}`,
+    `https://vercel.com/api/blob/?pathname=${encodeURIComponent(key)}`,
     {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${blobToken}`,
         "Content-Type": contentType,
+        "x-vercel-blob-access": "public",
       },
       body: data,
     }

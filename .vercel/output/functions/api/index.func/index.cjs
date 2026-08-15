@@ -28476,12 +28476,13 @@ async function saveDb(state) {
         throw new Error("BLOB_READ_WRITE_TOKEN not set");
       }
       const uploadResponse = await fetch(
-        `https://vercel.com/api/blob/upload?access=public&pathname=${encodeURIComponent(BLOB_PREFIX + "state.json")}`,
+        `https://vercel.com/api/blob/?pathname=${encodeURIComponent(BLOB_PREFIX + "state.json")}`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             Authorization: `Bearer ${blobToken}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "x-vercel-blob-access": "public"
           },
           body: json2
         }
@@ -46578,12 +46579,13 @@ async function storagePut(relKey, data, contentType = "application/octet-stream"
   }
   const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${key}`;
   const uploadResponse = await fetch(
-    `https://vercel.com/api/blob/upload?access=public&pathname=${encodeURIComponent(key)}`,
+    `https://vercel.com/api/blob/?pathname=${encodeURIComponent(key)}`,
     {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${blobToken}`,
-        "Content-Type": contentType
+        "Content-Type": contentType,
+        "x-vercel-blob-access": "public"
       },
       body: data
     }
