@@ -41,23 +41,11 @@ function getDefaultState(): DbState {
   };
 }
 
-// In-memory cache with TTL to reduce Blob fetch latency
-let cachedState: DbState | null = null;
-let cacheTimestamp = 0;
-const CACHE_TTL = 30000; // 30 seconds
-
-// Load full DB state from Blob - with in-memory caching for performance
-// freshRead=true bypasses cache for write operations to prevent race conditions
-export async function loadDb(freshRead = false): Promise<DbState> {
-  // Return cached state if still fresh (unless freshRead is requested)
-  if (!freshRead && cachedState && (Date.now() - cacheTimestamp) < CACHE_TTL) {
-    return cachedState;
-  }
-
+// Always fetch fresh from Blob - no in-memory caching to prevent race conditions
+export async function loadDb(): Promise<DbState> {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      // Use cache-busting timestamp to force fresh read
       const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}`;
       const response = await fetch(blobUrl, {
         cache: "no-store",
@@ -67,12 +55,7 @@ export async function loadDb(freshRead = false): Promise<DbState> {
         throw new Error(`Failed to read state.json: ${response.status}`);
       }
       const text = await response.text();
-      const newState = JSON.parse(text) as DbState;
-      if (!freshRead) {
-        cachedState = newState;
-        cacheTimestamp = Date.now();
-      }
-      return newState;
+      return JSON.parse(text) as DbState;
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise(r => setTimeout(r, 100 * (attempt + 1)));
@@ -85,32 +68,26 @@ export async function loadDb(freshRead = false): Promise<DbState> {
   return getDefaultState();
 }
 
-// Invalidate cache after write to ensure consistency
-function invalidateCache(): void {
-  cachedState = null;
-  cacheTimestamp = 0;
-}
 
-// Save full DB state to Blob with retry - uses fresh read first to prevent lost updates
-export async function saveDb(state: DbState, mergeFresh = true): Promise<void> {
+
+// Save full DB state to Blob with retry - always merges with latest state to prevent lost updates
+export async function saveDb(state: DbState): Promise<void> {
   const maxRetries = 5;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      // On subsequent attempts, re-read fresh state and merge changes to prevent lost updates
-      if (attempt > 0 && mergeFresh) {
-        const freshState = await loadDb(true); // fresh read
-        // Merge galleryImages: keep all from fresh state, add any missing from our state
-        for (const img of state.galleryImages) {
-          if (!freshState.galleryImages.find((f: any) => f.imageKey === img.imageKey)) {
-            freshState.galleryImages.push(img);
-          }
+      // Always re-read fresh state and merge our changes to prevent lost updates
+      const freshState = await loadDb(); // always fresh read
+      // Merge galleryImages: keep all from fresh state, add any missing from our state
+      for (const img of state.galleryImages) {
+        if (!freshState.galleryImages.find((f: any) => f.imageKey === img.imageKey)) {
+          freshState.galleryImages.push(img);
         }
-        // Merge branding: take the latest from either
-        for (const [key, val] of Object.entries(state.branding)) {
-          freshState.branding[key] = val;
-        }
-        state = freshState;
       }
+      // Merge branding: take the latest from either
+      for (const [key, val] of Object.entries(state.branding)) {
+        freshState.branding[key] = val;
+      }
+      state = freshState;
       const json = JSON.stringify(state);
       await put(`${BLOB_PREFIX}state.json`, json, {
         access: "public",
@@ -119,8 +96,7 @@ export async function saveDb(state: DbState, mergeFresh = true): Promise<void> {
         allowOverwrite: true,
       });
       console.log("[DB] State saved to Blob storage");
-      invalidateCache();
-      return;
+            return;
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
@@ -203,7 +179,7 @@ export async function getCarouselImages(): Promise<any[]> {
 }
 
 export async function addGalleryImage(imageUrl: string, imageKey: string, title?: string, description?: string, orientation?: string, isCarousel?: string): Promise<void> {
-  const state = await loadDb(true); // fresh read to prevent lost updates
+  const state = await loadDb(); // fresh read to prevent lost updates
   const maxOrder = state.galleryImages.length > 0
     ? Math.max(...state.galleryImages.map((img: any) => img.displayOrder || 0))
     : 0;
@@ -223,7 +199,7 @@ export async function addGalleryImage(imageUrl: string, imageKey: string, title?
 }
 
 export async function updateGalleryImage(imageKey: string, updates: any): Promise<void> {
-  const state = await loadDb(true); // fresh read
+  const state = await loadDb(); // fresh read
   const idx = state.galleryImages.findIndex((img: any) => img.imageKey === imageKey);
   if (idx >= 0) {
     state.galleryImages[idx] = { ...state.galleryImages[idx], ...updates, updatedAt: new Date().toISOString() };
@@ -232,7 +208,7 @@ export async function updateGalleryImage(imageKey: string, updates: any): Promis
 }
 
 export async function deleteGalleryImage(imageKey: string): Promise<void> {
-  const state = await loadDb(true); // fresh read
+  const state = await loadDb(); // fresh read
   state.galleryImages = state.galleryImages.filter((img: any) => img.imageKey !== imageKey);
   await saveDb(state);
 }
@@ -249,7 +225,7 @@ export async function getBrandingImage(type: string): Promise<any> {
 }
 
 export async function upsertBrandingImage(type: string, imageUrl: string, imageKey: string): Promise<void> {
-  const state = await loadDb(true); // fresh read
+  const state = await loadDb(); // fresh read
   state.branding[type] = {
     id: Object.keys(state.branding).length + 1,
     type,
@@ -262,7 +238,7 @@ export async function upsertBrandingImage(type: string, imageUrl: string, imageK
 }
 
 export async function deleteBrandingImage(type: string): Promise<void> {
-  const state = await loadDb(true); // fresh read
+  const state = await loadDb(); // fresh read
   delete state.branding[type];
   await saveDb(state);
 }
