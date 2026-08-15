@@ -72488,14 +72488,51 @@ function getDefaultState() {
     }
   };
 }
+function getStoreId() {
+  const token = process.env.BLOB_READ_WRITE_TOKEN || "";
+  const parts = token.split("_");
+  return parts.length >= 5 ? parts.slice(4).join("_") : "";
+}
 async function loadDb() {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}`;
+      const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+      const storeId = getStoreId();
+      if (blobToken && storeId) {
+        const apiResponse = await fetch(
+          `https://vercel.com/api/blob/?pathname=${encodeURIComponent(BLOB_PREFIX + "state.json")}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${blobToken}`,
+              "x-vercel-blob-store-id": storeId,
+              "Cache-Control": "no-store"
+            }
+          }
+        );
+        if (apiResponse.ok) {
+          const json2 = await apiResponse.json();
+          if (json2.body) {
+            return JSON.parse(json2.body);
+          }
+          if (json2.downloadUrl) {
+            const dlResponse = await fetch(json2.downloadUrl, { cache: "no-store" });
+            if (dlResponse.ok) {
+              const text2 = await dlResponse.text();
+              return JSON.parse(text2);
+            }
+          }
+        }
+      }
+      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}_${Math.random()}`;
       const response = await fetch(blobUrl, {
         cache: "no-store",
-        headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" }
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0"
+        }
       });
       if (!response.ok) {
         throw new Error(`Failed to read state.json: ${response.status}`);

@@ -41,15 +41,60 @@ function getDefaultState(): DbState {
   };
 }
 
-// Always fetch fresh from Blob - no in-memory caching to prevent race conditions
+// Helper to get store ID from BLOB_READ_WRITE_TOKEN
+function getStoreId(): string {
+  const token = process.env.BLOB_READ_WRITE_TOKEN || "";
+  const parts = token.split("_");
+  // Format: vercel_blob_rw_XXXX_storeId
+  return parts.length >= 5 ? parts.slice(4).join("_") : "";
+}
+
+// Always fetch fresh from Blob API (authenticated) - no CDN caching
 export async function loadDb(): Promise<DbState> {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}`;
+      const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+      const storeId = getStoreId();
+      
+      if (blobToken && storeId) {
+        // Use authenticated Blob API (not CDN cached)
+        const apiResponse = await fetch(
+          `https://vercel.com/api/blob/?pathname=${encodeURIComponent(BLOB_PREFIX + 'state.json')}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${blobToken}`,
+              "x-vercel-blob-store-id": storeId,
+              "Cache-Control": "no-store",
+            },
+          }
+        );
+        if (apiResponse.ok) {
+          const json = await apiResponse.json();
+          if (json.body) {
+            return JSON.parse(json.body) as DbState;
+          }
+          // If body is not directly accessible, try the downloadUrl
+          if (json.downloadUrl) {
+            const dlResponse = await fetch(json.downloadUrl, { cache: "no-store" });
+            if (dlResponse.ok) {
+              const text = await dlResponse.text();
+              return JSON.parse(text) as DbState;
+            }
+          }
+        }
+      }
+      
+      // Fallback: try public URL with cache-busting
+      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}_${Math.random()}`;
       const response = await fetch(blobUrl, {
         cache: "no-store",
-        headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" },
+        headers: { 
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0",
+        },
       });
       if (!response.ok) {
         throw new Error(`Failed to read state.json: ${response.status}`);
