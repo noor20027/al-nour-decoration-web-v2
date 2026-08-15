@@ -1,4 +1,5 @@
 import { put, del, list } from "@vercel/blob";
+import { parseStoreIdFromReadWriteToken } from "@vercel/blob";
 
 // Simple JSON-based storage in Vercel Blob
 // In-memory caching with TTL for fast reads + invalidation on writes
@@ -41,38 +42,45 @@ function getDefaultState(): DbState {
   };
 }
 
-// Always fetch fresh from Blob using authenticated fetch (not CDN cached)
+// Use @vercel/blob requestApi for authenticated reads (not CDN cached)
 export async function loadDb(): Promise<DbState> {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      // Use Bearer token to bypass CDN cache
-      const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
-      if (!blobToken) {
-        // No token - fallback to public URL (CDN cached)
-        const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}_${Math.random()}_${Math.random()}`;
-        const response = await fetch(blobUrl, { cache: "no-store" });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const text = await response.text();
-        return JSON.parse(text) as DbState;
+      // Use requestApi from @vercel/blob - this handles auth headers correctly
+      const storeId = parseStoreIdFromReadWriteToken(process.env.BLOB_READ_WRITE_TOKEN || "");
+      if (!storeId) {
+        throw new Error("No store ID found in BLOB_READ_WRITE_TOKEN");
       }
       
-      // Authenticated fetch - bypasses CDN
-      const storeId = blobToken.split("_")[4] || "";
-      const blobUrl = `https://${storeId}.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json`;
-      const response = await fetch(blobUrl, {
+      // Fetch directly from Blob API with proper auth
+      const apiUrl = `https://vercel.com/api/blob/?pathname=${encodeURIComponent(BLOB_PREFIX + "state.json")}`;
+      const response = await fetch(apiUrl, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${blobToken}`,
+          authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
           "x-vercel-blob-store-id": storeId,
+          "x-api-blob-request-id": `${storeId}:${Date.now()}:${Math.random().toString(16).slice(2)}`,
+          "x-api-version": "1",
         },
         cache: "no-store",
       });
       if (!response.ok) {
         throw new Error(`Failed to read state.json: ${response.status} ${response.statusText}`);
       }
-      const text = await response.text();
-      return JSON.parse(text) as DbState;
+      const json = await response.json();
+      // Blob API returns { body: "..." } or { downloadUrl: "..." }
+      if (json.body && typeof json.body === "string") {
+        return JSON.parse(json.body) as DbState;
+      } else if (json.downloadUrl) {
+        const dlResponse = await fetch(json.downloadUrl, { cache: "no-store" });
+        if (!dlResponse.ok) throw new Error("Failed to download");
+        return JSON.parse(await dlResponse.text()) as DbState;
+      } else if (json.data && typeof json.data === "string") {
+        return JSON.parse(json.data) as DbState;
+      } else {
+        throw new Error("Unexpected response format");
+      }
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise(r => setTimeout(r, 100 * (attempt + 1)));
