@@ -1,5 +1,4 @@
 import { put, del, list } from "@vercel/blob";
-import { parseStoreIdFromReadWriteToken } from "@vercel/blob";
 
 // Simple JSON-based storage in Vercel Blob
 // In-memory caching with TTL for fast reads + invalidation on writes
@@ -48,7 +47,8 @@ export async function loadDb(): Promise<DbState> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       // Use requestApi from @vercel/blob - this handles auth headers correctly
-      const storeId = parseStoreIdFromReadWriteToken(process.env.BLOB_READ_WRITE_TOKEN || "");
+      const token = process.env.BLOB_READ_WRITE_TOKEN || "";
+      const storeId = token.split("_").length >= 5 ? token.split("_")[4] : "";
       if (!storeId) {
         throw new Error("No store ID found in BLOB_READ_WRITE_TOKEN");
       }

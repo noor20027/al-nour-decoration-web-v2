@@ -72492,29 +72492,37 @@ async function loadDb() {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
-      if (!blobToken) {
-        const blobUrl2 = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}_${Math.random()}_${Math.random()}`;
-        const response2 = await fetch(blobUrl2, { cache: "no-store" });
-        if (!response2.ok) throw new Error(`HTTP ${response2.status}`);
-        const text2 = await response2.text();
-        return JSON.parse(text2);
+      const token = process.env.BLOB_READ_WRITE_TOKEN || "";
+      const storeId = token.split("_").length >= 5 ? token.split("_")[4] : "";
+      if (!storeId) {
+        throw new Error("No store ID found in BLOB_READ_WRITE_TOKEN");
       }
-      const storeId = blobToken.split("_")[4] || "";
-      const blobUrl = `https://${storeId}.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json`;
-      const response = await fetch(blobUrl, {
+      const apiUrl = `https://vercel.com/api/blob/?pathname=${encodeURIComponent(BLOB_PREFIX + "state.json")}`;
+      const response = await fetch(apiUrl, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${blobToken}`,
-          "x-vercel-blob-store-id": storeId
+          authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
+          "x-vercel-blob-store-id": storeId,
+          "x-api-blob-request-id": `${storeId}:${Date.now()}:${Math.random().toString(16).slice(2)}`,
+          "x-api-version": "1"
         },
         cache: "no-store"
       });
       if (!response.ok) {
         throw new Error(`Failed to read state.json: ${response.status} ${response.statusText}`);
       }
-      const text = await response.text();
-      return JSON.parse(text);
+      const json2 = await response.json();
+      if (json2.body && typeof json2.body === "string") {
+        return JSON.parse(json2.body);
+      } else if (json2.downloadUrl) {
+        const dlResponse = await fetch(json2.downloadUrl, { cache: "no-store" });
+        if (!dlResponse.ok) throw new Error("Failed to download");
+        return JSON.parse(await dlResponse.text());
+      } else if (json2.data && typeof json2.data === "string") {
+        return JSON.parse(json2.data);
+      } else {
+        throw new Error("Unexpected response format");
+      }
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise((r) => setTimeout(r, 100 * (attempt + 1)));
