@@ -83,6 +83,10 @@ export async function saveDb(state: DbState): Promise<void> {
           freshState.galleryImages.push(img);
         }
       }
+      // Remove images that are in freshState but NOT in our state (deletions)
+      freshState.galleryImages = freshState.galleryImages.filter((f: any) => 
+        state.galleryImages.find((img: any) => img.imageKey === f.imageKey)
+      );
       // Merge branding: take the latest from either
       for (const [key, val] of Object.entries(state.branding)) {
         freshState.branding[key] = val;

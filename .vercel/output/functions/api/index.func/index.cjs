@@ -72523,6 +72523,9 @@ async function saveDb(state) {
           freshState.galleryImages.push(img);
         }
       }
+      freshState.galleryImages = freshState.galleryImages.filter(
+        (f) => state.galleryImages.find((img) => img.imageKey === f.imageKey)
+      );
       for (const [key, val] of Object.entries(state.branding)) {
         freshState.branding[key] = val;
       }
