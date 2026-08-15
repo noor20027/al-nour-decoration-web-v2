@@ -278,12 +278,12 @@ var require_depd = __commonJS({
       if ("value" in descriptor) {
         descriptor = convertDataDescriptorToAccessor(obj, prop, message2);
       }
-      var get = descriptor.get;
+      var get2 = descriptor.get;
       var set2 = descriptor.set;
-      if (typeof get === "function") {
+      if (typeof get2 === "function") {
         descriptor.get = function getter() {
           log.call(deprecate, message2, site);
-          return get.apply(this, arguments);
+          return get2.apply(this, arguments);
         };
       }
       if (typeof set2 === "function") {
@@ -17077,7 +17077,7 @@ var require_body_parser = __commonJS({
       };
     }
     function createParserGetter(name) {
-      return function get() {
+      return function get2() {
         return loadParser(name);
       };
     }
@@ -45739,19 +45739,19 @@ var require_fetch_jwks = __commonJS({
     var errors_js_1 = require_errors4();
     var buffer_utils_js_1 = require_buffer_utils();
     var fetchJwks = async (url3, timeout, options) => {
-      let get;
+      let get2;
       switch (url3.protocol) {
         case "https:":
-          get = https2.get;
+          get2 = https2.get;
           break;
         case "http:":
-          get = http2.get;
+          get2 = http2.get;
           break;
         default:
           throw new TypeError("Unsupported URL protocol.");
       }
       const { agent, headers } = options;
-      const req = get(url3.href, {
+      const req = get2(url3.href, {
         agent,
         timeout,
         headers
@@ -66620,14 +66620,14 @@ var require_follow_redirects = __commonJS({
           debug2("options", options);
           return new RedirectableRequest(options, callback);
         }
-        function get(input, options, callback) {
+        function get2(input, options, callback) {
           var wrappedRequest = wrappedProtocol.request(input, options, callback);
           wrappedRequest.end();
           return wrappedRequest;
         }
         Object.defineProperties(wrappedProtocol, {
           request: { value: request, configurable: true, enumerable: true, writable: true },
-          get: { value: get, configurable: true, enumerable: true, writable: true }
+          get: { value: get2, configurable: true, enumerable: true, writable: true }
         });
       });
       return exports3;
@@ -71305,6 +71305,12 @@ var addPresignedParams = (url3, presignedUrlPayload) => {
   );
   return urlObj.toString();
 };
+function isUrl(urlOrPathname) {
+  return urlOrPathname.startsWith("http://") || urlOrPathname.startsWith("https://");
+}
+function constructBlobUrl(storeId, pathname, access) {
+  return `https://${storeId}.${access}.blob.vercel-storage.com/${pathname}`;
+}
 var debugIsActive = false;
 var _a;
 var _b;
@@ -72419,6 +72425,125 @@ var utf8Encoder = new TextEncoder();
 
 // node_modules/.pnpm/@vercel+blob@2.6.0/node_modules/@vercel/blob/dist/index.js
 var import_undici2 = __toESM(require_undici(), 1);
+function extractPathnameFromUrl(url3) {
+  try {
+    const parsedUrl = new URL(url3);
+    return parsedUrl.pathname.slice(1);
+  } catch {
+    return url3;
+  }
+}
+async function get(urlOrPathname, options) {
+  if (!urlOrPathname) {
+    throw new BlobError("url or pathname is required");
+  }
+  if (!options) {
+    throw new BlobError("missing options, see usage");
+  }
+  if (options.access !== "public" && options.access !== "private") {
+    throw new BlobError(
+      'access must be "private" or "public", see https://vercel.com/docs/vercel-blob'
+    );
+  }
+  const auth = await resolveBlobAuth(options);
+  if (auth.kind === "presigned") {
+    throw new BlobError("Presigned URLs are not supported for the get method");
+  }
+  let blobUrl;
+  let pathname;
+  const access = options.access;
+  if (isUrl(urlOrPathname)) {
+    blobUrl = urlOrPathname;
+    pathname = extractPathnameFromUrl(urlOrPathname);
+    try {
+      const { hostname: hostname3 } = new URL(blobUrl);
+      if (!hostname3.endsWith(".blob.vercel-storage.com")) {
+        throw new BlobError(
+          "Invalid URL: the URL does not point to a Vercel Blob store. Use a pathname instead, see https://vercel.com/docs/vercel-blob"
+        );
+      }
+    } catch (error46) {
+      if (error46 instanceof BlobError) throw error46;
+      throw new BlobError("Invalid URL: unable to parse the provided URL");
+    }
+  } else {
+    if (!auth.storeId) {
+      throw new BlobError("Invalid token: unable to extract store ID");
+    }
+    pathname = urlOrPathname;
+    blobUrl = constructBlobUrl(auth.storeId, pathname, access);
+  }
+  const requestHeaders = {
+    ...options.ifNoneMatch ? { "If-None-Match": options.ifNoneMatch } : {},
+    authorization: `Bearer ${auth.token}`,
+    ...options.headers
+    // low-level escape hatch, applied last to override anything
+  };
+  let fetchUrl = blobUrl;
+  if (options.useCache === false && access === "private") {
+    const url3 = new URL(blobUrl);
+    url3.searchParams.set("cache", "0");
+    fetchUrl = url3.toString();
+  }
+  const response = await (0, import_undici2.fetch)(fetchUrl, {
+    method: "GET",
+    headers: requestHeaders,
+    signal: options.abortSignal
+  });
+  if (response.status === 304) {
+    const downloadUrlObj = new URL(blobUrl);
+    downloadUrlObj.searchParams.set("download", "1");
+    const lastModified2 = response.headers.get("last-modified");
+    return {
+      statusCode: 304,
+      stream: null,
+      headers: response.headers,
+      blob: {
+        url: blobUrl,
+        downloadUrl: downloadUrlObj.toString(),
+        pathname,
+        contentType: null,
+        contentDisposition: response.headers.get("content-disposition") || "",
+        cacheControl: response.headers.get("cache-control") || "",
+        size: null,
+        uploadedAt: lastModified2 ? new Date(lastModified2) : /* @__PURE__ */ new Date(),
+        etag: response.headers.get("etag") || ""
+      }
+    };
+  }
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    throw new BlobError(
+      `Failed to fetch blob: ${response.status} ${response.statusText}`
+    );
+  }
+  const stream4 = response.body;
+  if (!stream4) {
+    throw new BlobError("Response body is null");
+  }
+  const contentLength = response.headers.get("content-length");
+  const lastModified = response.headers.get("last-modified");
+  const downloadUrl = new URL(blobUrl);
+  downloadUrl.searchParams.set("download", "1");
+  return {
+    statusCode: 200,
+    stream: stream4,
+    headers: response.headers,
+    blob: {
+      url: blobUrl,
+      downloadUrl: downloadUrl.toString(),
+      pathname,
+      contentType: response.headers.get("content-type") || "application/octet-stream",
+      contentDisposition: response.headers.get("content-disposition") || "",
+      cacheControl: response.headers.get("cache-control") || "",
+      size: contentLength ? parseInt(contentLength, 10) : 0,
+      uploadedAt: lastModified ? new Date(lastModified) : /* @__PURE__ */ new Date(),
+      etag: response.headers.get("etag") || ""
+    }
+  };
+}
 var put = createPutMethod({
   allowedOptions: [
     "cacheControlMaxAge",
@@ -72492,20 +72617,21 @@ async function loadDb() {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}_${Math.random()}_${Math.random()}`;
-      const response = await fetch(blobUrl, {
-        cache: "no-store",
-        headers: {
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0"
-        }
+      const result = await get(`${BLOB_PREFIX}state.json`, {
+        access: "public",
+        useCache: false
       });
-      if (!response.ok) {
-        throw new Error(`Failed to read state.json: ${response.status}`);
+      if (result.blob) {
+        if (result.body) {
+          const chunks = [];
+          for await (const chunk of result.body) {
+            chunks.push(Buffer.from(chunk));
+          }
+          const text = Buffer.concat(chunks).toString();
+          return JSON.parse(text);
+        }
       }
-      const text = await response.text();
-      return JSON.parse(text);
+      throw new Error("Failed to read blob data");
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise((r) => setTimeout(r, 100 * (attempt + 1)));

@@ -1,4 +1,4 @@
-import { put, del, list } from "@vercel/blob";
+import { put, del, list, get } from "@vercel/blob";
 
 // Simple JSON-based storage in Vercel Blob
 // In-memory caching with TTL for fast reads + invalidation on writes
@@ -41,25 +41,31 @@ function getDefaultState(): DbState {
   };
 }
 
-// Always fetch fresh from Blob public URL with aggressive cache-busting
+// Always fetch fresh from Blob using authenticated get() (not CDN cached)
 export async function loadDb(): Promise<DbState> {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}_${Math.random()}_${Math.random()}`;
-      const response = await fetch(blobUrl, {
-        cache: "no-store",
-        headers: { 
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0",
-        },
+      // Use @vercel/blob get() with options - this uses Bearer token (not CDN cached)
+      const result = await get(`${BLOB_PREFIX}state.json`, {
+        access: "public",
+        useCache: false,
       });
-      if (!response.ok) {
-        throw new Error(`Failed to read state.json: ${response.status}`);
+      if (result.blob) {
+        // For Vercel Blob, when access is "public" and useCache is false,
+        // it adds ?cache=0 to private URLs. For public, it reads directly.
+        // We need to read the stream/body
+        if (result.body) {
+          // Read from stream
+          const chunks: Buffer[] = [];
+          for await (const chunk of result.body as any) {
+            chunks.push(Buffer.from(chunk));
+          }
+          const text = Buffer.concat(chunks).toString();
+          return JSON.parse(text) as DbState;
+        }
       }
-      const text = await response.text();
-      return JSON.parse(text) as DbState;
+      throw new Error("Failed to read blob data");
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise(r => setTimeout(r, 100 * (attempt + 1)));
