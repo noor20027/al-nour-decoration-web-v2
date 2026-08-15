@@ -41,45 +41,25 @@ function getDefaultState(): DbState {
   };
 }
 
-// Fetch state.json using authenticated get() - bypasses CDN entirely
+// Fetch state.json from Blob public URL (CDN - fast reads)
 export async function loadDb(): Promise<DbState> {
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      // Import get dynamically to avoid issues with bundling
-      const { get } = await import("@vercel/blob");
-      const result = await get(`${BLOB_PREFIX}state.json`, {
-        access: "public",
-        useCache: false,
+      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}`;
+      const response = await fetch(blobUrl, {
+        cache: "no-store",
       });
-      
-      // result.body is a ReadableStream<Uint8Array>
-      if (!result.body) {
-        throw new Error("No body in result");
+      if (!response.ok) {
+        throw new Error(`Failed to read state.json: ${response.status}`);
       }
-      
-      // Read the stream to a string
-      const reader = result.body.getReader();
-      const decoder = new TextDecoder();
-      let text = "";
-      let done = false;
-      while (!done) {
-        const { value, done: streamDone } = await reader.read();
-        if (value) {
-          text += decoder.decode(value, { stream: true });
-        }
-        done = streamDone;
-      }
-      reader.releaseLock();
-      
+      const text = await response.text();
       const state = JSON.parse(text) as DbState;
       return state;
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
       } else {
-        console.log("[DB] Error reading state.json:", e instanceof Error ? e.message : String(e));
-        // Return default state with admin credentials
         return getDefaultState();
       }
     }
@@ -97,8 +77,8 @@ function withSaveMutex<T>(fn: () => Promise<T>): Promise<T> {
     try {
       return await fn();
     } finally {
-      // Small delay to let Blob CDN propagate
-      await new Promise(r => setTimeout(r, 500));
+      // Wait for Blob write to complete
+      await new Promise(r => setTimeout(r, 300));
     }
   };
   
@@ -113,33 +93,20 @@ function withSaveMutex<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-// Save full DB state to Blob with mutex serialization and merge logic
+// Save full DB state to Blob - simple overwrite (no merge)
+// The calling function is responsible for reading latest state before modifying
 export function saveDb(state: DbState): Promise<void> {
   return withSaveMutex(async () => {
-    // Always re-read fresh state using authenticated get() (not CDN cached)
-    const freshState = await loadDb(); // always fresh read via authenticated API
-    // Merge galleryImages: keep all from fresh state, add any missing from our state
-    for (const img of state.galleryImages) {
-      if (!freshState.galleryImages.find((f: any) => f.imageKey === img.imageKey)) {
-        freshState.galleryImages.push(img);
-      }
-    }
-    // Remove images that are in freshState but NOT in our state (deletions)
-    freshState.galleryImages = freshState.galleryImages.filter((f: any) => 
-      state.galleryImages.find((img: any) => img.imageKey === f.imageKey)
-    );
-    // Merge branding: take the latest from either
-    for (const [key, val] of Object.entries(state.branding)) {
-      freshState.branding[key] = val;
-    }
-    const json = JSON.stringify(freshState);
+    const json = JSON.stringify(state);
     await put(`${BLOB_PREFIX}state.json`, json, {
       access: "public",
       contentType: "application/json",
       addRandomSuffix: false,
       allowOverwrite: true,
-      cacheControlMaxAge: 0, // Prevent CDN caching - always serve fresh data
+      cacheControlMaxAge: 0, // Prevent CDN caching
     });
+    // Wait for CDN to propagate (cacheControlMaxAge: 0 should be instant)
+    await new Promise(r => setTimeout(r, 1000));
     console.log("[DB] State saved to Blob storage");
   });
 }
