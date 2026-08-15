@@ -72513,41 +72513,49 @@ async function loadDb() {
   }
   return getDefaultState();
 }
-async function saveDb(state) {
-  const maxRetries = 5;
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
+var savePromise = null;
+function withSaveMutex(fn) {
+  const run2 = async () => {
     try {
-      const freshState = await loadDb();
-      for (const img of state.galleryImages) {
-        if (!freshState.galleryImages.find((f) => f.imageKey === img.imageKey)) {
-          freshState.galleryImages.push(img);
-        }
-      }
-      freshState.galleryImages = freshState.galleryImages.filter(
-        (f) => state.galleryImages.find((img) => img.imageKey === f.imageKey)
-      );
-      for (const [key, val] of Object.entries(state.branding)) {
-        freshState.branding[key] = val;
-      }
-      state = freshState;
-      const json2 = JSON.stringify(state);
-      await put(`${BLOB_PREFIX}state.json`, json2, {
-        access: "public",
-        contentType: "application/json",
-        addRandomSuffix: false,
-        allowOverwrite: true
-      });
-      console.log("[DB] State saved to Blob storage");
-      return;
-    } catch (e) {
-      if (attempt < maxRetries - 1) {
-        await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
-      } else {
-        console.error("[DB] Failed to save state after retries:", e);
-        throw e;
+      return await fn();
+    } finally {
+      await new Promise((r) => setTimeout(r, 500));
+    }
+  };
+  if (savePromise) {
+    const result = savePromise.then(() => run2());
+    savePromise = result.catch(() => {
+    });
+    return result;
+  } else {
+    savePromise = run2().catch(() => {
+    });
+    return run2();
+  }
+}
+function saveDb(state) {
+  return withSaveMutex(async () => {
+    const freshState = await loadDb();
+    for (const img of state.galleryImages) {
+      if (!freshState.galleryImages.find((f) => f.imageKey === img.imageKey)) {
+        freshState.galleryImages.push(img);
       }
     }
-  }
+    freshState.galleryImages = freshState.galleryImages.filter(
+      (f) => state.galleryImages.find((img) => img.imageKey === f.imageKey)
+    );
+    for (const [key, val] of Object.entries(state.branding)) {
+      freshState.branding[key] = val;
+    }
+    const json2 = JSON.stringify(freshState);
+    await put(`${BLOB_PREFIX}state.json`, json2, {
+      access: "public",
+      contentType: "application/json",
+      addRandomSuffix: false,
+      allowOverwrite: true
+    });
+    console.log("[DB] State saved to Blob storage");
+  });
 }
 async function upsertUser(user) {
   const state = await loadDb();

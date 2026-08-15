@@ -70,46 +70,58 @@ export async function loadDb(): Promise<DbState> {
 
 
 
-// Save full DB state to Blob with retry - always merges with latest state to prevent lost updates
-export async function saveDb(state: DbState): Promise<void> {
-  const maxRetries = 5;
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
+// Simple in-process async mutex to serialize writes within the same serverless instance
+let savePromise: Promise<void> | null = null;
+
+function withSaveMutex<T>(fn: () => Promise<T>): Promise<T> {
+  const run = async () => {
     try {
-      // Always re-read fresh state and merge our changes to prevent lost updates
-      const freshState = await loadDb(); // always fresh read
-      // Merge galleryImages: keep all from fresh state, add any missing from our state
-      for (const img of state.galleryImages) {
-        if (!freshState.galleryImages.find((f: any) => f.imageKey === img.imageKey)) {
-          freshState.galleryImages.push(img);
-        }
-      }
-      // Remove images that are in freshState but NOT in our state (deletions)
-      freshState.galleryImages = freshState.galleryImages.filter((f: any) => 
-        state.galleryImages.find((img: any) => img.imageKey === f.imageKey)
-      );
-      // Merge branding: take the latest from either
-      for (const [key, val] of Object.entries(state.branding)) {
-        freshState.branding[key] = val;
-      }
-      state = freshState;
-      const json = JSON.stringify(state);
-      await put(`${BLOB_PREFIX}state.json`, json, {
-        access: "public",
-        contentType: "application/json",
-        addRandomSuffix: false,
-        allowOverwrite: true,
-      });
-      console.log("[DB] State saved to Blob storage");
-            return;
-    } catch (e) {
-      if (attempt < maxRetries - 1) {
-        await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
-      } else {
-        console.error("[DB] Failed to save state after retries:", e);
-        throw e;
+      return await fn();
+    } finally {
+      // Small delay to let Blob CDN propagate
+      await new Promise(r => setTimeout(r, 500));
+    }
+  };
+  
+  if (savePromise) {
+    // Chain after existing save
+    const result = savePromise.then(() => run());
+    savePromise = result.catch(() => {});
+    return result;
+  } else {
+    savePromise = run().catch(() => {});
+    return run();
+  }
+}
+
+// Save full DB state to Blob with mutex serialization and merge logic
+export function saveDb(state: DbState): Promise<void> {
+  return withSaveMutex(async () => {
+    // Always re-read fresh state and merge our changes to prevent lost updates
+    const freshState = await loadDb(); // always fresh read
+    // Merge galleryImages: keep all from fresh state, add any missing from our state
+    for (const img of state.galleryImages) {
+      if (!freshState.galleryImages.find((f: any) => f.imageKey === img.imageKey)) {
+        freshState.galleryImages.push(img);
       }
     }
-  }
+    // Remove images that are in freshState but NOT in our state (deletions)
+    freshState.galleryImages = freshState.galleryImages.filter((f: any) => 
+      state.galleryImages.find((img: any) => img.imageKey === f.imageKey)
+    );
+    // Merge branding: take the latest from either
+    for (const [key, val] of Object.entries(state.branding)) {
+      freshState.branding[key] = val;
+    }
+    const json = JSON.stringify(freshState);
+    await put(`${BLOB_PREFIX}state.json`, json, {
+      access: "public",
+      contentType: "application/json",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    });
+    console.log("[DB] State saved to Blob storage");
+  });
 }
 
 // User operations
