@@ -18,39 +18,18 @@ export async function storagePut(
   contentType = "application/octet-stream",
 ): Promise<{ key: string; url: string }> {
   const key = appendHashSuffix(normalizeKey(relKey));
-  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!blobToken) {
-    throw new Error("BLOB_READ_WRITE_TOKEN not set");
-  }
-  // Use Vercel Blob API - PUT method with pathname query param
-  const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${key}`;
-  const uploadResponse = await fetch(
-    `https://vercel.com/api/blob/?pathname=${encodeURIComponent(key)}`,
-    {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${blobToken}`,
-        "Content-Type": contentType,
-        "x-vercel-blob-access": "public",
-      },
-      body: data,
-    }
-  );
-  if (!uploadResponse.ok) {
-    const errorText = await uploadResponse.text();
-    throw new Error(`Blob upload failed: ${uploadResponse.status} ${errorText}`);
-  }
-  const result = await uploadResponse.json();
-  return { key: result.pathname || key, url: result.url || blobUrl };
+  const blob = await put(key, data, {
+    access: 'public',
+    contentType,
+  });
+  return { key: blob.pathname, url: blob.url };
 }
 
 export async function storageGet(relKey: string): Promise<{ key: string; url: string }> {
   const key = normalizeKey(relKey);
-  // Note: This is a simplified version as Vercel Blob URLs are direct
-  return { key, url: relKey }; 
+  return { key, url: relKey };
 }
 
 export async function storageGetSignedUrl(relKey: string): Promise<string> {
-  // Vercel Blob public URLs don't need signing if they are public
   return relKey;
 }
