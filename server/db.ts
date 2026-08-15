@@ -93,12 +93,26 @@ export async function saveDb(state: DbState): Promise<void> {
       }
       state = freshState;
       const json = JSON.stringify(state);
-      await put(`${BLOB_PREFIX}state.json`, json, {
-        access: "public",
-        contentType: "application/json",
-        addRandomSuffix: false,
-        allowOverwrite: true,
-      });
+      // Use direct fetch to Blob REST API for more reliable writes
+      const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+      if (!blobToken) {
+        throw new Error("BLOB_READ_WRITE_TOKEN not set");
+      }
+      const uploadUrl = "https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com";
+      const uploadResponse = await fetch(
+        `${uploadUrl}/upload?filename=${BLOB_PREFIX}state.json&access=public`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${blobToken}`,
+            "Content-Type": "application/json",
+          },
+          body: json,
+        }
+      );
+      if (!uploadResponse.ok) {
+        throw new Error(`Blob upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+      }
       console.log("[DB] State saved to Blob storage");
             return;
     } catch (e) {
