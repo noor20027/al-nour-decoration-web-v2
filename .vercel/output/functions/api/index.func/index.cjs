@@ -72491,14 +72491,14 @@ function getDefaultState() {
 var cachedState = null;
 var cacheTimestamp = 0;
 var CACHE_TTL = 3e4;
-async function loadDb() {
-  if (cachedState && Date.now() - cacheTimestamp < CACHE_TTL) {
+async function loadDb(freshRead = false) {
+  if (!freshRead && cachedState && Date.now() - cacheTimestamp < CACHE_TTL) {
     return cachedState;
   }
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}`;
+      const blobUrl = `https://wfykl3k1ry0wjacl.public.blob.vercel-storage.com/${BLOB_PREFIX}state.json?v=${Date.now()}_${Math.random()}`;
       const response = await fetch(blobUrl, {
         cache: "no-store",
         headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" }
@@ -72507,9 +72507,12 @@ async function loadDb() {
         throw new Error(`Failed to read state.json: ${response.status}`);
       }
       const text = await response.text();
-      cachedState = JSON.parse(text);
-      cacheTimestamp = Date.now();
-      return cachedState;
+      const newState = JSON.parse(text);
+      if (!freshRead) {
+        cachedState = newState;
+        cacheTimestamp = Date.now();
+      }
+      return newState;
     } catch (e) {
       if (attempt < maxRetries - 1) {
         await new Promise((r) => setTimeout(r, 100 * (attempt + 1)));
@@ -72525,10 +72528,22 @@ function invalidateCache() {
   cachedState = null;
   cacheTimestamp = 0;
 }
-async function saveDb(state) {
-  const maxRetries = 3;
+async function saveDb(state, mergeFresh = true) {
+  const maxRetries = 5;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
+      if (attempt > 0 && mergeFresh) {
+        const freshState = await loadDb(true);
+        for (const img of state.galleryImages) {
+          if (!freshState.galleryImages.find((f) => f.imageKey === img.imageKey)) {
+            freshState.galleryImages.push(img);
+          }
+        }
+        for (const [key, val] of Object.entries(state.branding)) {
+          freshState.branding[key] = val;
+        }
+        state = freshState;
+      }
       const json2 = JSON.stringify(state);
       await put(`${BLOB_PREFIX}state.json`, json2, {
         access: "public",
@@ -72541,7 +72556,7 @@ async function saveDb(state) {
       return;
     } catch (e) {
       if (attempt < maxRetries - 1) {
-        await new Promise((r) => setTimeout(r, 200 * (attempt + 1)));
+        await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
       } else {
         console.error("[DB] Failed to save state after retries:", e);
         throw e;
@@ -72596,7 +72611,7 @@ async function getCarouselImages() {
   return state.galleryImages.filter((img) => img.isCarousel === "yes");
 }
 async function addGalleryImage(imageUrl, imageKey, title, description, orientation, isCarousel) {
-  const state = await loadDb();
+  const state = await loadDb(true);
   const maxOrder = state.galleryImages.length > 0 ? Math.max(...state.galleryImages.map((img) => img.displayOrder || 0)) : 0;
   state.galleryImages.push({
     id: state.galleryImages.length > 0 ? Math.max(...state.galleryImages.map((img) => img.id)) + 1 : 1,
@@ -72613,7 +72628,7 @@ async function addGalleryImage(imageUrl, imageKey, title, description, orientati
   await saveDb(state);
 }
 async function updateGalleryImage(imageKey, updates) {
-  const state = await loadDb();
+  const state = await loadDb(true);
   const idx = state.galleryImages.findIndex((img) => img.imageKey === imageKey);
   if (idx >= 0) {
     state.galleryImages[idx] = { ...state.galleryImages[idx], ...updates, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
@@ -72621,7 +72636,7 @@ async function updateGalleryImage(imageKey, updates) {
   }
 }
 async function deleteGalleryImage(imageKey) {
-  const state = await loadDb();
+  const state = await loadDb(true);
   state.galleryImages = state.galleryImages.filter((img) => img.imageKey !== imageKey);
   await saveDb(state);
 }
@@ -72630,7 +72645,7 @@ async function getBrandingImage(type) {
   return state.branding[type] || null;
 }
 async function upsertBrandingImage(type, imageUrl, imageKey) {
-  const state = await loadDb();
+  const state = await loadDb(true);
   state.branding[type] = {
     id: Object.keys(state.branding).length + 1,
     type,
@@ -72642,7 +72657,7 @@ async function upsertBrandingImage(type, imageUrl, imageKey) {
   await saveDb(state);
 }
 async function deleteBrandingImage(type) {
-  const state = await loadDb();
+  const state = await loadDb(true);
   delete state.branding[type];
   await saveDb(state);
 }
